@@ -62,14 +62,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   void _pickTheme() {
     final notifier = ref.read(prefsProvider.notifier);
     final current = ref.read(prefsProvider).themeId;
-    const names = {
-      'mor': ['મોર', 'मोर', 'Peacock'],
-      'light': ['પ્રકાશ', 'प्रकाश', 'Light'],
-      'night': ['રાત', 'रात', 'Night'],
-      'kamal': ['કમળ', 'कमल', 'Lotus'],
-      'neel': ['નીલ', 'नील', 'Indigo'],
-      'van': ['વન', 'वन', 'Forest'],
-    };
     showModalBottomSheet<void>(
       context: context,
       builder: (ctx) => SafeArea(
@@ -86,7 +78,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 Semantics(
                   button: true,
                   selected: t.id == current,
-                  label: names[t.id]![ctx.lang.index],
+                  label: ctx.t('theme_${t.id}'),
                   excludeSemantics: true,
                   child: InkWell(
                     borderRadius: BorderRadius.circular(20),
@@ -101,9 +93,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         border: Border.all(color: t.id == current ? t.accent : t.ink.withValues(alpha: 0.12), width: t.id == current ? 3 : 1),
                       ),
                       child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                        Icon3D('lotus', size: 52, base: t.primary, glyph: t.isDark ? t.ink : t.accent),
+                        Icon3D('lotus', size: 52, base: t.accentDeep, glyph: t.accentLight),
                         const SizedBox(height: 6),
-                        Text(names[t.id]![ctx.lang.index], style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: t.ink)),
+                        Text(ctx.t('theme_${t.id}'), textAlign: TextAlign.center, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: t.ink)),
                       ]),
                     ),
                   ),
@@ -142,7 +134,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final c = context.gc;
     final prefs = ref.watch(prefsProvider);
     final sizeKey = prefs.textScale >= 1.3 ? 'size_xl' : prefs.textScale >= 1.15 ? 'size_l' : 'size_m';
-    const themeNames = {'mor': 'મોર · Mor', 'light': 'પ્રકાશ · Light', 'night': 'રાત · Night', 'kamal': 'કમળ · Kamal', 'neel': 'નીલ · Neel', 'van': 'વન · Van'};
     return SafeArea(
       bottom: false,
       child: Center(
@@ -153,7 +144,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             children: [
               ScreenHeader(title: context.t('settings_title'), actions: const [HelpButton('settings')]),
               _Group(title: context.t('sec_look'), rows: [
-                _Row(icon: 'theme', title: context.t('theme'), sub: themeNames[prefs.themeId] ?? '', onTap: _pickTheme),
+                _Row(icon: 'theme', title: context.t('theme'), sub: context.t('theme_${prefs.themeId}'), onTap: _pickTheme),
                 _Row(icon: 'language', title: context.t('language'), sub: tr('lang_${prefs.lang.name}', prefs.lang), onTap: _pickLang),
                 _Row(
                   icon: 'fontsize',

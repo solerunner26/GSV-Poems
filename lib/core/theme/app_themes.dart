@@ -1,6 +1,13 @@
+import 'package:flutter/cupertino.dart' show CupertinoPageTransitionsBuilder;
 import 'package:flutter/material.dart';
 
+import 'neon_backdrop.dart';
+import 'neon_tokens.dart';
+
 /// One colour set. Every screen reads colours from here, never hard-coded.
+///
+/// Each theme is built from a base colour and ONE accent hue; the deeper shade
+/// and the lighter highlight are derived from that hue.
 @immutable
 class GsvColors extends ThemeExtension<GsvColors> {
   const GsvColors({
@@ -21,14 +28,25 @@ class GsvColors extends ThemeExtension<GsvColors> {
     required this.alertBg,
     required this.alertBorder,
     required this.isDark,
+    this.glow = const Color(0x00000000),
+    this.accentDeep = const Color(0x00000000),
+    this.accentLight = const Color(0x00000000),
+    this.effect = AccentEffect.line,
   });
 
+  /// Saved preference value. Kept stable across releases so a saved choice resolves.
   final String id;
   final Color bg, surface, ink, mute, primary, primaryDeep, onPrimary, accent, accentText, tint;
   final Color heroA, heroB, heroC, alertBg, alertBorder;
   final bool isDark;
 
-  static const good = Color(0xFF2F5A3C), neutral = Color(0xFF283A70), bad = Color(0xFF9B2C2C);
+  /// The theme's single accent hue, its deeper shade and its lighter highlight.
+  final Color glow, accentDeep, accentLight;
+
+  /// The local accent motion played once per press on raised surfaces.
+  final AccentEffect effect;
+
+  static const good = Color(0xFF2F8A55), neutral = Color(0xFF3A5BB0), bad = Color(0xFFC0392B);
 
   LinearGradient get buttonGradient =>
       LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [primary, primaryDeep]);
@@ -40,58 +58,97 @@ class GsvColors extends ThemeExtension<GsvColors> {
   GsvColors lerp(ThemeExtension<GsvColors>? other, double t) => t < 0.5 || other is! GsvColors ? this : other;
 }
 
-const _mor = GsvColors(
-  id: 'mor', bg: Color(0xFFF4F7F6), surface: Color(0xFFFFFFFF), ink: Color(0xFF10302E), mute: Color(0xFF4F6664),
-  primary: Color(0xFF0E5E5A), primaryDeep: Color(0xFF0B4C49), onPrimary: Color(0xFFFFFFFF),
-  accent: Color(0xFFE8833A), accentText: Color(0xFFB4561A), tint: Color(0xFFE3EEEC),
-  heroA: Color(0xFF2D6CB5), heroB: Color(0xFF0E5E5A), heroC: Color(0xFF0A403E),
-  alertBg: Color(0xFFFFF0E3), alertBorder: Color(0xFFF2A65E), isDark: false,
-);
-const _light = GsvColors(
-  id: 'light', bg: Color(0xFFF5F5F7), surface: Color(0xFFFFFFFF), ink: Color(0xFF1C1C1E), mute: Color(0xFF5C5C60),
-  primary: Color(0xFF2D6CB5), primaryDeep: Color(0xFF1F5290), onPrimary: Color(0xFFFFFFFF),
-  accent: Color(0xFF8E8E93), accentText: Color(0xFF5C5C60), tint: Color(0xFFE8ECF3),
-  heroA: Color(0xFF4F8AD0), heroB: Color(0xFF2D6CB5), heroC: Color(0xFF1B4A80),
-  alertBg: Color(0xFFEEF3FB), alertBorder: Color(0xFF9DB9E0), isDark: false,
-);
-const _night = GsvColors(
-  id: 'night', bg: Color(0xFF0E1416), surface: Color(0xFF172124), ink: Color(0xFFE8F0EF), mute: Color(0xFFA7B8B6),
-  primary: Color(0xFF5FD0C5), primaryDeep: Color(0xFF3AA79D), onPrimary: Color(0xFF06201E),
-  accent: Color(0xFFF2A65E), accentText: Color(0xFFF2A65E), tint: Color(0xFF1F2D31),
-  heroA: Color(0xFF1C3D5C), heroB: Color(0xFF12403D), heroC: Color(0xFF0A2423),
-  alertBg: Color(0xFF2A2117), alertBorder: Color(0xFF8A5A2B), isDark: true,
-);
-const _kamal = GsvColors(
-  id: 'kamal', bg: Color(0xFFF7F2F8), surface: Color(0xFFFFFFFF), ink: Color(0xFF2A1630), mute: Color(0xFF66506B),
-  primary: Color(0xFFA0285F), primaryDeep: Color(0xFF7C1D49), onPrimary: Color(0xFFFFFFFF),
-  accent: Color(0xFF2F7D5B), accentText: Color(0xFF256649), tint: Color(0xFFF1E4EF),
-  heroA: Color(0xFF6B4FA0), heroB: Color(0xFFA0285F), heroC: Color(0xFF6E1A42),
-  alertBg: Color(0xFFFBEAF1), alertBorder: Color(0xFFE39BBE), isDark: false,
-);
-const _neel = GsvColors(
-  id: 'neel', bg: Color(0xFF0F1B3D), surface: Color(0xFF172654), ink: Color(0xFFEEF2FF), mute: Color(0xFFB9C3E6),
-  primary: Color(0xFFF5B83D), primaryDeep: Color(0xFFD9981F), onPrimary: Color(0xFF1B1F3B),
-  accent: Color(0xFF7FB2FF), accentText: Color(0xFF9EC4FF), tint: Color(0xFF1F2F63),
-  heroA: Color(0xFF2E3A87), heroB: Color(0xFF1D2A66), heroC: Color(0xFF111A40),
-  alertBg: Color(0xFF2A2A45), alertBorder: Color(0xFF8C7A3A), isDark: true,
-);
-const _van = GsvColors(
-  id: 'van', bg: Color(0xFFEEF5EF), surface: Color(0xFFFFFFFF), ink: Color(0xFF15281B), mute: Color(0xFF4E6354),
-  primary: Color(0xFF2F7D4F), primaryDeep: Color(0xFF22613C), onPrimary: Color(0xFFFFFFFF),
-  accent: Color(0xFFC27C0E), accentText: Color(0xFF94600B), tint: Color(0xFFDDEBDF),
-  heroA: Color(0xFF4C9A6A), heroB: Color(0xFF2F7D4F), heroC: Color(0xFF1C4F31),
-  alertBg: Color(0xFFFFF4DE), alertBorder: Color(0xFFE2B866), isDark: false,
-);
+Color _mix(Color a, Color b, double t) => Color.lerp(a, b, t)!;
+const _white = Color(0xFFFFFFFF), _black = Color(0xFF000000);
 
-const allThemes = [_mor, _light, _night, _kamal, _neel, _van];
+/// Builds a full theme from a base colour and one accent hue.
+GsvColors _palette(String id, Color base, Color accent, AccentEffect effect, {required bool dark}) {
+  final deep = _mix(accent, _black, dark ? 0.32 : 0.28);
+  final light = _mix(accent, _white, 0.45);
+  if (dark) {
+    final ink = _mix(_white, accent, 0.06);
+    return GsvColors(
+      id: id,
+      bg: base,
+      surface: _mix(base, _white, 0.07),
+      ink: ink,
+      mute: _mix(ink, base, 0.30),
+      primary: accent,
+      primaryDeep: deep,
+      onPrimary: _mix(base, _black, 0.35),
+      accent: light,
+      accentText: accent,
+      tint: _mix(base, accent, 0.12),
+      heroA: _mix(accent, base, 0.62),
+      heroB: _mix(accent, base, 0.78),
+      heroC: _mix(base, _black, 0.30),
+      alertBg: _mix(base, accent, 0.14),
+      alertBorder: _mix(base, accent, 0.55),
+      isDark: true,
+      glow: accent,
+      accentDeep: deep,
+      accentLight: light,
+      effect: effect,
+    );
+  }
+  const ink = Color(0xFF181B28);
+  return GsvColors(
+    id: id,
+    bg: base,
+    surface: _mix(base, _white, 0.72),
+    ink: ink,
+    mute: _mix(ink, base, 0.36),
+    primary: accent,
+    primaryDeep: deep,
+    onPrimary: _white,
+    accent: accent,
+    accentText: _mix(accent, _black, 0.12),
+    tint: _mix(base, accent, 0.08),
+    heroA: accent,
+    heroB: _mix(accent, _black, 0.12),
+    heroC: _mix(accent, _black, 0.38),
+    alertBg: _mix(base, accent, 0.08),
+    alertBorder: _mix(base, accent, 0.45),
+    isDark: false,
+    glow: accent,
+    accentDeep: deep,
+    accentLight: light,
+    effect: effect,
+  );
+}
 
-GsvColors themeById(String? id) => allThemes.firstWhere((t) => t.id == id, orElse: () => _mor);
+// The six themes. Saved ids from earlier versions map onto them, so a choice
+// made before this update still resolves.
+final _firstLight = _palette('mor', const Color(0xFFF7F2E9), const Color(0xFF285CFF), AccentEffect.line, dark: false);
+final _blueHour = _palette('night', const Color(0xFF0C1424), const Color(0xFF57E8FF), AccentEffect.halo, dark: true);
+final _copperLantern = _palette('light', const Color(0xFF211812), const Color(0xFFFFB34D), AccentEffect.lift, dark: true);
+final _violetSignal = _palette('neel', const Color(0xFF171223), const Color(0xFFB28AFF), AccentEffect.cornerTrace, dark: true);
+final _rainGarden = _palette('van', const Color(0xFF101D18), const Color(0xFFB9F65C), AccentEffect.sweep, dark: true);
+final _afterglow = _palette('kamal', const Color(0xFF23151D), const Color(0xFFFF7797), AccentEffect.arc, dark: true);
+
+/// In the order the theme selector shows them.
+final allThemes = [_firstLight, _blueHour, _copperLantern, _violetSignal, _rainGarden, _afterglow];
+
+GsvColors themeById(String? id) => allThemes.firstWhere((t) => t.id == id, orElse: () => _firstLight);
 
 const uiFont = 'HindVadodara';
 const uiFallback = ['Hind', 'NotoSerifGujarati', 'TiroDevanagariHindi'];
 
 /// Poem font for a language code.
 String poemFont(String lang) => lang == 'hi' ? 'TiroDevanagariHindi' : 'NotoSerifGujarati';
+
+/// Every page gets the animated backdrop behind its content.
+class _BackdropPageTransitions extends PageTransitionsBuilder {
+  const _BackdropPageTransitions();
+  static const _slide = CupertinoPageTransitionsBuilder();
+
+  @override
+  Widget buildTransitions<T>(PageRoute<T> route, BuildContext context, Animation<double> animation, Animation<double> secondary, Widget child) {
+    final page = AmbientBackdrop(child: child);
+    if (MediaQuery.disableAnimationsOf(context)) return FadeTransition(opacity: animation, child: page);
+    return _slide.buildTransitions(route, context, animation, secondary, page);
+  }
+}
 
 ThemeData buildTheme(GsvColors c) {
   final scheme = ColorScheme(
@@ -108,9 +165,20 @@ ThemeData buildTheme(GsvColors c) {
   final base = ThemeData(useMaterial3: true, colorScheme: scheme, fontFamily: uiFont, fontFamilyFallback: uiFallback);
   TextStyle s(double size, FontWeight w, [Color? col]) =>
       TextStyle(fontSize: size, fontWeight: w, color: col ?? c.ink, fontFamily: uiFont, fontFamilyFallback: uiFallback, height: 1.35);
+  const transitions = _BackdropPageTransitions();
   return base.copyWith(
-    scaffoldBackgroundColor: c.bg,
-    extensions: [c],
+    // Pages are transparent: the animated backdrop shows through.
+    scaffoldBackgroundColor: Colors.transparent,
+    canvasColor: c.bg,
+    extensions: [c, NeonTokens.standard],
+    pageTransitionsTheme: const PageTransitionsTheme(builders: {
+      TargetPlatform.android: transitions,
+      TargetPlatform.iOS: transitions,
+      TargetPlatform.windows: transitions,
+      TargetPlatform.linux: transitions,
+      TargetPlatform.macOS: transitions,
+      TargetPlatform.fuchsia: transitions,
+    }),
     textTheme: base.textTheme.copyWith(
       headlineMedium: s(28, FontWeight.w700),
       titleLarge: s(20, FontWeight.w700),
@@ -124,18 +192,19 @@ ThemeData buildTheme(GsvColors c) {
       behavior: SnackBarBehavior.floating,
       backgroundColor: c.isDark ? c.surface : c.ink,
       contentTextStyle: s(16, FontWeight.w500, c.isDark ? c.ink : Colors.white),
-      actionTextColor: c.accent,
+      actionTextColor: c.isDark ? c.primary : c.accentLight,
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: c.surface,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: c.primary.withValues(alpha: 0.2))),
-      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: c.primary.withValues(alpha: 0.2), width: 1.5)),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: c.primary.withValues(alpha: 0.25))),
+      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: c.primary.withValues(alpha: 0.25), width: 1.5)),
       focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: c.primary, width: 2)),
     ),
     dialogTheme: DialogThemeData(backgroundColor: c.surface, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24))),
     bottomSheetTheme: BottomSheetThemeData(backgroundColor: c.surface, showDragHandle: true),
+    cardTheme: CardThemeData(color: c.surface),
   );
 }
 

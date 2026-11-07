@@ -28,6 +28,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   String _lang = 'gu';
+  bool _recentAll = false;
 
   @override
   Widget build(BuildContext context) {
@@ -78,17 +79,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               if (recent.isNotEmpty) ...[
                 SectionTitle(
                   context.t('recent7'),
-                  action: TextButton(
-                    onPressed: () async {
-                      await ref.read(prefsProvider.notifier).clearRecent();
-                      if (!context.mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.t('list_cleared'))));
-                    },
-                    style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
-                    child: Text(context.t('clear_list'), style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: c.primary)),
-                  ),
+                  action: Row(mainAxisSize: MainAxisSize.min, children: [
+                    TextButton(
+                      onPressed: () async {
+                        await ref.read(prefsProvider.notifier).clearRecent();
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.t('list_cleared'))));
+                      },
+                      style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
+                      child: Text(context.t('clear_list'), style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: c.primary)),
+                    ),
+                    if (recent.length > 5) ExpandArrow(expanded: _recentAll, onPressed: () => setState(() => _recentAll = !_recentAll)),
+                  ]),
                 ),
-                for (var i = 0; i < recent.length && i < 7; i++) PoemTile(poem: recent[i], onTap: () => openPoem(context, recent, i)),
+                // Five at first; the arrow shows up to seven.
+                for (var i = 0; i < recent.length && i < (_recentAll ? 7 : 5); i++) PoemTile(poem: recent[i], onTap: () => openPoem(context, recent, i)),
                 const SizedBox(height: 14),
               ],
               if (stats.total > 0) ...[
@@ -214,7 +219,7 @@ class _TodayCard extends ConsumerWidget {
                       Text(localDigits(DateFormat('MMMM y', loc).format(now), lang),
                           style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w700, color: Colors.white)),
                       Text('${vaarNames[p.vaar][l]} · ${DateFormat('d MMM y', 'en').format(now)}',
-                          style: const TextStyle(fontSize: 15, color: Color(0xFFD6ECEA))),
+                          style: TextStyle(fontSize: 15, color: Colors.white.withValues(alpha: 0.85))),
                     ]),
                   ),
                 ),
@@ -222,7 +227,7 @@ class _TodayCard extends ConsumerWidget {
               const SizedBox(height: 12),
               Text(dateLine(p, l), style: const TextStyle(fontFamily: 'NotoSerifGujarati', fontSize: 20, fontWeight: FontWeight.w600, color: Colors.white)),
               Text('${context.t('vs')} ${localDigits(p.samvat, lang)} · ${context.t('nakshatra')}: ${nakshatraNames[p.nakshatra][l]}',
-                  style: const TextStyle(fontSize: 15, color: Color(0xFFD6ECEA))),
+                  style: TextStyle(fontSize: 15, color: Colors.white.withValues(alpha: 0.85))),
               const SizedBox(height: 12),
               if (ch != null)
                 Container(
@@ -254,7 +259,7 @@ class _TodayCard extends ConsumerWidget {
                         Text(
                           '${qualityNames[ch.quality]![l]} · ${clock(ch.end, lang)} ${context.t('till')}'
                           '${nextCh == null ? '' : ' · ${context.t('then')} ${choghadiyaNames[nextCh.kind]![l]}'}',
-                          style: const TextStyle(fontSize: 14, color: Color(0xFFD6ECEA)),
+                          style: TextStyle(fontSize: 14, color: Colors.white.withValues(alpha: 0.85)),
                         ),
                       ]),
                     ),
@@ -308,27 +313,32 @@ class _FestivalAlert extends ConsumerWidget {
 }
 
 /// The next festivals and vrat days (Purnima, Ekadashi, Chaturthi…).
-class _UpcomingFestivals extends ConsumerWidget {
+class _UpcomingFestivals extends ConsumerStatefulWidget {
   const _UpcomingFestivals();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_UpcomingFestivals> createState() => _UpcomingFestivalsState();
+}
+
+class _UpcomingFestivalsState extends ConsumerState<_UpcomingFestivals> {
+  bool _all = false;
+
+  @override
+  Widget build(BuildContext context) {
     final c = context.gc;
     final lang = context.lang;
     final l = lang.index;
     final today = ref.watch(todayPanchangProvider).date;
-    final items = ref.watch(upcomingFestivalsProvider).where((f) => !f.date.isBefore(today)).take(6).toList();
+    final every = ref.watch(upcomingFestivalsProvider).where((f) => !f.date.isBefore(today)).toList();
+    // The next three; the arrow beside the title shows the rest.
+    final items = _all ? every : every.take(3).toList();
     if (items.isEmpty) return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.only(bottom: 22),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         SectionTitle(
           context.t('upcoming_fest'),
-          action: TextButton(
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const CalendarScreen())),
-            style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
-            child: Text(context.t('all'), style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: c.primary)),
-          ),
+          action: every.length > 3 ? ExpandArrow(expanded: _all, onPressed: () => setState(() => _all = !_all)) : null,
         ),
         GsvCard(
           padding: EdgeInsets.zero,

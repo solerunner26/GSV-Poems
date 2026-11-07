@@ -189,7 +189,7 @@ class PoemRepository {
 
   /// Finds the category with this name in either script, or creates it.
   /// "જીવન મંથન" and "जीवन मंथन" are the same collection.
-  Future<String> ensureCategory(String name) async {
+  Future<String> ensureCategory(String name, {String? iconKey}) async {
     final key = _nameKey(name);
     // "અન્ય વિભાગ" / "अन्य" (other) belong in Others.
     if (key == 'any' || key.startsWith('any ') || key == 'others' || key == 'other') return 'other';
@@ -215,7 +215,7 @@ class PoemRepository {
           nameGu: toScript(name.trim(), PoemLang.gu),
           nameHi: toScript(name.trim(), PoemLang.hi),
           nameEn: title.isEmpty ? name.trim() : title,
-          iconKey: _iconFor(key),
+          iconKey: iconKey ?? _iconFor(key),
           sortOrder: Value(order),
         ));
     return id;

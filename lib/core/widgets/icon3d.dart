@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:path_drawing/path_drawing.dart';
 
+import '../theme/app_themes.dart';
+import '../theme/neon_tokens.dart';
+
 /// Art for one 3D clay icon: tile colour, highlight colour, label and
 /// path layers on a 24×24 grid (f = filled body, s = tube strokes,
 /// h = carved fills, c = carved strokes). Same art as the design canvas.
@@ -68,26 +71,82 @@ const iconArt = <String, IconArt>{
   'restore': IconArt(Color(0xFF1F8A5B), Color(0xFFCFF7E3), 'Restore', '', 'M15 10l5-5-5-5M20 5H10a6 6 0 0 0 0 12h3', '', ''),
 };
 
-/// A raised 3D clay tile icon. [well] draws the recessed background.
-class Icon3D extends StatelessWidget {
+/// A raised, embossed symbol on a subtly recessed tile, in two tones of the
+/// active theme (or the explicit [base]/[glyph]). When pressed, a slightly
+/// darker accent line traces the symbol's own contour and fades. The trace
+/// listens to the pointer without taking part in gestures, so taps reach the
+/// surrounding button exactly as before.
+class Icon3D extends StatefulWidget {
   const Icon3D(this.icon, {super.key, this.size = 48, this.well = false, this.base, this.glyph, this.semanticLabel});
 
   final String icon;
   final double size;
+
+  /// A deeper, more visible recess (the tile always sits in a subtle one).
   final bool well;
   final Color? base, glyph;
   final String? semanticLabel;
 
   @override
+  State<Icon3D> createState() => _Icon3DState();
+}
+
+class _Icon3DState extends State<Icon3D> with SingleTickerProviderStateMixin {
+  AnimationController? _trace;
+  bool _held = false;
+
+  AnimationController _controller(Duration d) => _trace ??= AnimationController(vsync: this, duration: d);
+
+  @override
+  void dispose() {
+    _trace?.dispose();
+    super.dispose();
+  }
+
+  void _down(PointerDownEvent _) {
+    if (context.reduceMotion) {
+      setState(() => _held = true);
+      return;
+    }
+    _controller(context.neon.traceDuration).forward(from: 0);
+  }
+
+  void _up(PointerEvent _) {
+    if (_held) setState(() => _held = false);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final art = iconArt[icon] ?? iconArt['lotus']!;
+    final art = iconArt[widget.icon] ?? iconArt['lotus']!;
+    final theme = Theme.of(context).extension<GsvColors>();
+    final base = widget.base ?? theme?.accentDeep ?? art.base;
+    final glyph = widget.glyph ?? theme?.accentLight ?? art.glyph;
+    final recess = theme?.bg ?? const Color(0xFFE4ECEA);
+    final traceColor = Color.lerp(theme?.glow ?? art.base, const Color(0xFF000000), 0.18)!;
+    final trace = _trace;
     return Semantics(
-      label: semanticLabel,
-      excludeSemantics: semanticLabel == null,
-      child: RepaintBoundary(
-        child: CustomPaint(
-          size: Size.square(size),
-          painter: _Icon3DPainter(art, well, base ?? art.base, glyph ?? art.glyph),
+      label: widget.semanticLabel,
+      excludeSemantics: widget.semanticLabel == null,
+      child: Listener(
+        behavior: HitTestBehavior.translucent,
+        onPointerDown: _down,
+        onPointerUp: _up,
+        onPointerCancel: _up,
+        child: RepaintBoundary(
+          child: CustomPaint(
+            size: Size.square(widget.size),
+            painter: _Icon3DPainter(
+              art,
+              deepWell: widget.well,
+              base: base,
+              glyph: glyph,
+              recess: recess,
+              dark: theme?.isDark ?? false,
+              traceColor: traceColor,
+              progress: trace,
+              held: _held,
+            ),
+          ),
         ),
       ),
     );
@@ -99,11 +158,37 @@ Path _p(String d) => _pathCache.putIfAbsent(d, () => d.isEmpty ? Path() : parseS
 
 Color _mix(Color a, Color b, double t) => Color.lerp(a, b, t)!;
 
+/// Part of [paths] from the start up to [fraction] of their total length.
+Path contourUpTo(List<Path> paths, double fraction) {
+  final out = Path();
+  final metrics = [for (final p in paths) ...p.computeMetrics()];
+  final total = metrics.fold<double>(0, (s, m) => s + m.length);
+  var left = total * fraction.clamp(0, 1);
+  for (final m in metrics) {
+    if (left <= 0) break;
+    out.addPath(m.extractPath(0, left < m.length ? left : m.length), Offset.zero);
+    left -= m.length;
+  }
+  return out;
+}
+
 class _Icon3DPainter extends CustomPainter {
-  _Icon3DPainter(this.art, this.well, this.base, this.glyph);
+  _Icon3DPainter(
+    this.art, {
+    required this.deepWell,
+    required this.base,
+    required this.glyph,
+    required this.recess,
+    required this.dark,
+    required this.traceColor,
+    required this.progress,
+    required this.held,
+  }) : super(repaint: progress);
+
   final IconArt art;
-  final bool well;
-  final Color base, glyph;
+  final bool deepWell, dark, held;
+  final Color base, glyph, recess, traceColor;
+  final Animation<double>? progress;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -112,23 +197,18 @@ class _Icon3DPainter extends CustomPainter {
     const black = Color(0xFF000000), white = Color(0xFFFFFFFF);
     final shadow = _mix(base, black, 0.7);
 
-    if (well) {
-      final r = RRect.fromRectAndRadius(const Rect.fromLTWH(1, 1, 62, 62), const Radius.circular(19));
-      canvas.drawRRect(
-        r,
-        Paint()
-          ..shader = const LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFFD3DEDC), Color(0xFFE4ECEA), Color(0xFFF4F8F7)],
-            stops: [0, 0.35, 1],
-          ).createShader(const Rect.fromLTWH(1, 1, 62, 62)),
-      );
-    }
+    // Recessed tile bed: darker at the top edge, lighter at the bottom (light from above).
+    const wellRect = Rect.fromLTWH(1, 1, 62, 62);
+    final top = dark ? _mix(recess, black, deepWell ? 0.45 : 0.3) : _mix(recess, black, deepWell ? 0.14 : 0.08);
+    final bottom = dark ? _mix(recess, white, deepWell ? 0.08 : 0.05) : _mix(recess, white, deepWell ? 0.6 : 0.45);
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(wellRect, const Radius.circular(19)),
+      Paint()
+        ..shader = LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [top, bottom]).createShader(wellRect),
+    );
 
     const tileRect = Rect.fromLTWH(7, 6, 50, 50);
     final tile = RRect.fromRectAndRadius(tileRect, const Radius.circular(15.5));
-    // Soft coloured drop shadow, then the darker bottom edge that reads as thickness.
     canvas.drawRRect(
       tile.shift(const Offset(0, 3.2)),
       Paint()
@@ -136,27 +216,24 @@ class _Icon3DPainter extends CustomPainter {
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2.6),
     );
     canvas.drawRRect(tile.shift(const Offset(0, 2.5)), Paint()..color = _mix(base, black, 0.42));
+    // Smooth matte face.
     canvas.drawRRect(
       tile,
       Paint()
         ..shader = LinearGradient(
           begin: Alignment.topLeft,
           end: const Alignment(-0.3, 1),
-          colors: [_mix(base, white, 0.28), base, _mix(base, black, 0.22)],
+          colors: [_mix(base, white, 0.22), base, _mix(base, black, 0.2)],
           stops: const [0, 0.55, 1],
         ).createShader(tileRect),
     );
+    // Restrained glass highlight.
     canvas.drawRRect(
       tile,
       Paint()
-        ..shader = const RadialGradient(
-          center: Alignment(-0.4, -0.76),
-          radius: 0.6,
-          colors: [Color(0x8CFFFFFF), Color(0x00FFFFFF)],
-        ).createShader(tileRect),
+        ..shader = const RadialGradient(center: Alignment(-0.4, -0.76), radius: 0.6, colors: [Color(0x66FFFFFF), Color(0x00FFFFFF)]).createShader(tileRect),
     );
 
-    // Symbol: 24×24 art placed at (14,13) and scaled 1.5×.
     canvas.translate(14, 13);
     canvas.scale(1.5);
     final f = _p(art.f), s = _p(art.s), h = _p(art.h), c = _p(art.c);
@@ -167,14 +244,12 @@ class _Icon3DPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round;
 
-    // Extruded underside.
+    // Raised symbol: extruded underside, contact shadow, then the face.
     canvas.save();
     canvas.translate(0, 0.85);
     canvas.drawPath(f, Paint()..color = extr);
     canvas.drawPath(s, stroke(2.7)..color = extr);
     canvas.restore();
-
-    // Contact shadow under the symbol.
     final sh = Paint()
       ..color = shadow.withValues(alpha: 0.45)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 0.55);
@@ -187,7 +262,7 @@ class _Icon3DPainter extends CustomPainter {
     final glyphShader = LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
-      colors: [_mix(glyph, white, 0.6), glyph, _mix(glyph, black, 0.14)],
+      colors: [_mix(glyph, white, 0.5), glyph, _mix(glyph, black, 0.12)],
       stops: const [0, 0.55, 1],
     ).createShader(const Rect.fromLTRB(4, 1, 12, 23));
     canvas.drawPath(f, Paint()..shader = glyphShader);
@@ -195,11 +270,10 @@ class _Icon3DPainter extends CustomPainter {
     canvas.drawPath(h, Paint()..color = carve);
     canvas.drawPath(c, stroke(1.5)..color = carve);
 
-    // Glass shine across the top half.
     final gloss = const LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
-      colors: [Color(0xBFFFFFFF), Color(0x00FFFFFF)],
+      colors: [Color(0x99FFFFFF), Color(0x00FFFFFF)],
     ).createShader(const Rect.fromLTRB(0, 2, 24, 13));
     canvas.drawPath(f, Paint()..shader = gloss);
     canvas.save();
@@ -207,9 +281,26 @@ class _Icon3DPainter extends CustomPainter {
     canvas.drawPath(s, stroke(1.1)..shader = gloss);
     canvas.restore();
 
+    // Press feedback: a darker neon line follows the symbol's contour, then fades.
+    final t = progress?.value ?? 0;
+    final active = held || (t > 0 && t < 1);
+    if (active) {
+      final drawn = held ? 1.0 : (t / 0.6).clamp(0.0, 1.0);
+      final fade = held ? 1.0 : (t < 0.6 ? 1.0 : 1 - (t - 0.6) / 0.4);
+      final contour = contourUpTo([f, s, c], drawn);
+      canvas.drawPath(
+        contour,
+        stroke(1.6)
+          ..color = traceColor.withValues(alpha: 0.55 * fade)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 1.2),
+      );
+      canvas.drawPath(contour, stroke(0.7)..color = traceColor.withValues(alpha: fade));
+    }
+
     canvas.restore();
   }
 
   @override
-  bool shouldRepaint(_Icon3DPainter old) => old.art != art || old.well != well || old.base != base || old.glyph != glyph;
+  bool shouldRepaint(_Icon3DPainter old) =>
+      old.art != art || old.deepWell != deepWell || old.base != base || old.glyph != glyph || old.recess != recess || old.held != held || old.progress != progress;
 }

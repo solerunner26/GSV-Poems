@@ -12,6 +12,7 @@ import '../../core/theme/app_themes.dart';
 import '../../core/widgets/common.dart';
 import '../../core/widgets/icon3d.dart';
 import '../../data/db/database.dart';
+import '../common/new_topic_sheet.dart';
 import '../common/poem_tile.dart';
 import '../sync/drive_screen.dart';
 
@@ -249,6 +250,21 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
                             SizedBox(
                               height: 48,
                               child: ListView(scrollDirection: Axis.horizontal, children: [
+                                // First chip: add a new topic.
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 8),
+                                  child: ActionChip(
+                                    avatar: Icon(Icons.add_rounded, color: c.primary),
+                                    label: Text(context.t('topic_new'), style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: c.primary)),
+                                    side: BorderSide(color: c.primary, width: 1.5),
+                                    onPressed: () async {
+                                      final id = await addTopic(context, ref);
+                                      if (id == null || !mounted) return;
+                                      setState(() => _categoryId = id);
+                                      _changed();
+                                    },
+                                  ),
+                                ),
                                 for (final cat in cats)
                                   Padding(
                                     padding: const EdgeInsets.only(right: 8),

@@ -11,6 +11,7 @@ import '../../app_providers.dart';
 import '../../core/l10n/strings.dart';
 import '../../core/text/text_tools.dart';
 import '../../core/theme/app_themes.dart';
+import '../../core/theme/neon_tokens.dart';
 import '../../core/widgets/common.dart';
 import '../../core/widgets/icon3d.dart';
 import '../../data/backup/backup_codec.dart';
@@ -226,12 +227,14 @@ class _BackupCardState extends ConsumerState<BackupCard> {
   Widget build(BuildContext context) {
     final st = ref.watch(backupStatusProvider).asData?.value;
     const onDark = Colors.white;
+    final c = context.gc;
+    final soft = Colors.white.withValues(alpha: 0.85);
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(22),
-        gradient: const RadialGradient(center: Alignment(1, -1), radius: 1.6, colors: [Color(0xFF3F6B4A), Color(0xFF2F5A3C), Color(0xFF23452D)], stops: [0, 0.5, 1]),
-        boxShadow: [BoxShadow(color: const Color(0xFF23452D).withValues(alpha: 0.3), blurRadius: 26, offset: const Offset(0, 12))],
+        gradient: RadialGradient(center: const Alignment(1, -1), radius: 1.6, colors: [c.heroA, c.heroB, c.heroC], stops: const [0, 0.5, 1]),
+        boxShadow: [BoxShadow(color: c.heroC.withValues(alpha: 0.3), blurRadius: 26, offset: const Offset(0, 12)), BoxShadow(color: c.glow.withValues(alpha: 0.18 * context.neon.glowIntensity), blurRadius: 28)],
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         Row(children: [
@@ -241,8 +244,8 @@ class _BackupCardState extends ConsumerState<BackupCard> {
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(st?.lastBackup == null ? context.t('backup_never') : context.t('backup_safe'),
                   style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: onDark)),
-              Text('${context.t('backup_last')}: ${_when(context, st?.lastBackup)}', style: const TextStyle(fontSize: 14, color: Color(0xFFD9EBDC))),
-              Text('${context.t('backup_nightly')} · ${context.t('backup_locked')}', style: const TextStyle(fontSize: 14, color: Color(0xFFD9EBDC))),
+              Text('${context.t('backup_last')}: ${_when(context, st?.lastBackup)}', style: TextStyle(fontSize: 14, color: soft)),
+              Text('${context.t('backup_nightly')} · ${context.t('backup_locked')}', style: TextStyle(fontSize: 14, color: soft)),
             ]),
           ),
         ]),
@@ -260,7 +263,7 @@ class _BackupCardState extends ConsumerState<BackupCard> {
         SizedBox(
           height: 56,
           child: FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Colors.white, foregroundColor: const Color(0xFF23452D), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18))),
+            style: FilledButton.styleFrom(backgroundColor: Colors.white, foregroundColor: c.heroC, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18))),
             onPressed: _busy ? null : _backupNow,
             child: Text(_busy ? context.t('backup_working') : context.t('backup_now'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
           ),
