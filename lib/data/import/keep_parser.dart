@@ -27,7 +27,7 @@ class ImportedPoem {
   final DateTime updatedAt;
 
   /// Collection (category) name taken from the note's title, e.g. "જીવન મંથન".
-  final String collection;
+  String collection;
 
   /// Stable fingerprint, so importing the same export twice adds nothing.
   final String sourceKey;
@@ -39,7 +39,7 @@ class ImportedPoem {
 class NoteSummary {
   NoteSummary(this.fileName, this.collection, this.poems, this.listed, this.missing);
   final String fileName;
-  final String collection;
+  String collection;
   final int poems;
 
   /// Entries in the note's table of contents (0 when the note has none).
@@ -281,5 +281,33 @@ KeepParseResult parseKeepTakeout(Map<String, String> files, {DateTime? now}) {
     final missing = [for (final n in split.listed) if (!found.contains(n)) n];
     notes.add(NoteSummary(name, collection, split.poems.length, split.listed.length, missing));
   }
+  _mergeContinuations(poems, notes);
   return KeepParseResult(poems, notes, skipped);
+}
+
+/// A first volume is sometimes titled shorter than the rest ("પ્રકૃતિ" 1–19,
+/// then "પ્રકૃતિ સંગ" 20 onward). When a collection's name is the first words
+/// of another one in the same script and its numbers end just before the other
+/// begins, both are one collection under the longer name.
+void _mergeContinuations(List<ImportedPoem> poems, List<NoteSummary> notes) {
+  final nums = <String, List<int>>{};
+  for (final p in poems) {
+    if (p.number != null) (nums[p.collection] ??= []).add(p.number!);
+  }
+  final rename = <String, String>{};
+  for (final a in nums.keys) {
+    for (final b in nums.keys) {
+      if (a == b || !b.startsWith('$a ') || detectLang(a) != detectLang(b)) continue;
+      final aMax = nums[a]!.reduce((x, y) => x > y ? x : y);
+      final bMin = nums[b]!.reduce((x, y) => x < y ? x : y);
+      if (bMin == aMax + 1) rename[a] = b;
+    }
+  }
+  if (rename.isEmpty) return;
+  for (final p in poems) {
+    p.collection = rename[p.collection] ?? p.collection;
+  }
+  for (final n in notes) {
+    n.collection = rename[n.collection] ?? n.collection;
+  }
 }

@@ -131,6 +131,17 @@ void main() {
       expect(r.problems, isEmpty);
     });
 
+    test('a short-named first volume joins the collection it continues', () {
+      final r = parseKeepTakeout({
+        'v1.json': note('1:- a\n2:- b\n****\n1:- a\ntext\n****\n2:- b\ntext', title: '૯): પ્રકૃતિ. ૧ થી ૨'),
+        'v2.json': note('3:- c\n4:- d\n****\n3:- c\ntext\n****\n4:- d\ntext', title: '૯): પ્રકૃતિ સંગ: ૩ થી ૪'),
+        'x.json': note('10:- z\n11:- y\n****\n10:- z\ntext\n****\n11:- y\ntext', title: 'પ્રેમ'),
+        'y.json': note('1:- q\n2:- w\n****\n1:- q\ntext\n****\n2:- w\ntext', title: 'પ્રેમ જ્યોત'),
+      });
+      expect(r.collections, {'પ્રકૃતિ સંગ', 'પ્રેમ', 'પ્રેમ જ્યોત'}, reason: '"પ્રેમ" 10–11 does not continue into 1–2');
+      expect(r.poems.where((p) => p.collection == 'પ્રકૃતિ સંગ').map((p) => p.number), [1, 2, 3, 4]);
+    });
+
     test('a contents entry with no poem yet is reported as missing', () {
       final r = parseKeepTakeout({'a.json': note('1:- a\n2:- b\n****\n1:- a\ntext', title: 'X')});
       expect(r.notes.single.missing, [2]);

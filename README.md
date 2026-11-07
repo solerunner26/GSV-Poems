@@ -15,7 +15,7 @@ An Android app (phone and tablet) for writing, finding, reading and safely keepi
 - Search that finds any 3 letters across Gujarati, Hindi and English letters
 - Collection by category, and a recycle bin with restore
 - Six themes, a gu/hi/en interface and an in-app help guide
-- **Google Keep import** (Settings → Import from Google Keep). Each note's title becomes a collection, and the same title in Gujarati and Hindi is one collection. The importer reads the contents list at the top of each note, splits poems at their numbered titles and at separator lines (`****`, `++++`, `####`, `:::`), and keeps the date written under a poem. Importing twice never duplicates. Tested on the full export: 888 entries, which are 887 unique poems (one appears twice) in 18 collections.
+- **Google Keep import** (Settings → Import from Google Keep). Each note's title becomes a collection, and the same title in Gujarati and Hindi is one collection. The importer reads the contents list at the top of each note, splits poems at their numbered titles and at separator lines (`****`, `++++`, `####`, `:::`), and keeps the date written under a poem. Importing twice never duplicates. Tested on the full export: 888 entries, which are 887 unique poems (one appears twice) in 17 collections. A short-named first volume ("પ્રકૃતિ" 1–19) joins the collection it continues ("પ્રકૃતિ સંગ" 20 onward).
 
 **Coming next:**
 - Panchang and Choghadiya
