@@ -10,6 +10,7 @@ import '../../core/text/text_tools.dart';
 import '../../core/theme/app_themes.dart';
 import '../../core/widgets/common.dart';
 import '../../core/widgets/icon3d.dart';
+import '../calendar/calendar_screen.dart';
 import '../duplicates/duplicates_screen.dart';
 import '../import/keep_import_screen.dart';
 import '../pin/pin_screen.dart';
@@ -191,6 +192,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   title: context.t('keep_import'),
                   sub: context.t('keep_import_sub'),
                   onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const KeepImportScreen())),
+                ),
+              ]),
+              _Group(title: context.t('panchang'), rows: [
+                _Row(
+                  icon: 'location',
+                  title: context.t('place'),
+                  sub: placeLabel(prefs.place, context.lang),
+                  onTap: () => choosePlace(context, ref),
+                ),
+                _Row(
+                  icon: 'calendar',
+                  title: context.t('panchang'),
+                  sub: context.t('choghadiya'),
+                  onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const CalendarScreen())),
                 ),
               ]),
               _Group(title: context.t('sec_help'), rows: [

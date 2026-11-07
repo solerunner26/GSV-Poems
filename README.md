@@ -7,7 +7,7 @@ An Android app (phone and tablet) for writing, finding, reading and safely keepi
 - **Code layout:** [ARCHITECTURE.md](ARCHITECTURE.md)
 - **Icon render prompts:** [ICON_PROMPTS.md](ICON_PROMPTS.md)
 
-## Status — v1.1.0-beta.2 (build 3)
+## Status — v1.2.0-beta.1 (build 4)
 - **Foundation:**
   - Splash, 4-digit PIN (plus optional fingerprint), and the 5-button bottom bar with a raised Home
   - Write with auto-save, voice typing and edit history
@@ -26,10 +26,31 @@ An Android app (phone and tablet) for writing, finding, reading and safely keepi
   - shown on Home and in Settings → "એકસરખી કવિતા" (duplicate poems)
   - removed only when asked, and the extras go to the recycle bin
   - the editor warns when typed or pasted text is already in the collection
+- **Panchang and Choghadiya**, worked out on the phone with no internet:
+  - Sun and Moon positions from Meeus' *Astronomical Algorithms*, with Lahiri ayanamsa.
+  - **Today card on Home:**
+    - Gujarati date (month, paksha, tithi), Vikram Samvat and nakshatra
+    - the Choghadiya running now, whether it is good, and when it ends
+  - **Festival strip:** a "Tomorrow is …" / "Today is …" notice on Home.
+  - **Upcoming list:** festivals and vrat days, including Ekadashi, Purnima, Amavasya and Sankashti Chaturthi.
+  - **Panchang screen:**
+    - month calendar with tithi and festival dots
+    - day details: tithi and nakshatra with end times, yoga, karana, sunrise and sunset
+    - day and night Choghadiya
+  - **Calendar rules:**
+    - Gujarati amanta months, with Adhik month detection
+    - Vikram Samvat changes at Kartik sud 1
+    - festivals use the right moment of the day: sunrise, Diwali/Holi at sunset, Ganesh Chaturthi at madhyahna, Dussehra in the afternoon, Shivratri/Janmashtami at midnight
+    - a skipped tithi is kept on the day it begins
+  - **Place:** phone GPS once, or a city list (Gujarat cities, Mumbai, Delhi, Auckland). The default is Ahmedabad.
+  - **Checked against published sources:**
+    - 5 eclipse times, to within 12 minutes
+    - Ahmedabad sunrise and sunset
+    - 11 festival dates in 2026–27, all matching Drik Panchang and others
 - **Updates:** on every open, the app checks this repo's GitHub Releases and offers **Update Now**: download, then Android's installer, with all poems kept.
 
 **Coming next:**
-- Panchang and Choghadiya
+- Festival reminder notifications the evening before (they need the same scheduler as the nightly backup)
 - Encrypted backup (WhatsApp, email, Drive) and restore
 - Two-device sync
 

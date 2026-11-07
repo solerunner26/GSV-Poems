@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/panchang/festivals.dart';
+import 'core/panchang/panchang.dart';
 import 'core/text/text_tools.dart';
 import 'data/db/database.dart';
 import 'data/poem_repository.dart';
@@ -11,25 +13,38 @@ final repoProvider = Provider<PoemRepository>((ref) => PoemRepository(ref.watch(
 final pinServiceProvider = Provider<PinService>((ref) => PinService(const SecureSecretStore()));
 
 class AppPrefs {
-  const AppPrefs({this.themeId = 'mor', this.lang = PoemLang.gu, this.textScale = 1.0, this.recentClearedAt});
+  const AppPrefs({this.themeId = 'mor', this.lang = PoemLang.gu, this.textScale = 1.0, this.recentClearedAt, this.place = Place.ahmedabad, this.placeChosen = false});
   final String themeId;
   final PoemLang lang;
   final double textScale;
   final DateTime? recentClearedAt;
 
-  AppPrefs copyWith({String? themeId, PoemLang? lang, double? textScale, DateTime? recentClearedAt}) => AppPrefs(
+  /// Where sunrise, tithi and Choghadiya are worked out for.
+  final Place place;
+
+  /// False until the poet picked GPS or a city (until then Ahmedabad is used).
+  final bool placeChosen;
+
+  AppPrefs copyWith({String? themeId, PoemLang? lang, double? textScale, DateTime? recentClearedAt, Place? place, bool? placeChosen}) => AppPrefs(
         themeId: themeId ?? this.themeId,
         lang: lang ?? this.lang,
         textScale: textScale ?? this.textScale,
         recentClearedAt: recentClearedAt ?? this.recentClearedAt,
+        place: place ?? this.place,
+        placeChosen: placeChosen ?? this.placeChosen,
       );
 
-  static AppPrefs fromMap(Map<String, String> m) => AppPrefs(
-        themeId: m['theme'] ?? 'mor',
-        lang: langFromCode(m['lang'] ?? 'gu'),
-        textScale: double.tryParse(m['textScale'] ?? '') ?? 1.0,
-        recentClearedAt: DateTime.tryParse(m['recentClearedAt'] ?? ''),
-      );
+  static AppPrefs fromMap(Map<String, String> m) {
+    final lat = double.tryParse(m['placeLat'] ?? ''), lon = double.tryParse(m['placeLon'] ?? '');
+    return AppPrefs(
+      themeId: m['theme'] ?? 'mor',
+      lang: langFromCode(m['lang'] ?? 'gu'),
+      textScale: double.tryParse(m['textScale'] ?? '') ?? 1.0,
+      recentClearedAt: DateTime.tryParse(m['recentClearedAt'] ?? ''),
+      place: lat == null || lon == null ? Place.ahmedabad : Place(m['placeName'] ?? 'GPS', lat, lon),
+      placeChosen: lat != null,
+    );
+  }
 }
 
 class PrefsNotifier extends Notifier<AppPrefs> {
@@ -54,6 +69,13 @@ class PrefsNotifier extends Notifier<AppPrefs> {
   Future<void> setTextScale(double s) async {
     state = state.copyWith(textScale: s);
     await _repo.setSetting('textScale', '$s');
+  }
+
+  Future<void> setPlace(Place p) async {
+    state = state.copyWith(place: p, placeChosen: true);
+    await _repo.setSetting('placeName', p.name);
+    await _repo.setSetting('placeLat', '${p.lat}');
+    await _repo.setSetting('placeLon', '${p.lon}');
   }
 
   Future<void> clearRecent() async {
@@ -81,6 +103,26 @@ final recentProvider = StreamProvider<List<Poem>>((ref) {
 final poemProvider = StreamProvider.family<Poem?, String>((ref, id) => ref.watch(repoProvider).watchPoem(id));
 final duplicateCountProvider = StreamProvider<int>((ref) => ref.watch(repoProvider).watchDuplicateCount());
 final onThisDayProvider = FutureProvider<List<Poem>>((ref) => ref.watch(repoProvider).onThisDay());
+
+/// Ticks every minute so "now" (current Choghadiya, today's date) stays fresh.
+final minuteProvider = StreamProvider<DateTime>((ref) async* {
+  yield DateTime.now();
+  yield* Stream.periodic(const Duration(seconds: 30), (_) => DateTime.now());
+});
+
+/// Today's Panchang at the chosen place (changes at midnight).
+final todayPanchangProvider = Provider<PanchangDay>((ref) {
+  final now = ref.watch(minuteProvider).asData?.value ?? DateTime.now();
+  final place = ref.watch(prefsProvider.select((p) => p.place));
+  return panchangFor(now, place);
+});
+
+/// Festivals and vrat days for the next 45 days.
+final upcomingFestivalsProvider = Provider<List<({DateTime date, Festival festival})>>((ref) {
+  final today = ref.watch(todayPanchangProvider).date;
+  final place = ref.watch(prefsProvider.select((p) => p.place));
+  return upcoming(today, place, days: 45);
+});
 
 /// Category name in the interface language.
 String categoryName(PoemCategory c, PoemLang lang) => switch (lang) {

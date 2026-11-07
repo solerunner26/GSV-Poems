@@ -10,6 +10,9 @@ import '../../core/widgets/common.dart';
 import '../../core/widgets/icon3d.dart';
 import '../../data/db/database.dart';
 import '../../data/poem_repository.dart';
+import '../../core/panchang/names.dart';
+import '../../core/panchang/panchang.dart';
+import '../calendar/calendar_screen.dart';
 import '../common/poem_tile.dart';
 import '../duplicates/duplicates_screen.dart';
 
@@ -60,8 +63,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ]),
               const SizedBox(height: 16),
               _TodayCard(lang: lang),
-              const SizedBox(height: 22),
+              const SizedBox(height: 18),
+              const _FestivalAlert(),
               const DuplicateNotice(),
+              const _UpcomingFestivals(),
               if (stats.total == 0)
                 EmptyState(
                   icon: 'write',
@@ -164,57 +169,202 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 }
 
-class _TodayCard extends StatelessWidget {
+/// Today's date in both calendars and the Choghadiya running now. Tap → Panchang.
+class _TodayCard extends ConsumerWidget {
   const _TodayCard({required this.lang});
   final PoemLang lang;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final c = context.gc;
-    final now = DateTime.now();
+    final now = ref.watch(minuteProvider).asData?.value ?? DateTime.now();
+    final p = ref.watch(todayPanchangProvider);
+    final l = lang.index;
+    // Before sunrise the night Choghadiya of the previous day is still running.
+    final before = now.isBefore(p.sunrise) ? panchangFor(now.subtract(const Duration(days: 1)), ref.watch(prefsProvider).place) : p;
+    final ch = before.choghadiyaAt(now);
+    final list = [...before.dayChoghadiya, ...before.nightChoghadiya];
+    final nextCh = ch == null ? null : (list.indexOf(ch) + 1 < list.length ? list[list.indexOf(ch) + 1] : null);
     final loc = lang.name;
-    return Container(
-      padding: const EdgeInsets.fromLTRB(22, 20, 22, 18),
-      decoration: BoxDecoration(
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
         borderRadius: BorderRadius.circular(26),
-        gradient: RadialGradient(center: const Alignment(1, -1), radius: 1.6, colors: [c.heroA, c.heroB, c.heroC], stops: const [0, 0.45, 1]),
-        boxShadow: [BoxShadow(color: c.heroC.withValues(alpha: 0.35), blurRadius: 30, offset: const Offset(0, 14))],
+        onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const CalendarScreen())),
+        child: Ink(
+          padding: const EdgeInsets.fromLTRB(22, 20, 22, 18),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(26),
+            gradient: RadialGradient(center: const Alignment(1, -1), radius: 1.6, colors: [c.heroA, c.heroB, c.heroC], stops: const [0, 0.45, 1]),
+            boxShadow: [BoxShadow(color: c.heroC.withValues(alpha: 0.35), blurRadius: 30, offset: const Offset(0, 14))],
+          ),
+          child: Stack(children: [
+            const Positioned(right: -8, top: -8, child: Opacity(opacity: 0.22, child: Icon3D('lotus', size: 90))),
+            Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
+                Text(localDigits(now.day, lang),
+                    style: const TextStyle(fontFamily: 'NotoSerifGujarati', fontSize: 64, height: 0.95, fontWeight: FontWeight.w700, color: Colors.white)),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Text(localDigits(DateFormat('MMMM y', loc).format(now), lang),
+                          style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w700, color: Colors.white)),
+                      Text('${vaarNames[p.vaar][l]} · ${DateFormat('d MMM y', 'en').format(now)}',
+                          style: const TextStyle(fontSize: 15, color: Color(0xFFD6ECEA))),
+                    ]),
+                  ),
+                ),
+              ]),
+              const SizedBox(height: 12),
+              Text(dateLine(p, l), style: const TextStyle(fontFamily: 'NotoSerifGujarati', fontSize: 20, fontWeight: FontWeight.w600, color: Colors.white)),
+              Text('${context.t('vs')} ${localDigits(p.samvat, lang)} · ${context.t('nakshatra')}: ${nakshatraNames[p.nakshatra][l]}',
+                  style: const TextStyle(fontSize: 15, color: Color(0xFFD6ECEA))),
+              const SizedBox(height: 12),
+              if (ch != null)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.22)),
+                  ),
+                  child: Row(children: [
+                    Container(
+                      width: 14,
+                      height: 14,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: switch (ch.quality) {
+                          Quality.good => const Color(0xFF9BE3A5),
+                          Quality.neutral => const Color(0xFFBFD7FF),
+                          Quality.bad => const Color(0xFFFFB4A8),
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Text('${context.t('now_running')}: ${choghadiyaNames[ch.kind]![l]} ${context.t('choghadiya_one')}',
+                            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Colors.white)),
+                        Text(
+                          '${qualityNames[ch.quality]![l]} · ${clock(ch.end, lang)} ${context.t('till')}'
+                          '${nextCh == null ? '' : ' · ${context.t('then')} ${choghadiyaNames[nextCh.kind]![l]}'}',
+                          style: const TextStyle(fontSize: 14, color: Color(0xFFD6ECEA)),
+                        ),
+                      ]),
+                    ),
+                    const Icon(Icons.chevron_right_rounded, color: Colors.white),
+                  ]),
+                ),
+            ]),
+          ]),
+        ),
       ),
-      child: Stack(children: [
-        const Positioned(right: -8, top: -8, child: Opacity(opacity: 0.22, child: Icon3D('lotus', size: 90))),
-        Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
-            Text(localDigits(now.day, lang),
-                style: const TextStyle(fontFamily: 'NotoSerifGujarati', fontSize: 64, height: 0.95, fontWeight: FontWeight.w700, color: Colors.white)),
-            const SizedBox(width: 14),
+    );
+  }
+}
+
+/// "Tomorrow is Diwali" / "Today is Ekadashi" strip.
+class _FestivalAlert extends ConsumerWidget {
+  const _FestivalAlert();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final c = context.gc;
+    final l = context.lang.index;
+    final today = ref.watch(todayPanchangProvider).date;
+    final items = ref.watch(upcomingFestivalsProvider).where((f) => f.date.difference(today).inDays <= 1).toList();
+    if (items.isEmpty) return const SizedBox.shrink();
+    final first = items.first;
+    final isToday = DateUtils.isSameDay(first.date, today);
+    final names = items.where((f) => DateUtils.isSameDay(f.date, first.date)).map((f) => f.festival.names[l]).join(' · ');
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 18),
+      child: Semantics(
+        liveRegion: true,
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(color: c.alertBg, borderRadius: BorderRadius.circular(20), border: Border.all(color: c.alertBorder, width: 1.5)),
+          child: Row(children: [
+            Icon3D(first.festival.icon, size: 54),
+            const SizedBox(width: 12),
             Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(localDigits(DateFormat('MMMM y', loc).format(now), lang),
-                      style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w700, color: Colors.white)),
-                  Text('${DateFormat('EEEE', loc).format(now)} · ${DateFormat('d MMM y', 'en').format(now)}',
-                      style: const TextStyle(fontSize: 15, color: Color(0xFFD6ECEA))),
-                ]),
-              ),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('${context.t(isToday ? 'today_is' : 'tomorrow_is')} $names', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: c.ink)),
+                Text('${vaarNames[first.date.weekday % 7][l]} · ${localDigits(DateFormat('d MMMM', context.lang.name).format(first.date), context.lang)}',
+                    style: TextStyle(fontSize: 15, color: c.mute)),
+              ]),
             ),
           ]),
-          const SizedBox(height: 14),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.14),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.22)),
-            ),
-            child: Row(children: [
-              const Icon3D('calendar', size: 36),
-              const SizedBox(width: 10),
-              Expanded(child: Text(context.t('panchang_soon'), style: const TextStyle(fontSize: 15, color: Colors.white, fontWeight: FontWeight.w600))),
-            ]),
+        ),
+      ),
+    );
+  }
+}
+
+/// The next festivals and vrat days (Purnima, Ekadashi, Chaturthi…).
+class _UpcomingFestivals extends ConsumerWidget {
+  const _UpcomingFestivals();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final c = context.gc;
+    final lang = context.lang;
+    final l = lang.index;
+    final today = ref.watch(todayPanchangProvider).date;
+    final items = ref.watch(upcomingFestivalsProvider).where((f) => !f.date.isBefore(today)).take(6).toList();
+    if (items.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 22),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        SectionTitle(
+          context.t('upcoming_fest'),
+          action: TextButton(
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const CalendarScreen())),
+            style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
+            child: Text(context.t('all'), style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: c.primary)),
           ),
-        ]),
+        ),
+        GsvCard(
+          padding: EdgeInsets.zero,
+          child: Column(children: [
+            for (var i = 0; i < items.length; i++)
+              InkWell(
+                onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => CalendarScreen(initial: items[i].date))),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(border: i == 0 ? null : Border(top: BorderSide(color: c.primary.withValues(alpha: 0.08)))),
+                  child: Row(children: [
+                    Container(
+                      width: 54,
+                      height: 54,
+                      decoration: BoxDecoration(color: c.tint, borderRadius: BorderRadius.circular(14)),
+                      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                        Text(localDigits(items[i].date.day, lang), style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, height: 1, color: c.ink)),
+                        Text(DateFormat('MMM', lang.name).format(items[i].date), style: TextStyle(fontSize: 12.5, color: c.mute)),
+                      ]),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Text(items[i].festival.names[l], style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: c.ink)),
+                        Text('${vaarNames[items[i].date.weekday % 7][l]} · ${dateLine(panchangFor(items[i].date, ref.watch(prefsProvider).place), l)}',
+                            maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 14, color: c.mute)),
+                      ]),
+                    ),
+                    Container(
+                      width: 10,
+                      height: 10,
+                      decoration: BoxDecoration(shape: BoxShape.circle, color: festivalColor(items[i].festival.kind)),
+                    ),
+                  ]),
+                ),
+              ),
+          ]),
+        ),
       ]),
     );
   }
