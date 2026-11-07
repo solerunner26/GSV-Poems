@@ -268,6 +268,38 @@ const Map<String, List<String>> _t = {
   'forgot_wrong': ['આ Recovery key આ ફોનની નથી', 'यह Recovery key इस फ़ोन की नहीं है', 'This is not this phone\'s recovery key'],
   'forgot_ok': ['સાચી ચાવી. હવે નવો PIN બનાવો.', 'सही चाबी। अब नया PIN बनाएँ।', 'Correct key. Now make a new PIN.'],
   'next': ['આગળ', 'आगे', 'Next'],
+  'drive_title': ['Google Drive અને બે ઉપકરણ', 'Google Drive और दो डिवाइस', 'Google Drive & two devices'],
+  'drive_row_sub': ['ફોન અને ટેબ્લેટમાં એ જ કવિતા', 'फ़ोन और टैबलेट में वही कविताएँ', 'Same poems on phone and tablet'],
+  'drive_intro': [
+    'ફોન અને ટેબ્લેટ બંનેમાં એ જ Google એકાઉન્ટ જોડો. પછી દરેક ઉપકરણ પોતાનો તાળાબંધ બેકઅપ Drive ના "GSV Poems Backups" ફોલ્ડરમાં મૂકશે અને બીજા ઉપકરણની નવી કવિતા લઈ આવશે. કોઈ કવિતા બે વાર નહીં થાય અને ભૂંસાશે નહીં.',
+    'फ़ोन और टैबलेट दोनों में वही Google खाता जोड़ें। फिर हर डिवाइस अपना ताला-बंद बैकअप Drive के "GSV Poems Backups" फ़ोल्डर में रखेगा और दूसरे डिवाइस की नई कविताएँ ले आएगा। कोई कविता दो बार नहीं होगी और मिटेगी नहीं।',
+    'Connect the same Google account on the phone and the tablet. Each device then keeps its encrypted backup in the Drive folder "GSV Poems Backups" and brings in the other device\'s new poems. Nothing is doubled or erased.'
+  ],
+  'drive_connect': ['Google Drive જોડો', 'Google Drive जोड़ें', 'Connect Google Drive'],
+  'drive_connected_as': ['જોડાયેલું', 'जुड़ा है', 'Connected'],
+  'drive_not_connected': ['જોડાયેલું નથી', 'जुड़ा नहीं है', 'Not connected'],
+  'drive_sync_now': ['હમણાં સિંક કરો', 'अभी सिंक करें', 'Sync now'],
+  'drive_syncing': ['સિંક થાય છે…', 'सिंक हो रहा है…', 'Syncing…'],
+  'drive_synced': ['સિંક થયું', 'सिंक हुआ', 'Synced'],
+  'drive_last_sync': ['છેલ્લું સિંક', 'पिछला सिंक', 'Last sync'],
+  'drive_other_devices': ['બીજાં ઉપકરણ', 'दूसरे डिवाइस', 'other devices'],
+  'drive_needs_key': ['બીજા ઉપકરણની Recovery key જોઈએ', 'दूसरे डिवाइस की Recovery key चाहिए', "The other device's recovery key is needed"],
+  'drive_needs_key_body': [
+    'બીજા ઉપકરણનો બેકઅપ જુદી Recovery key થી તાળાબંધ છે. એ ઉપકરણની (પહેલા ફોનની) Recovery key અહીં એક વાર લખો. પછી બંને ઉપકરણ એક જ ચાવી વાપરશે.',
+    'दूसरे डिवाइस का बैकअप अलग Recovery key से बंद है। उस डिवाइस (पहले फ़ोन) की Recovery key यहाँ एक बार लिखें। फिर दोनों एक ही चाबी इस्तेमाल करेंगे।',
+    "The other device's backup is locked with a different recovery key. Type that device's (the first phone's) recovery key here once; then both use the same key."
+  ],
+  'drive_enter_key': ['Recovery key લખો', 'Recovery key लिखें', 'Type the recovery key'],
+  'drive_disconnect': ['Drive છોડી દો', 'Drive से हटें', 'Disconnect Drive'],
+  'drive_not_setup': [
+    'Google Drive હજી ગોઠવાયું નથી. નીચે "Google Cloud સેટઅપ" માં Web client ID લખવાનું બાકી છે.',
+    'Google Drive अभी सेट नहीं है। नीचे "Google Cloud सेटअप" में Web client ID लिखना बाकी है।',
+    'Google Drive is not set up yet: the Web client ID still needs to be entered under "Google Cloud setup" below.'
+  ],
+  'drive_setup_title': ['Google Cloud સેટઅપ (એક વાર)', 'Google Cloud सेटअप (एक बार)', 'Google Cloud setup (once)'],
+  'drive_client_id': ['Web client ID', 'Web client ID', 'Web client ID'],
+  'drive_saved': ['સાચવ્યું', 'सहेजा', 'Saved'],
+  'drive_failed': ['Drive સાથે ન થયું', 'Drive के साथ नहीं हुआ', 'Drive did not work'],
   'help': ['કેવી રીતે વાપરવું', 'कैसे इस्तेमाल करें', 'How to use'],
   'version': ['આવૃત્તિ', 'संस्करण', 'Version'],
   'history': ['જૂની આવૃત્તિઓ', 'पुराने संस्करण', 'Earlier versions'],

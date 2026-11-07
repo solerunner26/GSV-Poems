@@ -15,6 +15,7 @@ import '../calendar/calendar_screen.dart';
 import '../duplicates/duplicates_screen.dart';
 import '../import/keep_import_screen.dart';
 import '../pin/pin_screen.dart';
+import '../sync/drive_screen.dart';
 import '../update/update_prompt.dart';
 
 
@@ -182,6 +183,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ]),
               const Padding(padding: EdgeInsets.only(bottom: 18), child: BackupCard()),
               _Group(title: context.t('sec_backup'), rows: [
+                _Row(
+                  icon: 'cloud',
+                  title: context.t('drive_title'),
+                  sub: context.t('drive_row_sub'),
+                  onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const DriveScreen())),
+                ),
                 _Row(
                   icon: 'mail',
                   title: context.t('email_backup'),

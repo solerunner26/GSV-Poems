@@ -10,6 +10,7 @@ import '../../core/widgets/icon3d.dart';
 import '../../app_providers.dart';
 import '../../data/backup/scheduler.dart';
 import '../backup/backup_screens.dart';
+import '../sync/drive_screen.dart';
 import '../collection/collection_screen.dart';
 import '../editor/editor_screen.dart';
 import '../home/home_screen.dart';
@@ -50,6 +51,14 @@ class _ShellState extends ConsumerState<Shell> {
         await askNotificationPermission();
       } on Object {
         // Older Android: nothing to ask.
+      }
+    }
+    final sync = ref.read(syncProvider);
+    if (await sync.connected()) {
+      try {
+        await sync.run();
+      } on Object {
+        // Offline or signed out: tried again later.
       }
     }
     final svc = ref.read(backupServiceProvider);

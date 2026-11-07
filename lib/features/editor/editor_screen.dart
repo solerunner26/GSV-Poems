@@ -13,6 +13,7 @@ import '../../core/widgets/common.dart';
 import '../../core/widgets/icon3d.dart';
 import '../../data/db/database.dart';
 import '../common/poem_tile.dart';
+import '../sync/drive_screen.dart';
 
 /// Write a new poem ([poemId] null) or edit one. Saves itself a moment after
 /// each change; the text as it was before editing goes to the edit history once.
@@ -42,6 +43,7 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
   int? _number;
   // Read once: the final save in dispose() runs after ref is gone.
   late final _repo = ref.read(repoProvider);
+  late final _sync = ref.read(syncProvider);
 
   @override
   void initState() {
@@ -104,6 +106,7 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
     }
     _dirty = false;
     _savedOnce = true;
+    _sync.soon();
     if (mounted) setState(() {});
   }
 

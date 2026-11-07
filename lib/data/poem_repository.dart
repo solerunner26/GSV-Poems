@@ -277,11 +277,14 @@ class PoemRepository {
       (db.update(db.poems)..where((p) => p.id.equals(id))).write(PoemsCompanion(isFavorite: Value(fav)));
 
   /// Moves a poem to the recycle bin. Nothing is erased.
-  Future<void> moveToBin(String id) =>
-      (db.update(db.poems)..where((p) => p.id.equals(id))).write(PoemsCompanion(deletedAt: Value(_now())));
+  /// Counts as an edit (updatedAt moves), so the other device follows when syncing.
+  Future<void> moveToBin(String id) {
+    final now = _now();
+    return (db.update(db.poems)..where((p) => p.id.equals(id))).write(PoemsCompanion(deletedAt: Value(now), updatedAt: Value(now)));
+  }
 
   Future<void> restoreFromBin(String id) =>
-      (db.update(db.poems)..where((p) => p.id.equals(id))).write(const PoemsCompanion(deletedAt: Value(null)));
+      (db.update(db.poems)..where((p) => p.id.equals(id))).write(PoemsCompanion(deletedAt: const Value(null), updatedAt: Value(_now())));
 
   /// The only real delete. Only allowed for a poem already in the recycle bin.
   Future<void> deleteForever(String id) => db.transaction(() async {
@@ -400,7 +403,7 @@ class PoemRepository {
   /// wins and the other text is kept in edit history. A poem deleted in the
   /// backup only goes to the recycle bin here. With [replaceAll] the phone's
   /// poems are first cleared (the poet confirms this twice in the app).
-  Future<RestoreOutcome> restoreBackup(Map<String, dynamic> data, {bool replaceAll = false}) async {
+  Future<RestoreOutcome> restoreBackup(Map<String, dynamic> data, {bool replaceAll = false, bool applySettings = true}) async {
     var added = 0, updated = 0, same = 0;
     await db.transaction(() async {
       if (replaceAll) {
@@ -428,8 +431,19 @@ class PoemRepository {
         }
         idMap[b.id] = mine.id;
         if (!b.updatedAt.isAfter(mine.updatedAt)) {
-          // The phone's copy is the same age or newer: keep it, but a deletion
-          // or a favourite mark made elsewhere still counts.
+          // The phone's copy is the same age or newer: keep it. The other
+          // text is not thrown away: it goes into this poem's edit history.
+          if ((b.body != mine.body || b.title != mine.title) && b.updatedAt.isBefore(mine.updatedAt)) {
+            final already = await (db.select(db.poemVersions)
+                  ..where((v) => v.poemId.equals(mine.id) & v.savedAt.equals(b.updatedAt)))
+                .get();
+            if (already.isEmpty) {
+              await db.into(db.poemVersions).insert(
+                    PoemVersionsCompanion.insert(poemId: mine.id, title: b.title, body: b.body, savedAt: b.updatedAt),
+                  );
+            }
+          }
+          // A deletion or a favourite mark made elsewhere still counts.
           final binIt = b.deletedAt != null && mine.deletedAt == null && b.deletedAt!.isAfter(mine.updatedAt);
           if (binIt || (b.isFavorite && !mine.isFavorite)) {
             await (db.update(db.poems)..where((x) => x.id.equals(mine.id))).write(PoemsCompanion(
@@ -474,7 +488,8 @@ class PoemRepository {
               PoemVersionsCompanion.insert(poemId: poemId, title: '${m['title'] ?? ''}', body: '${m['body'] ?? ''}', savedAt: saved),
             );
       }
-      final settings = (data['settings'] as Map?)?.cast<String, dynamic>() ?? const {};
+      // Syncing with another device keeps this device's own theme, language and place.
+      final settings = applySettings ? (data['settings'] as Map?)?.cast<String, dynamic>() ?? const {} : const <String, dynamic>{};
       for (final e in settings.entries) {
         if (backupSettingKeys.contains(e.key)) await setSetting(e.key, '${e.value}');
       }

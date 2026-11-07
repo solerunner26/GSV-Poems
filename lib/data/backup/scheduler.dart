@@ -12,6 +12,8 @@ import '../db/database.dart';
 import '../poem_repository.dart';
 import '../security/pin_service.dart';
 import 'backup_service.dart';
+import '../sync/drive_service.dart';
+import '../sync/sync_service.dart';
 
 const _nightlyId = 1159, _reminderId = 1900;
 
@@ -74,7 +76,18 @@ Future<(AppDatabase, PoemRepository, PoemLang)> _open() async {
 Future<void> nightlyBackupAlarm() async {
   final (db, repo, lang) = await _open();
   try {
-    await BackupService(repo, const SecureSecretStore()).nightly(subject: tr('backup_mail_subject', lang), body: tr('backup_mail_body', lang));
+    final backups = BackupService(repo, const SecureSecretStore());
+    await backups.nightly(subject: tr('backup_mail_subject', lang), body: tr('backup_mail_body', lang));
+    // Drive (when connected): best effort from the background; the app also syncs on open.
+    if ((await repo.getSetting('driveEmail'))?.isNotEmpty ?? false) {
+      try {
+        final id = await repo.getSetting('driveClientId');
+        final drive = DriveService(id == null || id.isEmpty ? defaultWebClientId : id);
+        if (await drive.signInQuietly()) await SyncService(repo, backups, drive).sync();
+      } on Object {
+        // Not fatal.
+      }
+    }
   } on Object catch (e) {
     await _initNotes();
     await _show(2, tr('backup_failed', lang), '$e', channel: 'backup', channelName: 'Backup');

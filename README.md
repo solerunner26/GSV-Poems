@@ -7,7 +7,7 @@ An Android app (phone and tablet) for writing, finding, reading and safely keepi
 - **Code layout:** [ARCHITECTURE.md](ARCHITECTURE.md)
 - **Icon render prompts:** [ICON_PROMPTS.md](ICON_PROMPTS.md)
 
-## Status — v1.3.0-beta.1 (build 5)
+## Status — v1.4.0-beta.1 (build 6)
 - **Foundation:**
   - Splash, 4-digit PIN (plus optional fingerprint), and the 5-button bottom bar with a raised Home
   - Write with auto-save, voice typing and edit history
@@ -56,11 +56,16 @@ An Android app (phone and tablet) for writing, finding, reading and safely keepi
     - **Gmail** emails the backup automatically every night (app password, set once in Settings)
   - **Restore:** from any `.gsvbak` file (WhatsApp, email, phone). It merges poem by poem: matched by id, bundled-poem key or text, the newer edit wins, the older text goes to history, and nothing is duplicated or erased. A safety backup is taken first. "Replace everything" asks twice.
   - **Forgot PIN:** resets with the recovery key.
+- **Google Drive and two devices:**
+  - **Drive folder:** each device keeps its encrypted latest backup, plus 14 daily copies, in the Drive folder "GSV Poems Backups". The app uses the `drive.file` scope, so it sees only its own files.
+  - **Syncing:** happens on open, about 20 seconds after an edit, and at night. Merges use the restore rules: the newer edit wins, the other text goes to history, nothing is duplicated, and deletes only go to the bin.
+  - **Shared key:** the second device asks once for the first device's recovery key, so both use one key. It never uploads under a different key.
+  - **One-time setup:** see [DRIVE_SETUP.md](DRIVE_SETUP.md). It needs a Google Cloud project with an Android client (package + release SHA-1) and a Web client ID.
 - **Festival reminders:** a notification at 7 PM the evening before festivals and vrat days.
 - **Updates:** on every open, the app checks this repo's GitHub Releases and offers **Update Now**: download, then Android's installer, with all poems kept.
 
 **Coming next:**
-- Google Drive backup and two-device sync (needs a Google Cloud sign-in setup, done together)
+- After the Google Cloud setup: build the Web client ID into the app, and test sync on both devices
 
 ## Develop
 Requirements: Flutter 3.47+, Android SDK 36, and Android licences accepted (`flutter doctor --android-licenses`).
