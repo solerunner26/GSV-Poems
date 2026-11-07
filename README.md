@@ -7,7 +7,7 @@ An Android app (phone and tablet) for writing, finding, reading and safely keepi
 - **Code layout:** [ARCHITECTURE.md](ARCHITECTURE.md)
 - **Icon render prompts:** [ICON_PROMPTS.md](ICON_PROMPTS.md)
 
-## Status — v1.1.0-beta.1 (build 2)
+## Status — v1.1.0-beta.2 (build 3)
 - **Foundation:**
   - Splash, 4-digit PIN (plus optional fingerprint), and the 5-button bottom bar with a raised Home
   - Write with auto-save, voice typing and edit history
