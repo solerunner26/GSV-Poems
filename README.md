@@ -7,7 +7,7 @@ An Android app (phone and tablet) for writing, finding, reading and safely keepi
 - **Code layout:** [ARCHITECTURE.md](ARCHITECTURE.md)
 - **Icon render prompts:** [ICON_PROMPTS.md](ICON_PROMPTS.md)
 
-## Status — v1.4.0-beta.1 (build 6)
+## Status — v1.4.1-beta.1 (build 7)
 - **Foundation:**
   - Splash, 4-digit PIN (plus optional fingerprint), and the 5-button bottom bar with a raised Home
   - Write with auto-save, voice typing and edit history
@@ -65,7 +65,7 @@ An Android app (phone and tablet) for writing, finding, reading and safely keepi
 - **Updates:** on every open, the app checks this repo's GitHub Releases and offers **Update Now**: download, then Android's installer, with all poems kept.
 
 **Coming next:**
-- After the Google Cloud setup: build the Web client ID into the app, and test sync on both devices
+- Test Drive sync on the phone and the tablet
 
 ## Develop
 Requirements: Flutter 3.47+, Android SDK 36, and Android licences accepted (`flutter doctor --android-licenses`).

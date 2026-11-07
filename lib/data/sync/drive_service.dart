@@ -14,7 +14,7 @@ const driveFolderName = 'GSV Poems Backups';
 
 /// The *Web* OAuth client ID from Google Cloud (Credentials). Not a secret:
 /// it only names the project. Can also be set in the app (Drive screen).
-const defaultWebClientId = '';
+const defaultWebClientId = '307387375591-prjdev9fb0cd03ptkp8svcg37v68njg9.apps.googleusercontent.com';
 
 class DriveNotSetUp implements Exception {
   @override
