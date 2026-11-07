@@ -11,6 +11,7 @@ import '../../core/text/text_tools.dart';
 import '../../core/theme/app_themes.dart';
 import '../../core/widgets/icon3d.dart';
 import '../../data/security/pin_service.dart';
+import '../backup/backup_screens.dart';
 
 enum PinMode { unlock, change }
 
@@ -132,15 +133,21 @@ class _PinScreenState extends ConsumerState<PinScreen> {
     });
   }
 
-  void _forgot() {
-    showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(context.t('pin_forgot')),
-        content: Text(context.t('pin_forgot_body'), style: const TextStyle(fontSize: 17, height: 1.5)),
-        actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: Text(context.t('close')))],
-      ),
-    );
+  /// The recovery key unlocks a PIN reset.
+  Future<void> _forgot() async {
+    final typed = await askRecoveryKey(context, title: context.t('pin_forgot'), body: context.t('forgot_body'));
+    if (typed == null || !mounted) return;
+    final ok = await ref.read(backupServiceProvider).matchesRecoveryKey(typed);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.t(ok ? 'forgot_ok' : 'forgot_wrong'))));
+    if (ok) {
+      setState(() {
+        _step = _Step.create;
+        _digits = '';
+        _error = null;
+        _firstEntry = null;
+      });
+    }
   }
 
   @override

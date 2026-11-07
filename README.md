@@ -7,7 +7,7 @@ An Android app (phone and tablet) for writing, finding, reading and safely keepi
 - **Code layout:** [ARCHITECTURE.md](ARCHITECTURE.md)
 - **Icon render prompts:** [ICON_PROMPTS.md](ICON_PROMPTS.md)
 
-## Status — v1.2.0-beta.1 (build 4)
+## Status — v1.3.0-beta.1 (build 5)
 - **Foundation:**
   - Splash, 4-digit PIN (plus optional fingerprint), and the 5-button bottom bar with a raised Home
   - Write with auto-save, voice typing and edit history
@@ -47,12 +47,20 @@ An Android app (phone and tablet) for writing, finding, reading and safely keepi
     - 5 eclipse times, to within 12 minutes
     - Ahmedabad sunrise and sunset
     - 11 festival dates in 2026–27, all matching Drik Panchang and others
+- **Backup and restore:**
+  - **Encrypted file:** an encrypted `.gsvbak` file (gzip + AES-256-GCM) with a key made from a 25-character **recovery key** (PBKDF2-SHA256, 120,000 rounds). The recovery key is shown once at first launch, to write down, print or email.
+  - **When:** automatically **every night at 11:59 PM**, even with the app closed (exact alarm when Android allows it, otherwise within a few minutes). A missed night is backed up the next time the app opens. **Back up now** works any time.
+  - **Where:**
+    - the last 7 backups stay on the phone
+    - **Send to WhatsApp** takes one tap
+    - **Gmail** emails the backup automatically every night (app password, set once in Settings)
+  - **Restore:** from any `.gsvbak` file (WhatsApp, email, phone). It merges poem by poem: matched by id, bundled-poem key or text, the newer edit wins, the older text goes to history, and nothing is duplicated or erased. A safety backup is taken first. "Replace everything" asks twice.
+  - **Forgot PIN:** resets with the recovery key.
+- **Festival reminders:** a notification at 7 PM the evening before festivals and vrat days.
 - **Updates:** on every open, the app checks this repo's GitHub Releases and offers **Update Now**: download, then Android's installer, with all poems kept.
 
 **Coming next:**
-- Festival reminder notifications the evening before (they need the same scheduler as the nightly backup)
-- Encrypted backup (WhatsApp, email, Drive) and restore
-- Two-device sync
+- Google Drive backup and two-device sync (needs a Google Cloud sign-in setup, done together)
 
 ## Develop
 Requirements: Flutter 3.47+, Android SDK 36, and Android licences accepted (`flutter doctor --android-licenses`).

@@ -5,6 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app_providers.dart';
 import 'core/l10n/strings.dart';
 import 'core/theme/app_themes.dart';
+import 'data/backup/backup_service.dart';
+import 'data/security/pin_service.dart';
+import 'features/backup/backup_screens.dart';
 import 'features/pin/pin_screen.dart';
 import 'features/shell/shell.dart';
 import 'features/splash/splash_screen.dart';
@@ -42,7 +45,7 @@ class GsvApp extends ConsumerWidget {
   }
 }
 
-enum _Stage { splash, pin, app }
+enum _Stage { splash, pin, recovery, app }
 
 /// Splash → PIN → app. Coming back after 2 minutes in the background asks for the PIN again.
 class StartFlow extends StatefulWidget {
@@ -82,13 +85,20 @@ class _StartFlowState extends State<StartFlow> with WidgetsBindingObserver {
     }
   }
 
+  /// First time after the PIN: show the recovery key once so it gets written down.
+  Future<void> _afterPin() async {
+    final seen = await BackupService.recoveryAcknowledgedIn(const SecureSecretStore());
+    if (mounted) setState(() => _stage = seen ? _Stage.app : _Stage.recovery);
+  }
+
   @override
   Widget build(BuildContext context) {
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 280),
       child: switch (_stage) {
         _Stage.splash => SplashScreen(key: const ValueKey('splash'), onEnter: () => setState(() => _stage = _Stage.pin)),
-        _Stage.pin => PinScreen(key: const ValueKey('pin'), onUnlocked: () => setState(() => _stage = _Stage.app)),
+        _Stage.pin => PinScreen(key: const ValueKey('pin'), onUnlocked: _afterPin),
+        _Stage.recovery => RecoveryKeyScreen(key: const ValueKey('recovery'), onDone: () => setState(() => _stage = _Stage.app)),
         _Stage.app => const Shell(key: ValueKey('app')),
       },
     );

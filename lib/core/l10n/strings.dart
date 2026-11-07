@@ -18,11 +18,6 @@ const Map<String, List<String>> _t = {
   'pin_wrong': ['ખોટો PIN. ફરી પ્રયત્ન કરો.', 'गलत PIN। फिर कोशिश करें।', 'Wrong PIN. Try again.'],
   'pin_locked': ['ઘણા ખોટા પ્રયત્ન. 30 સેકન્ડ રાહ જુઓ.', 'कई गलत प्रयास। 30 सेकंड रुकें।', 'Too many tries. Wait 30 seconds.'],
   'pin_forgot': ['PIN ભૂલી ગયા?', 'PIN भूल गए?', 'Forgot PIN?'],
-  'pin_forgot_body': [
-    'Recovery key થી PIN બદલી શકાશે. આ સુવિધા બેકઅપ સાથે આવતા અપડેટમાં આવશે. ત્યાં સુધી PIN યાદ રાખજો.',
-    'Recovery key से PIN बदला जा सकेगा। यह सुविधा बैकअप के साथ अगले अपडेट में आएगी। तब तक PIN याद रखें।',
-    'You will be able to reset the PIN with the recovery key. That arrives with the backup update. Until then, please remember the PIN.'
-  ],
   'pin_changed': ['PIN બદલાઈ ગયો', 'PIN बदल गया', 'PIN changed'],
   'pin_current': ['હાલનો PIN લખો', 'वर्तमान PIN डालें', 'Enter your current PIN'],
   'fingerprint_reason': ['એપ ખોલવા આંગળી મૂકો', 'ऐप खोलने के लिए उंगली रखें', 'Touch the sensor to open the app'],
@@ -193,6 +188,86 @@ const Map<String, List<String>> _t = {
   'change': ['બદલો', 'बदलें', 'Change'],
   'no_fest_day': ['આ દિવસે કોઈ તહેવાર નથી', 'इस दिन कोई त्योहार नहीं', 'No festival on this day'],
   'adhik_month': ['અધિક માસ', 'अधिक मास', 'Adhik month'],
+  'recovery_title': ['તમારી Recovery key', 'आपकी Recovery key', 'Your recovery key'],
+  'recovery_intro': [
+    'આ ચાવી કાગળ પર લખી સલામત રાખો. નવા ફોનમાં બેકઅપ ખોલવા અને PIN ભૂલી જાઓ ત્યારે આ જ ચાવી જોઈશે. ચાવી વગર બેકઅપ કોઈ ખોલી શકતું નથી.',
+    'यह चाबी काग़ज़ पर लिखकर सुरक्षित रखें। नए फ़ोन में बैकअप खोलने और PIN भूलने पर यही चाबी चाहिए। चाबी के बिना बैकअप कोई नहीं खोल सकता।',
+    'Write this key on paper and keep it safe. You need it to open a backup on a new phone and to reset a forgotten PIN. Without it nobody can open the backups.'
+  ],
+  'recovery_written': ['મેં લખી લીધી', 'मैंने लिख ली', 'I have written it down'],
+  'recovery_share': ['છાપો / મોકલો', 'छापें / भेजें', 'Print / share'],
+  'recovery_email': ['ઈમેલ પર મોકલો', 'ईमेल पर भेजें', 'Email it to me'],
+  'recovery_emailed': ['Recovery key ઈમેલ પર મોકલી', 'Recovery key ईमेल पर भेजी', 'Recovery key emailed'],
+  'recovery_mail_subject': ['GSV Poems — Recovery key (સાચવીને રાખો)', 'GSV Poems — Recovery key (सँभालकर रखें)', 'GSV Poems — recovery key (keep safe)'],
+  'recovery_mail_body': [
+    'આ તમારી કાવ્ય સંગ્રહ એપની Recovery key છે. બેકઅપ ખોલવા અને PIN બદલવા જોઈશે. આ ઈમેલ કોઈને મોકલશો નહીં.',
+    'यह आपके काव्य संग्रह ऐप की Recovery key है। बैकअप खोलने और PIN बदलने के लिए चाहिए। यह ईमेल किसी को न भेजें।',
+    'This is the recovery key for your poem collection app. You need it to open backups and to reset the PIN. Do not forward this email.'
+  ],
+  'recovery_view': ['Recovery key જુઓ', 'Recovery key देखें', 'View recovery key'],
+  'backup_title': ['બેકઅપ', 'बैकअप', 'Backup'],
+  'backup_now': ['હમણાં બેકઅપ લો', 'अभी बैकअप लें', 'Back up now'],
+  'backup_working': ['બેકઅપ લે છે…', 'बैकअप हो रहा है…', 'Backing up…'],
+  'backup_done': ['બેકઅપ થઈ ગયો', 'बैकअप हो गया', 'Backup done'],
+  'backup_last': ['છેલ્લો બેકઅપ', 'पिछला बैकअप', 'Last backup'],
+  'backup_never': ['હજી બેકઅપ નથી', 'अभी कोई बैकअप नहीं', 'No backup yet'],
+  'backup_nightly': ['દરરોજ રાત્રે 11:59 વાગ્યે આપમેળે', 'हर रात 11:59 बजे अपने-आप', 'Every night at 11:59 PM by itself'],
+  'backup_on_phone': ['ફોનમાં બેકઅપ', 'फ़ोन में बैकअप', 'backups on the phone'],
+  'backup_safe': ['બધી કવિતા સુરક્ષિત છે', 'सभी कविताएँ सुरक्षित हैं', 'All poems are safe'],
+  'backup_locked': ['તાળાબંધ (encrypted)', 'ताला-बंद (encrypted)', 'Encrypted'],
+  'backup_whatsapp': ['WhatsApp પર મોકલો', 'WhatsApp पर भेजें', 'Send to WhatsApp'],
+  'backup_share_text': ['GSV Poems બેકઅપ. ખોલવા Recovery key જોઈશે.', 'GSV Poems बैकअप। खोलने के लिए Recovery key चाहिए।', 'GSV Poems backup. The recovery key is needed to open it.'],
+  'backup_restore': ['બેકઅપમાંથી પાછું લાવો', 'बैकअप से वापस लाएँ', 'Restore from a backup'],
+  'backup_failed': ['બેકઅપ ન થયો', 'बैकअप नहीं हुआ', 'Backup did not finish'],
+  'backup_mail_subject': ['GSV Poems — આજનો બેકઅપ', 'GSV Poems — आज का बैकअप', 'GSV Poems — today\'s backup'],
+  'backup_mail_body': [
+    'કાવ્ય સંગ્રહનો આજનો બેકઅપ સાથે છે. તે તાળાબંધ છે; ખોલવા Recovery key જોઈશે. નવા ફોનમાં: એપ → સેટિંગ → બેકઅપમાંથી પાછું લાવો.',
+    'काव्य संग्रह का आज का बैकअप साथ में है। यह ताला-बंद है; खोलने के लिए Recovery key चाहिए। नए फ़ोन में: ऐप → सेटिंग → बैकअप से वापस लाएँ।',
+    "Today's backup of the poem collection is attached. It is encrypted; the recovery key opens it. On a new phone: app → Settings → Restore from a backup."
+  ],
+  'email_backup': ['ઈમેલ બેકઅપ', 'ईमेल बैकअप', 'Email backup'],
+  'email_on': ['ચાલુ', 'चालू', 'On'],
+  'email_off': ['બંધ — ગોઠવવા દબાવો', 'बंद — सेट करने के लिए दबाएँ', 'Off — tap to set up'],
+  'email_last': ['છેલ્લો ઈમેલ', 'पिछला ईमेल', 'Last email'],
+  'email_to': ['કયા ઈમેલ પર મોકલવું', 'किस ईमेल पर भेजें', 'Send to (email address)'],
+  'email_from': ['મોકલનાર Gmail', 'भेजने वाला Gmail', 'Sending Gmail account'],
+  'email_pass': ['Gmail App password (16 અક્ષર)', 'Gmail App password (16 अक्षर)', 'Gmail app password (16 letters)'],
+  'email_how': [
+    'App password બનાવવા: Google Account → Security → 2-Step Verification ચાલુ કરો → App passwords → "GSV Poems" નામ આપો → મળેલા 16 અક્ષર અહીં લખો. તમારો સામાન્ય Gmail પાસવર્ડ ન લખો.',
+    'App password बनाने के लिए: Google Account → Security → 2-Step Verification चालू करें → App passwords → "GSV Poems" नाम दें → मिले 16 अक्षर यहाँ लिखें। अपना सामान्य Gmail पासवर्ड न लिखें।',
+    'To make an app password: Google Account → Security → turn on 2-Step Verification → App passwords → name it "GSV Poems" → type the 16 letters here. Do not type your normal Gmail password.'
+  ],
+  'email_save_test': ['સાચવો અને ટેસ્ટ ઈમેલ મોકલો', 'सहेजें और टेस्ट ईमेल भेजें', 'Save and send a test email'],
+  'email_ok': ['ઈમેલ પહોંચી ગયો. દરરોજ રાત્રે બેકઅપ આ ઈમેલ પર આવશે.', 'ईमेल पहुँच गया। हर रात बैकअप इसी ईमेल पर आएगा।', 'Email sent. Every night the backup will arrive at this address.'],
+  'email_fail': ['ઈમેલ ન ગયો', 'ईमेल नहीं गया', 'The email was not sent'],
+  'email_remove': ['ઈમેલ બેકઅપ બંધ કરો', 'ईमेल बैकअप बंद करें', 'Turn off email backup'],
+  'email_bad_input': ['ઈમેલ સરનામાં અને 16 અક્ષરનો App password તપાસો', 'ईमेल पते और 16 अक्षर का App password जाँचें', 'Check the email addresses and the 16-letter app password'],
+  'restore_title': ['બેકઅપમાંથી પાછું લાવો', 'बैकअप से वापस लाएँ', 'Restore from a backup'],
+  'restore_how': [
+    'WhatsApp, ઈમેલ કે ફોનમાં સાચવેલી .gsvbak ફાઈલ પસંદ કરો. કોઈ કવિતા બે વાર નહીં ઉમેરાય અને ફોનની કોઈ કવિતા ભૂંસાશે નહીં.',
+    'WhatsApp, ईमेल या फ़ोन में रखी .gsvbak फ़ाइल चुनें। कोई कविता दो बार नहीं जुड़ेगी और फ़ोन की कोई कविता नहीं मिटेगी।',
+    'Pick the .gsvbak file saved from WhatsApp, email or the phone. No poem is added twice and no poem on the phone is erased.'
+  ],
+  'restore_pick': ['બેકઅપ ફાઈલ પસંદ કરો', 'बैकअप फ़ाइल चुनें', 'Choose the backup file'],
+  'restore_phone_copies': ['આ ફોનમાંના બેકઅપ', 'इस फ़ोन के बैकअप', 'Backups on this phone'],
+  'restore_of': ['નો બેકઅપ', 'का बैकअप', 'backup of'],
+  'restore_key_hint': ['Recovery key લખો (ઉ.દા. 7K2QM-…)', 'Recovery key लिखें (जैसे 7K2QM-…)', 'Type the recovery key (e.g. 7K2QM-…)'],
+  'restore_open': ['ખોલો', 'खोलें', 'Open'],
+  'restore_wrong_key': ['આ ચાવીથી બેકઅપ ન ખૂલ્યો. ચાવી ફરી તપાસો.', 'इस चाबी से बैकअप नहीं खुला। चाबी फिर जाँचें।', 'This key does not open the backup. Check it again.'],
+  'restore_not_backup': ['આ GSV Poems ની બેકઅપ ફાઈલ નથી', 'यह GSV Poems की बैकअप फ़ाइल नहीं है', 'This is not a GSV Poems backup file'],
+  'restore_merge': ['પાછું લાવો (ભેગું કરો)', 'वापस लाएँ (जोड़ें)', 'Restore (combine)'],
+  'restore_merge_note': ['નવી કવિતા ઉમેરાશે, જે બદલાઈ છે તેની નવી આવૃત્તિ રહેશે અને જૂની ઇતિહાસમાં સચવાશે.', 'नई कविताएँ जुड़ेंगी, बदली हुई का नया रूप रहेगा और पुराना इतिहास में सहेजा जाएगा।', 'New poems are added; for changed ones the newer text stays and the older one is kept in history.'],
+  'restore_replace': ['બધું બદલી નાખો', 'सब बदल दें', 'Replace everything'],
+  'restore_replace_confirm': ['ફોનની બધી કવિતા કાઢીને ફક્ત બેકઅપની કવિતા રાખશે.', 'फ़ोन की सभी कविताएँ हटाकर केवल बैकअप की कविताएँ रखेगा।', 'This removes every poem on the phone and keeps only the backup\'s poems.'],
+  'restore_done': ['પાછું આવી ગયું', 'वापस आ गया', 'Restored'],
+  'restore_added': ['નવી', 'नई', 'new'],
+  'restore_updated': ['સુધરી', 'अपडेट', 'updated'],
+  'restore_same': ['એ જ હતી', 'वैसी ही थीं', 'unchanged'],
+  'restore_key_adopted': ['હવેથી આ જ Recovery key વપરાશે', 'अब से यही Recovery key चलेगी', 'This recovery key is used from now on'],
+  'forgot_body': ['Recovery key લખો. સાચી હશે તો નવો PIN બનાવી શકશો.', 'Recovery key लिखें। सही होगी तो नया PIN बना सकेंगे।', 'Type the recovery key. If it is right you can make a new PIN.'],
+  'forgot_wrong': ['આ Recovery key આ ફોનની નથી', 'यह Recovery key इस फ़ोन की नहीं है', 'This is not this phone\'s recovery key'],
+  'forgot_ok': ['સાચી ચાવી. હવે નવો PIN બનાવો.', 'सही चाबी। अब नया PIN बनाएँ।', 'Correct key. Now make a new PIN.'],
+  'next': ['આગળ', 'आगे', 'Next'],
   'help': ['કેવી રીતે વાપરવું', 'कैसे इस्तेमाल करें', 'How to use'],
   'version': ['આવૃત્તિ', 'संस्करण', 'Version'],
   'history': ['જૂની આવૃત્તિઓ', 'पुराने संस्करण', 'Earlier versions'],
@@ -236,10 +311,11 @@ const Map<String, List<String>> helpText = {
     'The month is at the top; below are the chosen day\'s Panchang and Choghadiya. A coloured dot marks a festival or vrat day. "Today" jumps back to today; "Change" sets the place.'
   ],
   'settings': [
-    'થીમ, ભાષા, અક્ષરનું કદ અને PIN અહીં બદલો. બેકઅપની સુવિધા આવતા અપડેટમાં અહીં આવશે.',
-    'थीम, भाषा, अक्षर का आकार और PIN यहाँ बदलें। बैकअप की सुविधा अगले अपडेट में यहाँ आएगी।',
-    'Change theme, language, text size and PIN here. Backup arrives here in the next update.'
+    'થીમ, ભાષા, અક્ષરનું કદ, PIN અને સ્થળ અહીં બદલો. લીલા ખાનામાં બેકઅપ છે: દરરોજ રાત્રે 11:59 વાગ્યે આપમેળે થાય છે. "હમણાં બેકઅપ લો" દબાવી ગમે ત્યારે લઈ શકાય. "WhatsApp પર મોકલો" થી બેકઅપ ફાઈલ કોઈ પણ ચેટમાં મોકલો. નવા ફોનમાં "બેકઅપમાંથી પાછું લાવો" દબાવી એ ફાઈલ પસંદ કરો અને Recovery key લખો.',
+    'थीम, भाषा, अक्षर का आकार, PIN और स्थान यहाँ बदलें। हरे खाने में बैकअप है: हर रात 11:59 बजे अपने-आप होता है। "अभी बैकअप लें" से कभी भी ले सकते हैं। "WhatsApp पर भेजें" से बैकअप फ़ाइल किसी भी चैट में भेजें। नए फ़ोन में "बैकअप से वापस लाएँ" दबाकर वह फ़ाइल चुनें और Recovery key लिखें।',
+    'Change theme, language, text size, PIN and place here. The green box is the backup: it runs every night at 11:59 PM by itself. "Back up now" takes one any time. "Send to WhatsApp" sends the backup file to any chat. On a new phone, tap "Restore from a backup", pick that file and type the recovery key.'
   ],
+
 };
 
 /// Supplies the active interface language. Wrapping a subtree in a

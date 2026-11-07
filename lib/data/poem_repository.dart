@@ -15,6 +15,11 @@ class PoemStats {
   final int total, words, gu, hi, en, inBin;
 }
 
+class RestoreOutcome {
+  const RestoreOutcome(this.added, this.updated, this.unchanged);
+  final int added, updated, unchanged;
+}
+
 class ImportOutcome {
   const ImportOutcome(this.added, this.alreadyThere, {this.duplicates = 0});
   final int added, alreadyThere;
@@ -366,6 +371,115 @@ class PoemRepository {
       moved++;
     }
     return moved;
+  }
+
+  // ---------- backup & restore ----------
+
+  /// Settings that travel with a backup (never secrets: those live in secure storage).
+  static const backupSettingKeys = {'theme', 'lang', 'textScale', 'placeName', 'placeLat', 'placeLon', 'seedHash', 'recentClearedAt'};
+
+  /// Everything a backup holds: poems (also those in the recycle bin), edit history, collections, settings.
+  Future<Map<String, dynamic>> exportBackup() async {
+    final poems = await db.select(db.poems).get();
+    final cats = await db.select(db.poemCategories).get();
+    final versions = await db.select(db.poemVersions).get();
+    final settings = await allSettings();
+    return {
+      'format': 1,
+      'poems': [for (final p in poems) p.toJson()],
+      'categories': [for (final c in cats) c.toJson()],
+      'versions': [for (final v in versions) (v.toJson()..remove('id'))],
+      'settings': {for (final e in settings.entries) if (backupSettingKeys.contains(e.key)) e.key: e.value},
+    };
+  }
+
+  /// Brings a backup back without ever duplicating or erasing a poem.
+  ///
+  /// A poem in the backup is matched to one on the phone by its id, else by the
+  /// bundled-poem key, else by identical text. When both exist the newer edit
+  /// wins and the other text is kept in edit history. A poem deleted in the
+  /// backup only goes to the recycle bin here. With [replaceAll] the phone's
+  /// poems are first cleared (the poet confirms this twice in the app).
+  Future<RestoreOutcome> restoreBackup(Map<String, dynamic> data, {bool replaceAll = false}) async {
+    var added = 0, updated = 0, same = 0;
+    await db.transaction(() async {
+      if (replaceAll) {
+        await db.delete(db.poemVersions).go();
+        await db.delete(db.poems).go();
+      }
+      for (final m in (data['categories'] as List? ?? const []).cast<Map<String, dynamic>>()) {
+        final c = PoemCategory.fromJson(m);
+        await db.into(db.poemCategories).insertOnConflictUpdate(c);
+      }
+      final local = await db.select(db.poems).get();
+      final byId = {for (final p in local) p.id: p};
+      final bySource = {for (final p in local) if (p.sourceKey != null) p.sourceKey!: p};
+      final byContent = {for (final p in local) if (p.contentKey != null) p.contentKey!: p};
+      final idMap = <String, String>{};
+      for (final m in (data['poems'] as List? ?? const []).cast<Map<String, dynamic>>()) {
+        var b = Poem.fromJson(m);
+        b = b.copyWith(contentKey: Value(b.contentKey ?? contentKeyOf(b.body)));
+        final mine = byId[b.id] ?? (b.sourceKey == null ? null : bySource[b.sourceKey]) ?? (b.contentKey == null ? null : byContent[b.contentKey]);
+        if (mine == null) {
+          await db.into(db.poems).insert(b);
+          idMap[b.id] = b.id;
+          added++;
+          continue;
+        }
+        idMap[b.id] = mine.id;
+        if (!b.updatedAt.isAfter(mine.updatedAt)) {
+          // The phone's copy is the same age or newer: keep it, but a deletion
+          // or a favourite mark made elsewhere still counts.
+          final binIt = b.deletedAt != null && mine.deletedAt == null && b.deletedAt!.isAfter(mine.updatedAt);
+          if (binIt || (b.isFavorite && !mine.isFavorite)) {
+            await (db.update(db.poems)..where((x) => x.id.equals(mine.id))).write(PoemsCompanion(
+                  deletedAt: binIt ? Value(b.deletedAt) : const Value.absent(),
+                  isFavorite: b.isFavorite ? const Value(true) : const Value.absent(),
+                ));
+            updated++;
+          } else {
+            same++;
+          }
+          continue;
+        }
+        if (mine.body != b.body || mine.title != b.title) {
+          await db.into(db.poemVersions).insert(
+                PoemVersionsCompanion.insert(poemId: mine.id, title: mine.title, body: mine.body, savedAt: mine.updatedAt),
+              );
+        }
+        await (db.update(db.poems)..where((x) => x.id.equals(mine.id))).write(PoemsCompanion(
+              number: Value(b.number),
+              title: Value(b.title),
+              body: Value(b.body),
+              lang: Value(b.lang),
+              categoryId: Value(b.categoryId),
+              isFavorite: Value(b.isFavorite || mine.isFavorite),
+              wordCount: Value(b.wordCount),
+              searchBlob: Value(buildSearchBlob(b.title, b.body)),
+              contentKey: Value(contentKeyOf(b.body)),
+              updatedAt: Value(b.updatedAt),
+              deletedAt: Value(b.deletedAt),
+              sourceKey: Value(mine.sourceKey ?? b.sourceKey),
+            ));
+        updated++;
+      }
+      // Edit history: add what is missing (same poem + same time = already there).
+      final have = {for (final v in await db.select(db.poemVersions).get()) '${v.poemId}|${v.savedAt.millisecondsSinceEpoch}'};
+      for (final m in (data['versions'] as List? ?? const []).cast<Map<String, dynamic>>()) {
+        final poemId = idMap[m['poemId']];
+        if (poemId == null) continue;
+        final saved = DateTime.fromMillisecondsSinceEpoch((m['savedAt'] as num).toInt());
+        if (!have.add('$poemId|${saved.millisecondsSinceEpoch}')) continue;
+        await db.into(db.poemVersions).insert(
+              PoemVersionsCompanion.insert(poemId: poemId, title: '${m['title'] ?? ''}', body: '${m['body'] ?? ''}', savedAt: saved),
+            );
+      }
+      final settings = (data['settings'] as Map?)?.cast<String, dynamic>() ?? const {};
+      for (final e in settings.entries) {
+        if (backupSettingKeys.contains(e.key)) await setSetting(e.key, '${e.value}');
+      }
+    });
+    return RestoreOutcome(added, updated, same);
   }
 
   // ---------- settings ----------

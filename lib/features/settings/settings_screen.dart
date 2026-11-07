@@ -10,6 +10,7 @@ import '../../core/text/text_tools.dart';
 import '../../core/theme/app_themes.dart';
 import '../../core/widgets/common.dart';
 import '../../core/widgets/icon3d.dart';
+import '../backup/backup_screens.dart';
 import '../calendar/calendar_screen.dart';
 import '../duplicates/duplicates_screen.dart';
 import '../import/keep_import_screen.dart';
@@ -179,8 +180,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   onTap: _bio == null ? null : () => _toggleBio(!(_bio ?? false)),
                 ),
               ]),
+              const Padding(padding: EdgeInsets.only(bottom: 18), child: BackupCard()),
               _Group(title: context.t('sec_backup'), rows: [
-                _Row(icon: 'shield', title: context.t('backup_soon'), sub: ''),
+                _Row(
+                  icon: 'mail',
+                  title: context.t('email_backup'),
+                  sub: (ref.watch(backupStatusProvider).asData?.value.emailOn ?? false) ? context.t('email_on') : context.t('email_off'),
+                  onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const EmailSetupScreen())),
+                ),
+                _Row(
+                  icon: 'key',
+                  title: context.t('recovery_view'),
+                  sub: '••••• — PIN',
+                  onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
+                    builder: (routeCtx) => PinScreen(
+                      onUnlocked: () => Navigator.of(routeCtx).pushReplacement(MaterialPageRoute<void>(builder: (_) => const RecoveryKeyScreen())),
+                    ),
+                  )),
+                ),
                 _Row(
                   icon: 'collection',
                   title: context.t('dup_title'),

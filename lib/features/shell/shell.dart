@@ -1,10 +1,15 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/l10n/strings.dart';
 import '../../core/theme/app_themes.dart';
 import '../../core/widgets/icon3d.dart';
+import '../../app_providers.dart';
+import '../../data/backup/scheduler.dart';
+import '../backup/backup_screens.dart';
 import '../collection/collection_screen.dart';
 import '../editor/editor_screen.dart';
 import '../home/home_screen.dart';
@@ -15,14 +20,14 @@ import '../update/update_prompt.dart';
 enum Tab { settings, search, home, collection }
 
 /// Main frame. Bottom bar, left to right: Settings · Search · HOME · Write · Collection.
-class Shell extends StatefulWidget {
+class Shell extends ConsumerStatefulWidget {
   const Shell({super.key});
 
   @override
-  State<Shell> createState() => _ShellState();
+  ConsumerState<Shell> createState() => _ShellState();
 }
 
-class _ShellState extends State<Shell> {
+class _ShellState extends ConsumerState<Shell> {
   Tab _tab = Tab.home;
 
   @override
@@ -31,7 +36,32 @@ class _ShellState extends State<Shell> {
     // Every time the app is opened (after the PIN), look for a newer version.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) checkForUpdate(context);
+      unawaited(_startupJobs());
     });
+  }
+
+  /// Once per open: ask for notification permission the first time, and take
+  /// the backup if 11:59 PM was missed (phone off or battery saver).
+  Future<void> _startupJobs() async {
+    final repo = ref.read(repoProvider);
+    if (await repo.getSetting('notifAsked') == null) {
+      await repo.setSetting('notifAsked', '1');
+      try {
+        await askNotificationPermission();
+      } on Object {
+        // Older Android: nothing to ask.
+      }
+    }
+    final svc = ref.read(backupServiceProvider);
+    if (await svc.overdue()) {
+      try {
+        final lang = ref.read(prefsProvider).lang;
+        await svc.nightly(subject: tr('backup_mail_subject', lang), body: tr('backup_mail_body', lang));
+        ref.invalidate(backupStatusProvider);
+      } on Object {
+        // Shown on the Settings backup card next time.
+      }
+    }
   }
 
   void _go(Tab t) => setState(() => _tab = t);
