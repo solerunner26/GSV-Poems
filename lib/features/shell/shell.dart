@@ -183,11 +183,12 @@ class _BottomBar extends StatelessWidget {
 
     final row = Row(
       children: [
-        item('settings', 'nav_settings', () => onTab(Tab.settings), selected: current == Tab.settings),
+        // Order: Write · Search · Home (raised, centre) · Collection · Settings.
+        item('write', 'nav_write', onWrite),
         item('search', 'nav_search', () => onTab(Tab.search), selected: current == Tab.search),
         const Expanded(child: SizedBox(height: 66)),
-        item('write', 'nav_write', onWrite),
         item('collection', 'nav_collection', () => onTab(Tab.collection), selected: current == Tab.collection),
+        item('settings', 'nav_settings', () => onTab(Tab.settings), selected: current == Tab.settings),
       ],
     );
 

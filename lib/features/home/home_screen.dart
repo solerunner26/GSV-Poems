@@ -18,6 +18,7 @@ import '../../core/panchang/panchang.dart';
 import '../calendar/calendar_screen.dart';
 import '../common/poem_tile.dart';
 import '../duplicates/duplicates_screen.dart';
+import '../profile/profile_screen.dart';
 import '../sync/drive_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -66,11 +67,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           context.t('app_title'),
                           style: TextStyle(fontFamily: 'NotoSerifGujarati', fontSize: 22, fontWeight: FontWeight.w700, color: c.ink),
                         ),
-                        Text(context.t('greeting'), style: TextStyle(fontSize: 14, color: c.mute)),
                       ],
                     ),
                   ),
-                  const HelpButton('home'),
+                  const ProfileButton(),
                 ],
               ),
               const SizedBox(height: 16),

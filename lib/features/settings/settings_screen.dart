@@ -1,8 +1,5 @@
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:local_auth/local_auth.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../app_providers.dart';
@@ -11,12 +8,11 @@ import '../../core/text/text_tools.dart';
 import '../../core/theme/app_themes.dart';
 import '../../core/widgets/common.dart';
 import '../../core/widgets/icon3d.dart';
-import '../../data/splash_photo.dart';
 import '../backup/backup_screens.dart';
 import '../calendar/calendar_screen.dart';
 import '../duplicates/duplicates_screen.dart';
 import '../import/keep_import_screen.dart';
-import '../pin/pin_screen.dart';
+import '../profile/profile_screen.dart';
 import '../sync/drive_screen.dart';
 import '../update/update_prompt.dart';
 
@@ -28,71 +24,14 @@ class SettingsScreen extends ConsumerStatefulWidget {
 }
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
-  bool? _bio;
   String _version = '';
 
   @override
   void initState() {
     super.initState();
-    ref.read(pinServiceProvider).biometricEnabled().then((v) {
-      if (mounted) setState(() => _bio = v);
-    });
     PackageInfo.fromPlatform().then((i) {
       if (mounted) setState(() => _version = '${i.version} (${i.buildNumber})');
     });
-  }
-
-  Future<void> _toggleBio(bool on) async {
-    if (on) {
-      final auth = LocalAuthentication();
-      var ok = false;
-      try {
-        ok = await auth.canCheckBiometrics && (await auth.getAvailableBiometrics()).isNotEmpty;
-      } on PlatformException {
-        ok = false;
-      }
-      if (!ok) {
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.t('fingerprint_none'))));
-        return;
-      }
-    }
-    await ref.read(pinServiceProvider).setBiometric(on);
-    if (mounted) setState(() => _bio = on);
-  }
-
-  Future<void> _pickSplashPhoto() async {
-    final choice = await showModalBottomSheet<String>(
-      context: context,
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon3D('photo', size: 44),
-              title: Text(ctx.t('splash_photo_pick'), style: const TextStyle(fontSize: 18)),
-              onTap: () => Navigator.pop(ctx, 'pick'),
-            ),
-            if (SplashPhoto.chosen.value != null)
-              ListTile(
-                leading: const Icon3D('undo', size: 44),
-                title: Text(ctx.t('splash_photo_reset'), style: const TextStyle(fontSize: 18)),
-                onTap: () => Navigator.pop(ctx, 'reset'),
-              ),
-            const SizedBox(height: 8),
-          ],
-        ),
-      ),
-    );
-    if (choice == null) return;
-    if (choice == 'reset') {
-      await SplashPhoto.reset();
-    } else {
-      final files = await FilePicker.pickFiles(type: FileType.image);
-      if (files.isEmpty) return;
-      await SplashPhoto.save(await files.first.readAsBytes());
-    }
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.t('splash_photo_saved'))));
   }
 
   void _pickTheme() {
@@ -193,12 +132,37 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 140),
             children: [
               ScreenHeader(title: context.t('settings_title'), actions: const [HelpButton('settings')]),
-              _Group(
+              Padding(
+                padding: const EdgeInsets.only(bottom: 18),
+                child: GsvCard(
+                  onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const ProfileScreen())),
+                  child: Row(
+                    children: [
+                      const PoetAvatar(size: 58),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              context.t('profile'),
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: context.gc.ink),
+                            ),
+                            Text(context.t('profile_row_sub'), style: TextStyle(fontSize: 14, color: context.gc.mute)),
+                          ],
+                        ),
+                      ),
+                      Icon(Icons.chevron_right_rounded, color: context.gc.accent),
+                    ],
+                  ),
+                ),
+              ),
+              SettingsGroup(
                 title: context.t('sec_look'),
                 rows: [
-                  _Row(icon: 'theme', title: context.t('theme'), sub: context.t('theme_${prefs.themeId}'), onTap: _pickTheme),
-                  _Row(icon: 'language', title: context.t('language'), sub: tr('lang_${prefs.lang.name}', prefs.lang), onTap: _pickLang),
-                  _Row(
+                  SettingsRow(icon: 'theme', title: context.t('theme'), sub: context.t('theme_${prefs.themeId}'), onTap: _pickTheme),
+                  SettingsRow(icon: 'language', title: context.t('language'), sub: tr('lang_${prefs.lang.name}', prefs.lang), onTap: _pickLang),
+                  SettingsRow(
                     icon: 'fontsize',
                     title: context.t('text_size'),
                     sub: context.t(sizeKey),
@@ -211,74 +175,31 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ref.read(prefsProvider.notifier).setTextScale(next);
                     },
                   ),
-                  ValueListenableBuilder<String?>(
-                    valueListenable: SplashPhoto.chosen,
-                    builder: (context, chosen, _) => _Row(
-                      icon: 'photo',
-                      title: context.t('splash_photo'),
-                      sub: context.t(chosen == null ? 'splash_photo_original' : 'splash_photo_custom'),
-                      onTap: _pickSplashPhoto,
-                    ),
-                  ),
-                ],
-              ),
-              _Group(
-                title: context.t('sec_security'),
-                rows: [
-                  _Row(
-                    icon: 'lock',
-                    title: context.t('change_pin'),
-                    sub: '••••',
-                    onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (routeCtx) => PinScreen(mode: PinMode.change, onUnlocked: () => Navigator.of(routeCtx).pop()),
-                      ),
-                    ),
-                  ),
-                  _Row(
-                    icon: 'fingerprint',
-                    title: context.t('fingerprint'),
-                    trailing: Switch(value: _bio ?? false, onChanged: _bio == null ? null : _toggleBio),
-                    onTap: _bio == null ? null : () => _toggleBio(!(_bio ?? false)),
-                  ),
                 ],
               ),
               const Padding(padding: EdgeInsets.only(bottom: 18), child: BackupCard()),
-              _Group(
+              SettingsGroup(
                 title: context.t('sec_backup'),
                 rows: [
-                  _Row(
+                  SettingsRow(
                     icon: 'cloud',
                     title: context.t('drive_title'),
                     sub: context.t('drive_row_sub'),
                     onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const DriveScreen())),
                   ),
-                  _Row(
+                  SettingsRow(
                     icon: 'mail',
                     title: context.t('email_backup'),
                     sub: (ref.watch(backupStatusProvider).asData?.value.emailOn ?? false) ? context.t('email_on') : context.t('email_off'),
                     onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const EmailSetupScreen())),
                   ),
-                  _Row(
-                    icon: 'key',
-                    title: context.t('recovery_view'),
-                    sub: '••••• — PIN',
-                    onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (routeCtx) => PinScreen(
-                          onUnlocked: () =>
-                              Navigator.of(routeCtx).pushReplacement(MaterialPageRoute<void>(builder: (_) => const RecoveryKeyScreen())),
-                        ),
-                      ),
-                    ),
-                  ),
-                  _Row(
+                  SettingsRow(
                     icon: 'collection',
                     title: context.t('dup_title'),
                     sub: context.t('dup_note'),
                     onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const DuplicatesScreen())),
                   ),
-                  _Row(
+                  SettingsRow(
                     icon: 'download',
                     title: context.t('keep_import'),
                     sub: context.t('keep_import_sub'),
@@ -286,16 +207,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                 ],
               ),
-              _Group(
+              SettingsGroup(
                 title: context.t('panchang'),
                 rows: [
-                  _Row(
+                  SettingsRow(
                     icon: 'location',
                     title: context.t('place'),
                     sub: placeLabel(prefs.place, context.lang),
                     onTap: () => choosePlace(context, ref),
                   ),
-                  _Row(
+                  SettingsRow(
                     icon: 'calendar',
                     title: context.t('panchang'),
                     sub: context.t('choghadiya'),
@@ -303,16 +224,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                 ],
               ),
-              _Group(
+              SettingsGroup(
                 title: context.t('sec_help'),
                 rows: [
-                  _Row(
+                  SettingsRow(
                     icon: 'help',
                     title: context.t('help'),
                     sub: '',
                     onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const HelpGuideScreen())),
                   ),
-                  _Row(
+                  SettingsRow(
                     icon: 'download',
                     title: context.t('check_update'),
                     sub: '${context.t('version')} $_version',
@@ -332,8 +253,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 }
 
-class _Group extends StatelessWidget {
-  const _Group({required this.title, required this.rows});
+/// A titled card of setting rows.
+class SettingsGroup extends StatelessWidget {
+  const SettingsGroup({super.key, required this.title, required this.rows});
   final String title;
   final List<Widget> rows;
 
@@ -366,8 +288,9 @@ class _Group extends StatelessWidget {
   );
 }
 
-class _Row extends StatelessWidget {
-  const _Row({required this.icon, required this.title, this.sub = '', this.onTap, this.trailing});
+/// One setting: symbol, title, optional subtitle and trailing control.
+class SettingsRow extends StatelessWidget {
+  const SettingsRow({super.key, required this.icon, required this.title, this.sub = '', this.onTap, this.trailing});
   final String icon, title, sub;
   final VoidCallback? onTap;
   final Widget? trailing;

@@ -23,6 +23,8 @@ import 'package:gsv_poems/features/calendar/calendar_screen.dart';
 import 'package:gsv_poems/features/collection/collection_screen.dart';
 import 'package:gsv_poems/features/editor/editor_screen.dart';
 import 'package:gsv_poems/features/home/home_screen.dart';
+import 'package:gsv_poems/features/profile/profile_screen.dart';
+import 'package:gsv_poems/data/profile.dart';
 import 'package:gsv_poems/features/reader/reader_screen.dart';
 import 'package:gsv_poems/features/settings/settings_screen.dart';
 
@@ -84,6 +86,7 @@ void main() {
           onThisDayProvider.overrideWith((ref) async => poems),
           duplicateCountProvider.overrideWith((ref) => Stream.value(0)),
           categoriesProvider.overrideWith((ref) => Stream.value(cats)),
+          profileProvider.overrideWith((ref) async => const Profile(name: 'ગીગાભાઈ સનાભાઈ વાળા', penName: 'ગૌરવ', birthDate: '૧૨ જૂન ૧૯૫૮', place: 'ભાવનગર')),
           backupStatusProvider.overrideWith((ref) async => BackupStatus(lastBackup: DateTime(2026, 11, 7, 23, 59), localCount: 14)),
         ],
         child: MaterialApp(
@@ -112,6 +115,7 @@ void main() {
     'editor': (const EditorScreen(), false),
     'calendar': (CalendarScreen(initial: DateTime(2026, 11, 8)), false),
     'settings': (const SettingsScreen(), true),
+    'profile': (const ProfileScreen(), false),
   };
   for (final e in screens.entries) {
     testWidgets('screen ${e.key}', skip: _dir.isEmpty, (tester) async {

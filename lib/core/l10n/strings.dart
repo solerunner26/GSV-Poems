@@ -5,7 +5,6 @@ import '../text/text_tools.dart';
 /// Interface text in Gujarati, Hindi and English: [gu, hi, en].
 const Map<String, List<String>> _t = {
   'app_title': ['કાવ્ય સંગ્રહ', 'काव्य संग्रह', 'Poem Collection'],
-  'greeting': ['જય શ્રી કૃષ્ણ', 'जय श्री कृष्ण', 'Jai Shri Krishna'],
   'enter': ['પ્રવેશ કરો', 'प्रवेश करें', 'Enter'],
   'poet_name': ['ગીગાભાઈ સનાભાઈ વાળા "ગૌરવ"', 'गीगाभाई सनाभाई वाला "गौरव"', 'Gigabhai Sanabhai Vala "Gaurav"'],
   'poet_pen': ['ગૌરવ', 'गौरव', 'Gaurav'],
@@ -84,6 +83,21 @@ const Map<String, List<String>> _t = {
   'stop': ['બંધ', 'रोकें', 'Stop'],
   'favorite': ['મનગમતી', 'पसंदीदा', 'Favourite'],
   'share': ['મોકલો', 'भेजें', 'Share'],
+  'profile': ['મારી પ્રોફાઇલ', 'मेरी प्रोफ़ाइल', 'My profile'],
+  'profile_row_sub': ['ફોટો, વિગતો, PIN અને સુરક્ષા', 'फ़ोटो, विवरण, PIN और सुरक्षा', 'Photo, details, PIN and security'],
+  'profile_details': ['મારી વિગતો', 'मेरा विवरण', 'My details'],
+  'profile_add': ['વિગતો ઉમેરો', 'विवरण जोड़ें', 'Add details'],
+  'profile_edit': ['વિગતો બદલો', 'विवरण बदलें', 'Edit details'],
+  'profile_saved': ['વિગતો સચવાઈ ગઈ', 'विवरण सहेज लिया', 'Details saved'],
+  'profile_name': ['નામ', 'नाम', 'Name'],
+  'profile_penName': ['ઉપનામ', 'उपनाम', 'Pen name'],
+  'profile_birthDate': ['જન્મ તારીખ', 'जन्म तिथि', 'Date of birth'],
+  'profile_place': ['ગામ / શહેર', 'गाँव / शहर', 'Village / town'],
+  'profile_phone': ['ફોન', 'फ़ोन', 'Phone'],
+  'profile_email': ['ઈમેલ', 'ईमेल', 'Email'],
+  'profile_about': ['મારા વિશે', 'मेरे बारे में', 'About me'],
+  'profile_gu': ['ગુજરાતી', 'गुजराती', 'Gujarati'],
+  'profile_hi': ['હિન્દી', 'हिन्दी', 'Hindi'],
   'splash_photo': ['શરૂઆતનો ફોટો', 'शुरुआत की फ़ोटो', 'Opening photo'],
   'splash_photo_original': ['મૂળ ફોટો', 'मूल फ़ोटो', 'Original photo'],
   'splash_photo_custom': ['પસંદ કરેલો ફોટો', 'चुनी हुई फ़ोटो', 'Chosen photo'],
@@ -448,9 +462,9 @@ const Map<String, List<String>> helpText = {
     'The month is at the top; below are the chosen day\'s Panchang and Choghadiya. A coloured dot marks a festival or vrat day. "Today" jumps back to today; "Change" sets the place.',
   ],
   'settings': [
-    'થીમ, ભાષા, અક્ષરનું કદ, PIN અને સ્થળ અહીં બદલો. બેકઅપના ખાનામાં બધું છે: બેકઅપ દરરોજ રાત્રે ૧૧:૫૯ વાગ્યે આપમેળે થાય છે. "હમણાં બેકઅપ લો" દબાવી ગમે ત્યારે લઈ શકાય. "WhatsApp પર મોકલો" થી બેકઅપ ફાઈલ કોઈ પણ ચેટમાં મોકલો. નવા ફોનમાં "બેકઅપમાંથી પાછું લાવો" દબાવી એ ફાઈલ પસંદ કરો અને Recovery key લખો.',
-    'थीम, भाषा, अक्षर का आकार, PIN और स्थान यहाँ बदलें। बैकअप वाले खाने में सब है: बैकअप हर रात ११:५९ बजे अपने-आप होता है। "अभी बैकअप लें" से कभी भी ले सकते हैं। "WhatsApp पर भेजें" से बैकअप फ़ाइल किसी भी चैट में भेजें। नए फ़ोन में "बैकअप से वापस लाएँ" दबाकर वह फ़ाइल चुनें और Recovery key लिखें।',
-    'Change theme, language, text size, PIN and place here. The backup card shows it all: a backup runs every night at 11:59 PM by itself. "Back up now" takes one any time. "Send to WhatsApp" sends the backup file to any chat. On a new phone, tap "Restore from a backup", pick that file and type the recovery key.',
+    'થીમ, ભાષા, અક્ષરનું કદ અને સ્થળ અહીં બદલો. ઉપર "મારી પ્રોફાઇલ" માં ફોટો, વિગતો, PIN અને આંગળીની છાપ છે. બેકઅપના ખાનામાં બધું છે: બેકઅપ દરરોજ રાત્રે ૧૧:૫૯ વાગ્યે આપમેળે થાય છે. "હમણાં બેકઅપ લો" દબાવી ગમે ત્યારે લઈ શકાય. "WhatsApp પર મોકલો" થી બેકઅપ ફાઈલ કોઈ પણ ચેટમાં મોકલો. નવા ફોનમાં "બેકઅપમાંથી પાછું લાવો" દબાવી એ ફાઈલ પસંદ કરો અને Recovery key લખો.',
+    'थीम, भाषा, अक्षर का आकार और स्थान यहाँ बदलें। ऊपर "मेरी प्रोफ़ाइल" में फ़ोटो, विवरण, PIN और फ़िंगरप्रिंट हैं। बैकअप वाले खाने में सब है: बैकअप हर रात ११:५९ बजे अपने-आप होता है। "अभी बैकअप लें" से कभी भी ले सकते हैं। "WhatsApp पर भेजें" से बैकअप फ़ाइल किसी भी चैट में भेजें। नए फ़ोन में "बैकअप से वापस लाएँ" दबाकर वह फ़ाइल चुनें और Recovery key लिखें।',
+    'Change theme, language, text size and place here. "My profile" at the top holds the photo, details, PIN and fingerprint. The backup card shows it all: a backup runs every night at 11:59 PM by itself. "Back up now" takes one any time. "Send to WhatsApp" sends the backup file to any chat. On a new phone, tap "Restore from a backup", pick that file and type the recovery key.',
   ],
 };
 
