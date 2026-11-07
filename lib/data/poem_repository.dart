@@ -1,0 +1,308 @@
+import 'package:drift/drift.dart';
+import 'package:uuid/uuid.dart';
+
+import '../core/text/text_tools.dart';
+import 'db/database.dart';
+import 'import/keep_parser.dart';
+
+enum PoemSort { newest, oldest, number, title }
+
+class PoemStats {
+  const PoemStats({this.total = 0, this.words = 0, this.gu = 0, this.hi = 0, this.en = 0, this.inBin = 0});
+  final int total, words, gu, hi, en, inBin;
+}
+
+class ImportOutcome {
+  const ImportOutcome(this.added, this.alreadyThere);
+  final int added, alreadyThere;
+}
+
+/// All reads and writes of poems go through here.
+class PoemRepository {
+  PoemRepository(this.db, {DateTime Function()? clock}) : _now = clock ?? DateTime.now;
+
+  final AppDatabase db;
+  final DateTime Function() _now;
+  static const _uuid = Uuid();
+
+  // ---------- reading ----------
+
+  Stream<List<Poem>> watchPoems({String? lang, String? categoryId, PoemSort sort = PoemSort.newest}) {
+    final q = db.select(db.poems)..where((p) => p.deletedAt.isNull());
+    if (lang != null) q.where((p) => p.lang.equals(lang));
+    if (categoryId != null) q.where((p) => p.categoryId.equals(categoryId));
+    q.orderBy([
+      switch (sort) {
+        PoemSort.newest => (p) => OrderingTerm.desc(p.createdAt),
+        PoemSort.oldest => (p) => OrderingTerm.asc(p.createdAt),
+        PoemSort.number => (p) => OrderingTerm.asc(p.number),
+        PoemSort.title => (p) => OrderingTerm.asc(p.title),
+      },
+    ]);
+    return q.watch();
+  }
+
+  Stream<List<Poem>> watchRecycleBin() =>
+      (db.select(db.poems)
+            ..where((p) => p.deletedAt.isNotNull())
+            ..orderBy([(p) => OrderingTerm.desc(p.deletedAt)]))
+          .watch();
+
+  Stream<List<Poem>> watchFavorites() =>
+      (db.select(db.poems)
+            ..where((p) => p.deletedAt.isNull() & p.isFavorite.equals(true))
+            ..orderBy([(p) => OrderingTerm.desc(p.updatedAt)]))
+          .watch();
+
+  /// Poems written or edited in the last 7 days, after [clearedAt] if the list was cleared.
+  Stream<List<Poem>> watchRecent({DateTime? clearedAt}) {
+    var since = _now().subtract(const Duration(days: 7));
+    if (clearedAt != null && clearedAt.isAfter(since)) since = clearedAt;
+    return (db.select(db.poems)
+          ..where((p) => p.deletedAt.isNull() & p.updatedAt.isBiggerThanValue(since))
+          ..orderBy([(p) => OrderingTerm.desc(p.updatedAt)]))
+        .watch();
+  }
+
+  /// Poems written on today's day and month in earlier years.
+  Future<List<Poem>> onThisDay() async {
+    final now = _now();
+    final all = await (db.select(db.poems)..where((p) => p.deletedAt.isNull())).get();
+    return all
+        .where((p) => p.createdAt.month == now.month && p.createdAt.day == now.day && p.createdAt.year < now.year)
+        .toList();
+  }
+
+  Future<Poem?> getPoem(String id) => (db.select(db.poems)..where((p) => p.id.equals(id))).getSingleOrNull();
+
+  Stream<Poem?> watchPoem(String id) =>
+      (db.select(db.poems)..where((p) => p.id.equals(id))).watchSingleOrNull();
+
+  Stream<PoemStats> watchStats() {
+    final all = db.select(db.poems).watch();
+    return all.map((rows) {
+      var total = 0, words = 0, gu = 0, hi = 0, en = 0, bin = 0;
+      for (final p in rows) {
+        if (p.deletedAt != null) {
+          bin++;
+          continue;
+        }
+        total++;
+        words += p.wordCount;
+        switch (p.lang) {
+          case 'hi':
+            hi++;
+          case 'en':
+            en++;
+          default:
+            gu++;
+        }
+      }
+      return PoemStats(total: total, words: words, gu: gu, hi: hi, en: en, inBin: bin);
+    });
+  }
+
+  Stream<List<PoemCategory>> watchCategories() =>
+      (db.select(db.poemCategories)..orderBy([(c) => OrderingTerm.asc(c.sortOrder)])).watch();
+
+  Future<List<PoemVersion>> versions(String poemId) =>
+      (db.select(db.poemVersions)
+            ..where((v) => v.poemId.equals(poemId))
+            ..orderBy([(v) => OrderingTerm.desc(v.savedAt)]))
+          .get();
+
+  /// Poems containing the query (at least 3 letters), in any script.
+  Future<List<Poem>> search(String query, {String? lang}) async {
+    final patterns = searchPatterns(query);
+    if (patterns.isEmpty) return const [];
+    String esc(String s) => s.replaceAll(r'\', r'\\').replaceAll('%', r'\%').replaceAll('_', r'\_');
+    final q = db.select(db.poems)
+      ..where((p) {
+        Expression<bool> any = const Constant(false);
+        for (final pat in patterns) {
+          any = any | p.searchBlob.like('%${esc(pat)}%', escapeChar: r'\');
+        }
+        return p.deletedAt.isNull() & any;
+      });
+    if (lang != null) q.where((p) => p.lang.equals(lang));
+    q.orderBy([(p) => OrderingTerm.desc(p.updatedAt)]);
+    return q.get();
+  }
+
+  // ---------- writing ----------
+
+  /// Next number inside a collection (each collection counts from 1, like the poet's notes).
+  Future<int> _nextNumber(String? categoryId) async {
+    final max = db.poems.number.max();
+    final q = db.selectOnly(db.poems)..addColumns([max]);
+    q.where(categoryId == null ? db.poems.categoryId.isNull() : db.poems.categoryId.equals(categoryId));
+    final row = await q.getSingle();
+    return (row.read(max) ?? 0) + 1;
+  }
+
+  static String _nameKey(String name) =>
+      foldLatin(transliterate(name.trim())).replaceAll(RegExp(r'[^a-z0-9 ]'), '').replaceAll(RegExp(r'\s+'), ' ').trim();
+
+  static String _iconFor(String key) {
+    // Keys are in folded Latin (sh→s, aa→a). Most specific first:
+    // "sangharshmay jivan" is struggle, "desh prem" is the nation.
+    const map = {
+      'sanghar': 'shield', 'des ': 'desh', 'tahevar': 'diya', 'prer': 'star', 'smrit': 'photo',
+      'prakrit': 'prakruti', 'prakrut': 'prakruti', 'samaj': 'parivar', 'parivar': 'parivar',
+      'bhakti': 'bhakti', 'bhajan': 'bhajan', 'gajal': 'ghazal', 'prem': 'prem', 'hasy': 'hasya', 'jivan': 'jivan',
+    };
+    for (final e in map.entries) {
+      if (key.contains(e.key)) return e.value;
+    }
+    return 'lotus';
+  }
+
+  /// Finds the category with this name in either script, or creates it.
+  /// "જીવન મંથન" and "जीवन मंथन" are the same collection.
+  Future<String> ensureCategory(String name) async {
+    final key = _nameKey(name);
+    final cats = await db.select(db.poemCategories).get();
+    for (final c in cats) {
+      if (_nameKey(c.nameGu) == key || _nameKey(c.nameHi) == key || _nameKey(c.nameEn) == key) return c.id;
+    }
+    final slug = key.isEmpty ? 'c${cats.length}' : key.replaceAll(' ', '_');
+    var id = 'c_$slug';
+    while (cats.any((c) => c.id == id)) {
+      id = '${id}_';
+    }
+    // English name: readable transliteration ("Desh Prem", not the folded search key).
+    final latin = transliterate(name.trim())
+        .replaceAll('aa', 'a')
+        .replaceAll('ii', 'i')
+        .replaceAll('uu', 'u')
+        .replaceAll(RegExp(r'[^a-z ]'), '');
+    final title = latin.split(' ').where((w) => w.isNotEmpty).map((w) => w[0].toUpperCase() + w.substring(1)).join(' ');
+    final order = cats.fold<int>(0, (m, c) => c.sortOrder > m ? c.sortOrder : m) + 1;
+    await db.into(db.poemCategories).insert(PoemCategoriesCompanion.insert(
+          id: id,
+          nameGu: toScript(name.trim(), PoemLang.gu),
+          nameHi: toScript(name.trim(), PoemLang.hi),
+          nameEn: title.isEmpty ? name.trim() : title,
+          iconKey: _iconFor(key),
+          sortOrder: Value(order),
+        ));
+    return id;
+  }
+
+  /// Creates a poem and returns its id.
+  Future<String> createPoem({required String title, required String body, String? categoryId, String? lang}) async {
+    final id = _uuid.v4();
+    final now = _now();
+    await db.into(db.poems).insert(PoemsCompanion.insert(
+          id: id,
+          number: Value(await _nextNumber(categoryId)),
+          title: Value(title.trim()),
+          body: body,
+          lang: Value(lang ?? detectLang('$title $body').name),
+          categoryId: Value(categoryId),
+          wordCount: Value(wordCount(body)),
+          searchBlob: Value(buildSearchBlob(title, body)),
+          createdAt: now,
+          updatedAt: now,
+        ));
+    return id;
+  }
+
+  /// Updates text and category. When [keepVersion] is set, the text as it was
+  /// before is saved to the edit history first.
+  Future<void> updatePoem(String id, {required String title, required String body, String? categoryId, bool keepVersion = false}) async {
+    await db.transaction(() async {
+      final old = await getPoem(id);
+      if (old == null) return;
+      final changed = old.title != title.trim() || old.body != body;
+      if (keepVersion && changed) {
+        await db.into(db.poemVersions).insert(
+              PoemVersionsCompanion.insert(poemId: id, title: old.title, body: old.body, savedAt: old.updatedAt),
+            );
+      }
+      await (db.update(db.poems)..where((p) => p.id.equals(id))).write(PoemsCompanion(
+            title: Value(title.trim()),
+            body: Value(body),
+            lang: Value(detectLang('$title $body').name),
+            categoryId: Value(categoryId),
+            wordCount: Value(wordCount(body)),
+            searchBlob: Value(buildSearchBlob(title, body)),
+            updatedAt: changed || old.categoryId != categoryId ? Value(_now()) : const Value.absent(),
+          ));
+    });
+  }
+
+  Future<void> restoreVersion(PoemVersion v) async {
+    final p = await getPoem(v.poemId);
+    if (p == null) return;
+    await updatePoem(p.id, title: v.title, body: v.body, categoryId: p.categoryId, keepVersion: true);
+  }
+
+  Future<void> setFavorite(String id, bool fav) =>
+      (db.update(db.poems)..where((p) => p.id.equals(id))).write(PoemsCompanion(isFavorite: Value(fav)));
+
+  /// Moves a poem to the recycle bin. Nothing is erased.
+  Future<void> moveToBin(String id) =>
+      (db.update(db.poems)..where((p) => p.id.equals(id))).write(PoemsCompanion(deletedAt: Value(_now())));
+
+  Future<void> restoreFromBin(String id) =>
+      (db.update(db.poems)..where((p) => p.id.equals(id))).write(const PoemsCompanion(deletedAt: Value(null)));
+
+  /// The only real delete. Only allowed for a poem already in the recycle bin.
+  Future<void> deleteForever(String id) => db.transaction(() async {
+        final p = await getPoem(id);
+        if (p == null || p.deletedAt == null) return;
+        await (db.delete(db.poemVersions)..where((v) => v.poemId.equals(id))).go();
+        await (db.delete(db.poems)..where((x) => x.id.equals(id))).go();
+      });
+
+  // ---------- import ----------
+
+  /// Adds imported poems, skipping any already imported (matched by sourceKey).
+  /// Each poem goes into the collection named after its note.
+  Future<ImportOutcome> importPoems(List<ImportedPoem> poems) async {
+    var added = 0, skipped = 0;
+    await db.transaction(() async {
+      final existing = (await (db.selectOnly(db.poems)..addColumns([db.poems.sourceKey])).get())
+          .map((r) => r.read(db.poems.sourceKey))
+          .whereType<String>()
+          .toSet();
+      final catIds = <String, String>{};
+      for (final p in poems) {
+        if (existing.contains(p.sourceKey)) {
+          skipped++;
+          continue;
+        }
+        existing.add(p.sourceKey);
+        final cat = catIds[p.collection] ??= await ensureCategory(p.collection);
+        await db.into(db.poems).insert(PoemsCompanion.insert(
+              id: _uuid.v4(),
+              number: Value(p.number),
+              title: Value(p.title),
+              body: p.body,
+              lang: Value(p.lang.name),
+              categoryId: Value(cat),
+              wordCount: Value(wordCount(p.body)),
+              searchBlob: Value(buildSearchBlob(p.title, p.body)),
+              createdAt: p.createdAt,
+              updatedAt: p.updatedAt,
+              source: const Value('keep'),
+              sourceKey: Value(p.sourceKey),
+            ));
+        added++;
+      }
+    });
+    return ImportOutcome(added, skipped);
+  }
+
+  // ---------- settings ----------
+
+  Future<String?> getSetting(String key) async =>
+      (await (db.select(db.appSettings)..where((s) => s.key.equals(key))).getSingleOrNull())?.value;
+
+  Future<void> setSetting(String key, String value) =>
+      db.into(db.appSettings).insertOnConflictUpdate(AppSettingsCompanion.insert(key: key, value: value));
+
+  Future<Map<String, String>> allSettings() async =>
+      {for (final s in await db.select(db.appSettings).get()) s.key: s.value};
+}
