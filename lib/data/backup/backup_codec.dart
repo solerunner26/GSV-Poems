@@ -18,7 +18,14 @@ const backupExtension = 'gsvbak';
 const pbkdf2Iterations = 120000;
 
 class BackupHeader {
-  const BackupHeader({required this.created, required this.poems, required this.salt, required this.nonce, required this.iterations, this.device = ''});
+  const BackupHeader({
+    required this.created,
+    required this.poems,
+    required this.salt,
+    required this.nonce,
+    required this.iterations,
+    this.device = '',
+  });
   final DateTime created;
   final int poems;
   final List<int> salt, nonce;
@@ -26,26 +33,26 @@ class BackupHeader {
   final String device;
 
   Map<String, dynamic> toJson() => {
-        'app': 'gsv-poems',
-        'format': 1,
-        'created': created.toUtc().toIso8601String(),
-        'poems': poems,
-        'device': device,
-        'kdf': 'pbkdf2-hmac-sha256',
-        'iterations': iterations,
-        'salt': base64Encode(salt),
-        'cipher': 'aes-256-gcm',
-        'nonce': base64Encode(nonce),
-      };
+    'app': 'gsv-poems',
+    'format': 1,
+    'created': created.toUtc().toIso8601String(),
+    'poems': poems,
+    'device': device,
+    'kdf': 'pbkdf2-hmac-sha256',
+    'iterations': iterations,
+    'salt': base64Encode(salt),
+    'cipher': 'aes-256-gcm',
+    'nonce': base64Encode(nonce),
+  };
 
   static BackupHeader fromJson(Map<String, dynamic> m) => BackupHeader(
-        created: DateTime.parse(m['created'] as String).toLocal(),
-        poems: (m['poems'] as num?)?.toInt() ?? 0,
-        salt: base64Decode(m['salt'] as String),
-        nonce: base64Decode(m['nonce'] as String),
-        iterations: (m['iterations'] as num?)?.toInt() ?? pbkdf2Iterations,
-        device: '${m['device'] ?? ''}',
-      );
+    created: DateTime.parse(m['created'] as String).toLocal(),
+    poems: (m['poems'] as num?)?.toInt() ?? 0,
+    salt: base64Decode(m['salt'] as String),
+    nonce: base64Decode(m['nonce'] as String),
+    iterations: (m['iterations'] as num?)?.toInt() ?? pbkdf2Iterations,
+    device: '${m['device'] ?? ''}',
+  );
 }
 
 class BackupFormatException implements Exception {
@@ -82,10 +89,10 @@ bool looksLikeRecoveryKey(String typed) {
 }
 
 Future<SecretKey> _deriveKey(String recoveryKey, List<int> salt, int iterations) => Pbkdf2(
-      macAlgorithm: Hmac.sha256(),
-      iterations: iterations,
-      bits: 256,
-    ).deriveKeyFromPassword(password: normalizeRecoveryKey(recoveryKey), nonce: salt);
+  macAlgorithm: Hmac.sha256(),
+  iterations: iterations,
+  bits: 256,
+).deriveKeyFromPassword(password: normalizeRecoveryKey(recoveryKey), nonce: salt);
 
 List<int> _random(int n) {
   final r = Random.secure();
@@ -93,8 +100,7 @@ List<int> _random(int n) {
 }
 
 /// Builds the backup file bytes from the backup contents (a JSON-able map).
-Future<Uint8List> encodeBackup(Map<String, dynamic> contents, String recoveryKey,
-    {int iterations = pbkdf2Iterations, String device = ''}) async {
+Future<Uint8List> encodeBackup(Map<String, dynamic> contents, String recoveryKey, {int iterations = pbkdf2Iterations, String device = ''}) async {
   final salt = _random(16), nonce = _random(12);
   final header = BackupHeader(
     created: DateTime.now(),

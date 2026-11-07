@@ -53,8 +53,10 @@ class UpdateService {
   Future<ReleaseInfo?> check(int currentBuild) async {
     try {
       final res = await _client
-          .get(Uri.parse('https://api.github.com/repos/$updateRepo/releases?per_page=10'),
-              headers: {'Accept': 'application/vnd.github+json', 'User-Agent': 'GSV-Poems-App'})
+          .get(
+            Uri.parse('https://api.github.com/repos/$updateRepo/releases?per_page=10'),
+            headers: {'Accept': 'application/vnd.github+json', 'User-Agent': 'GSV-Poems-App'},
+          )
           .timeout(const Duration(seconds: 12));
       if (res.statusCode != 200) return null;
       final latest = pickLatest(jsonDecode(res.body) as List<dynamic>);

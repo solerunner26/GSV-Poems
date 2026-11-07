@@ -28,8 +28,7 @@ class BackupStatus {
 
 /// Makes, keeps, sends and restores the encrypted backups.
 class BackupService {
-  BackupService(this.repo, this.secrets, {Future<Directory> Function()? baseDir})
-      : _baseDir = baseDir ?? getApplicationDocumentsDirectory;
+  BackupService(this.repo, this.secrets, {Future<Directory> Function()? baseDir}) : _baseDir = baseDir ?? getApplicationDocumentsDirectory;
 
   final PoemRepository repo;
   final SecretStore secrets;
@@ -122,8 +121,12 @@ class BackupService {
   }
 
   /// One tap: Android's share sheet with the file attached (choose WhatsApp).
-  Future<void> share(File f, {required String text}) =>
-      SharePlus.instance.share(ShareParams(files: [XFile(f.path, mimeType: 'application/octet-stream')], text: text));
+  Future<void> share(File f, {required String text}) => SharePlus.instance.share(
+    ShareParams(
+      files: [XFile(f.path, mimeType: 'application/octet-stream')],
+      text: text,
+    ),
+  );
 
   /// Sends [f] by Gmail. Returns null on success, or the reason it failed.
   Future<String?> email(File f, {required String subject, required String body}) async {

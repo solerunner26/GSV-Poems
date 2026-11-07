@@ -154,10 +154,14 @@ String collectionName(String raw) {
   s = s.replaceAll(RegExp(r'[0-9૦-૯०-९]+'), '');
   s = s.replaceAll(RegExp(r'[:;।॥.\-()"]+'), ' ');
   // Drop leftovers that are only vowel signs or marks (e.g. the "ં" of "થીં").
-  final words = s.split(RegExp(r'\s+')).where((w) => w.runes.any((c) {
-        final off = c >= 0x0A80 && c <= 0x0AFF ? c - 0x0A80 : (c >= 0x0900 && c <= 0x097F ? c - 0x0900 : null);
-        return off == null ? RegExp(r'[A-Za-z]').hasMatch(String.fromCharCode(c)) : off >= 0x05 && off <= 0x39;
-      }));
+  final words = s
+      .split(RegExp(r'\s+'))
+      .where(
+        (w) => w.runes.any((c) {
+          final off = c >= 0x0A80 && c <= 0x0AFF ? c - 0x0A80 : (c >= 0x0900 && c <= 0x097F ? c - 0x0900 : null);
+          return off == null ? RegExp(r'[A-Za-z]').hasMatch(String.fromCharCode(c)) : off >= 0x05 && off <= 0x39;
+        }),
+      );
   return words.join(' ').trim();
 }
 
@@ -311,20 +315,25 @@ KeepParseResult parseKeepTakeout(Map<String, String> files, {DateTime? now}) {
       // File + number + text: importing the same files again adds nothing, while the same
       // poem in two different notes is kept and shown as a duplicate for review.
       final key = sha1.convert(utf8.encode('$name|${p.number ?? ''}|${lettersOnly(p.title)}|${lettersOnly(p.body)}')).toString();
-      poems.add(ImportedPoem(
-        number: p.number,
-        title: p.title,
-        body: p.body,
-        lang: detectLang('${p.title}\n${p.body}'),
-        createdAt: written ?? created,
-        updatedAt: edited,
-        collection: collection,
-        sourceKey: 'keep:$key',
-        fileName: name,
-        problem: p.problem,
-      ));
+      poems.add(
+        ImportedPoem(
+          number: p.number,
+          title: p.title,
+          body: p.body,
+          lang: detectLang('${p.title}\n${p.body}'),
+          createdAt: written ?? created,
+          updatedAt: edited,
+          collection: collection,
+          sourceKey: 'keep:$key',
+          fileName: name,
+          problem: p.problem,
+        ),
+      );
     }
-    final missing = [for (final n in split.listed) if (!found.contains(n)) n];
+    final missing = [
+      for (final n in split.listed)
+        if (!found.contains(n)) n,
+    ];
     notes.add(NoteSummary(name, collection, split.poems.length, split.listed.length, missing));
   }
   _mergeContinuations(poems, notes);

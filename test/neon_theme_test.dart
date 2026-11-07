@@ -129,4 +129,15 @@ void main() {
     final ranked = PoemRepository.rankSearchResults(found, 'પ્રેમ').map((p) => p.id).toList();
     expect(ranked, ['t1', 't2', 't3', 'v1', 'v2']);
   });
+
+  test('every symbol sits centred on its tile at one shared size', () {
+    for (final key in iconArt.keys) {
+      final box = debugGlyphBoxOnTile(key);
+      expect((box.center.dx - 32).abs(), lessThan(0.01), reason: '$key horizontal');
+      expect((box.center.dy - 30.4).abs(), lessThan(0.01), reason: '$key vertical');
+      expect(box.longestSide, inInclusiveRange(20, 30.01), reason: '$key size');
+      expect(Rect.fromLTWH(7, 6, 50, 50).contains(box.topLeft) && Rect.fromLTWH(7, 6, 50, 50).contains(box.bottomRight), isTrue,
+          reason: '$key stays inside the tile');
+    }
+  });
 }

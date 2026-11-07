@@ -12,6 +12,7 @@ import 'data/db/database.dart';
 import 'data/backup/scheduler.dart';
 import 'data/import/seed.dart';
 import 'data/poem_repository.dart';
+import 'data/splash_photo.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,6 +20,7 @@ Future<void> main() async {
   final db = AppDatabase();
   final repo = PoemRepository(db);
   final prefs = AppPrefs.fromMap(await repo.allSettings());
+  await SplashPhoto.load();
   // The poet's bundled poems fill the collections on first launch (and add any
   // new ones after an update). Runs in the background; the screens update live.
   unawaited(loadSeed(repo, () => rootBundle.loadString(seedAsset)));
@@ -31,11 +33,5 @@ Future<void> main() async {
       // Not fatal: a missed backup also runs when the app is opened.
     }
   }());
-  runApp(ProviderScope(
-    overrides: [
-      dbProvider.overrideWithValue(db),
-      prefsProvider.overrideWith(() => PrefsNotifier(prefs)),
-    ],
-    child: const GsvApp(),
-  ));
+  runApp(ProviderScope(overrides: [dbProvider.overrideWithValue(db), prefsProvider.overrideWith(() => PrefsNotifier(prefs))], child: const GsvApp()));
 }

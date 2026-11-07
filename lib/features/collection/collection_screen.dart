@@ -116,7 +116,7 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
                   actions: [
                     TextButton.icon(
                       onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const RecycleBinScreen())),
-                      icon: const Icon3D('trash', size: 34),
+                      icon: const Icon3D('trash', size: 36),
                       label: Text(
                         '${context.t('recycle_bin')} · ${localDigits(stats.inBin, lang)}',
                         style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: c.primary),

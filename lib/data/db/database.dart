@@ -85,36 +85,33 @@ class AppDatabase extends _$AppDatabase {
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        onUpgrade: (m, from, to) async {
-          if (from < 2) {
-            // v2: duplicate detection key, and "Others" as the home for uncategorised poems.
-            await m.addColumn(poems, poems.contentKey);
-            await customStatement('CREATE INDEX poems_content_key ON poems (content_key)');
-            await customStatement(
-                "UPDATE poem_categories SET name_gu = 'અન્ય', name_hi = 'अन्य', name_en = 'Others' WHERE id = 'other'");
-            await customStatement("UPDATE poems SET category_id = 'other' WHERE category_id IS NULL");
-            await backfill?.call(this);
-          }
-        },
-        onCreate: (m) async {
-          await m.createAll();
-          await customStatement('CREATE INDEX poems_updated ON poems (updated_at)');
-          await customStatement('CREATE UNIQUE INDEX poems_source_key ON poems (source_key)');
-          await customStatement('CREATE INDEX poems_content_key ON poems (content_key)');
-          await batch((b) {
-            for (var i = 0; i < defaultCategories.length; i++) {
-              final c = defaultCategories[i];
-              b.insert(
-                poemCategories,
-                PoemCategoriesCompanion.insert(
-                  id: c.$1, nameGu: c.$2, nameHi: c.$3, nameEn: c.$4, iconKey: c.$5, sortOrder: Value(i),
-                ),
-              );
-            }
-          });
-        },
-        beforeOpen: (details) async {
-          await customStatement('PRAGMA foreign_keys = ON');
-        },
-      );
+    onUpgrade: (m, from, to) async {
+      if (from < 2) {
+        // v2: duplicate detection key, and "Others" as the home for uncategorised poems.
+        await m.addColumn(poems, poems.contentKey);
+        await customStatement('CREATE INDEX poems_content_key ON poems (content_key)');
+        await customStatement("UPDATE poem_categories SET name_gu = 'અન્ય', name_hi = 'अन्य', name_en = 'Others' WHERE id = 'other'");
+        await customStatement("UPDATE poems SET category_id = 'other' WHERE category_id IS NULL");
+        await backfill?.call(this);
+      }
+    },
+    onCreate: (m) async {
+      await m.createAll();
+      await customStatement('CREATE INDEX poems_updated ON poems (updated_at)');
+      await customStatement('CREATE UNIQUE INDEX poems_source_key ON poems (source_key)');
+      await customStatement('CREATE INDEX poems_content_key ON poems (content_key)');
+      await batch((b) {
+        for (var i = 0; i < defaultCategories.length; i++) {
+          final c = defaultCategories[i];
+          b.insert(
+            poemCategories,
+            PoemCategoriesCompanion.insert(id: c.$1, nameGu: c.$2, nameHi: c.$3, nameEn: c.$4, iconKey: c.$5, sortOrder: Value(i)),
+          );
+        }
+      });
+    },
+    beforeOpen: (details) async {
+      await customStatement('PRAGMA foreign_keys = ON');
+    },
+  );
 }

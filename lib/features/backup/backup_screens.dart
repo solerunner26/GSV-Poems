@@ -75,69 +75,86 @@ class _RecoveryKeyScreenState extends ConsumerState<RecoveryKeyScreen> {
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 600),
-            child: Column(children: [
-              ScreenHeader(back: widget.onDone == null, title: context.t('recovery_title')),
-              Expanded(
-                child: ListView(padding: const EdgeInsets.fromLTRB(20, 8, 20, 20), children: [
-                  const Center(child: Icon3D('key', size: 96, well: true)),
-                  const SizedBox(height: 14),
-                  Text(context.t('recovery_intro'), style: const TextStyle(fontSize: 18, height: 1.55)),
-                  const SizedBox(height: 18),
-                  Container(
-                    padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 12),
-                    decoration: BoxDecoration(
-                      color: c.surface,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: c.accent, width: 2),
-                    ),
-                    child: k == null
-                        ? const Center(child: CircularProgressIndicator())
-                        : Column(children: [
-                            for (final group in k.split('-'))
-                              Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 3),
-                                child: SelectableText(group,
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(fontSize: 34, fontWeight: FontWeight.w700, letterSpacing: 6, fontFamily: 'monospace', color: c.ink)),
+            child: Column(
+              children: [
+                ScreenHeader(back: widget.onDone == null, title: context.t('recovery_title')),
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+                    children: [
+                      const Center(child: Icon3D('key', size: 96, well: true)),
+                      const SizedBox(height: 14),
+                      Text(context.t('recovery_intro'), style: const TextStyle(fontSize: 18, height: 1.55)),
+                      const SizedBox(height: 18),
+                      Container(
+                        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 12),
+                        decoration: BoxDecoration(
+                          color: c.surface,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: c.accent, width: 2),
+                        ),
+                        child: k == null
+                            ? const Center(child: CircularProgressIndicator())
+                            : Column(
+                                children: [
+                                  for (final group in k.split('-'))
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 3),
+                                      child: SelectableText(
+                                        group,
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          fontSize: 34,
+                                          fontWeight: FontWeight.w700,
+                                          letterSpacing: 6,
+                                          fontFamily: 'monospace',
+                                          color: c.ink,
+                                        ),
+                                      ),
+                                    ),
+                                ],
                               ),
-                          ]),
+                      ),
+                      const SizedBox(height: 18),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              style: OutlinedButton.styleFrom(minimumSize: const Size(48, 56)),
+                              onPressed: k == null ? null : () => SharePlus.instance.share(ShareParams(text: '${context.t('recovery_title')}: $k')),
+                              icon: const Icon3D('share', size: 32),
+                              label: Text(context.t('recovery_share'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              style: OutlinedButton.styleFrom(minimumSize: const Size(48, 56)),
+                              onPressed: k == null || _sending ? null : _email,
+                              icon: const Icon3D('mail', size: 32),
+                              label: Text(context.t('recovery_email'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (widget.onDone != null) ...[
+                        const SizedBox(height: 18),
+                        PrimaryButton(
+                          label: context.t('recovery_written'),
+                          icon: 'check',
+                          onPressed: k == null
+                              ? null
+                              : () async {
+                                  await ref.read(backupServiceProvider).acknowledgeRecovery();
+                                  widget.onDone!();
+                                },
+                        ),
+                      ],
+                    ],
                   ),
-                  const SizedBox(height: 18),
-                  Row(children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        style: OutlinedButton.styleFrom(minimumSize: const Size(48, 56)),
-                        onPressed: k == null ? null : () => SharePlus.instance.share(ShareParams(text: '${context.t('recovery_title')}: $k')),
-                        icon: const Icon3D('share', size: 32),
-                        label: Text(context.t('recovery_share'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        style: OutlinedButton.styleFrom(minimumSize: const Size(48, 56)),
-                        onPressed: k == null || _sending ? null : _email,
-                        icon: const Icon3D('mail', size: 32),
-                        label: Text(context.t('recovery_email'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-                      ),
-                    ),
-                  ]),
-                  if (widget.onDone != null) ...[
-                    const SizedBox(height: 18),
-                    PrimaryButton(
-                      label: context.t('recovery_written'),
-                      icon: 'check',
-                      onPressed: k == null
-                          ? null
-                          : () async {
-                              await ref.read(backupServiceProvider).acknowledgeRecovery();
-                              widget.onDone!();
-                            },
-                    ),
-                  ],
-                ]),
-              ),
-            ]),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -152,20 +169,29 @@ Future<String?> askRecoveryKey(BuildContext context, {required String title, req
     context: context,
     builder: (ctx) => AlertDialog(
       title: Text(title),
-      content: Column(mainAxisSize: MainAxisSize.min, children: [
-        Text(body, style: const TextStyle(fontSize: 17, height: 1.5)),
-        const SizedBox(height: 12),
-        TextField(
-          controller: ctrl,
-          autofocus: true,
-          textCapitalization: TextCapitalization.characters,
-          style: const TextStyle(fontSize: 20, letterSpacing: 2, fontWeight: FontWeight.w700),
-          decoration: InputDecoration(hintText: ctx.t('restore_key_hint')),
-        ),
-      ]),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(body, style: const TextStyle(fontSize: 17, height: 1.5)),
+          const SizedBox(height: 12),
+          TextField(
+            controller: ctrl,
+            autofocus: true,
+            textCapitalization: TextCapitalization.characters,
+            style: const TextStyle(fontSize: 20, letterSpacing: 2, fontWeight: FontWeight.w700),
+            decoration: InputDecoration(hintText: ctx.t('restore_key_hint')),
+          ),
+        ],
+      ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(ctx), child: Text(ctx.t('cancel'), style: const TextStyle(fontSize: 17))),
-        FilledButton(onPressed: () => Navigator.pop(ctx, ctrl.text), child: Text(ctx.t('next'), style: const TextStyle(fontSize: 17))),
+        TextButton(
+          onPressed: () => Navigator.pop(ctx),
+          child: Text(ctx.t('cancel'), style: const TextStyle(fontSize: 17)),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(ctx, ctrl.text),
+          child: Text(ctx.t('next'), style: const TextStyle(fontSize: 17)),
+        ),
       ],
     ),
   );
@@ -234,71 +260,107 @@ class _BackupCardState extends ConsumerState<BackupCard> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(22),
         gradient: RadialGradient(center: const Alignment(1, -1), radius: 1.6, colors: [c.heroA, c.heroB, c.heroC], stops: const [0, 0.5, 1]),
-        boxShadow: [BoxShadow(color: c.heroC.withValues(alpha: 0.3), blurRadius: 26, offset: const Offset(0, 12)), BoxShadow(color: c.glow.withValues(alpha: 0.18 * context.neon.glowIntensity), blurRadius: 28)],
-      ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        Row(children: [
-          const Icon3D('shield', size: 54),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(st?.lastBackup == null ? context.t('backup_never') : context.t('backup_safe'),
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: onDark)),
-              Text('${context.t('backup_last')}: ${_when(context, st?.lastBackup)}', style: TextStyle(fontSize: 14, color: soft)),
-              Text('${context.t('backup_nightly')} · ${context.t('backup_locked')}', style: TextStyle(fontSize: 14, color: soft)),
-            ]),
-          ),
-        ]),
-        const SizedBox(height: 10),
-        Wrap(spacing: 8, runSpacing: 6, children: [
-          _chip('${localDigits(st?.localCount ?? 0, context.lang)} ${context.t('backup_on_phone')}'),
-          _chip('${context.t('email_backup')}: ${st?.emailOn ?? false ? context.t('email_on') : context.t('email_off').split(' — ').first}'),
-          if (st?.lastEmail != null) _chip('${context.t('email_last')}: ${_when(context, st!.lastEmail)}'),
-        ]),
-        if (st?.lastError != null) ...[
-          const SizedBox(height: 6),
-          Text('⚠ ${st!.lastError}', style: const TextStyle(fontSize: 13, color: Color(0xFFFFD2C2))),
+        boxShadow: [
+          BoxShadow(color: c.heroC.withValues(alpha: 0.3), blurRadius: 26, offset: const Offset(0, 12)),
+          BoxShadow(color: c.glow.withValues(alpha: 0.18 * context.neon.glowIntensity), blurRadius: 28),
         ],
-        const SizedBox(height: 12),
-        SizedBox(
-          height: 56,
-          child: FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Colors.white, foregroundColor: c.heroC, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18))),
-            onPressed: _busy ? null : _backupNow,
-            child: Text(_busy ? context.t('backup_working') : context.t('backup_now'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const Icon3D('shield', size: 56),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      st?.lastBackup == null ? context.t('backup_never') : context.t('backup_safe'),
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: onDark),
+                    ),
+                    Text('${context.t('backup_last')}: ${_when(context, st?.lastBackup)}', style: TextStyle(fontSize: 14, color: soft)),
+                    Text('${context.t('backup_nightly')} · ${context.t('backup_locked')}', style: TextStyle(fontSize: 14, color: soft)),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ),
-        const SizedBox(height: 8),
-        Row(children: [
-          Expanded(child: _outline(context.t('backup_whatsapp'), _busy ? null : _whatsapp)),
-          const SizedBox(width: 8),
-          Expanded(
-            child: _outline(context.t('backup_restore'), _busy ? null : () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const RestoreScreen()))),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
+            children: [
+              _chip('${localDigits(st?.localCount ?? 0, context.lang)} ${context.t('backup_on_phone')}'),
+              _chip('${context.t('email_backup')}: ${st?.emailOn ?? false ? context.t('email_on') : context.t('email_off').split(' — ').first}'),
+              if (st?.lastEmail != null) _chip('${context.t('email_last')}: ${_when(context, st!.lastEmail)}'),
+            ],
           ),
-        ]),
-      ]),
+          if (st?.lastError != null) ...[
+            const SizedBox(height: 6),
+            Text('⚠ ${st!.lastError}', style: const TextStyle(fontSize: 13, color: Color(0xFFFFD2C2))),
+          ],
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 56,
+            child: FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: c.heroC,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+              ),
+              onPressed: _busy ? null : _backupNow,
+              child: Text(
+                _busy ? context.t('backup_working') : context.t('backup_now'),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(child: _outline(context.t('backup_whatsapp'), _busy ? null : _whatsapp)),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _outline(
+                  context.t('backup_restore'),
+                  _busy ? null : () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const RestoreScreen())),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
   Widget _chip(String t) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.16), borderRadius: BorderRadius.circular(999)),
-        child: Text(t, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white)),
-      );
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+    decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.16), borderRadius: BorderRadius.circular(999)),
+    child: Text(
+      t,
+      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white),
+    ),
+  );
 
   Widget _outline(String label, VoidCallback? onTap) => SizedBox(
-        height: 52,
-        child: OutlinedButton(
-          style: OutlinedButton.styleFrom(
-            foregroundColor: Colors.white,
-            side: BorderSide(color: Colors.white.withValues(alpha: 0.55), width: 1.5),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            padding: const EdgeInsets.symmetric(horizontal: 6),
-          ),
-          onPressed: onTap,
-          child: Text(label, textAlign: TextAlign.center, style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700)),
-        ),
-      );
+    height: 52,
+    child: OutlinedButton(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: Colors.white,
+        side: BorderSide(color: Colors.white.withValues(alpha: 0.55), width: 1.5),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        padding: const EdgeInsets.symmetric(horizontal: 6),
+      ),
+      onPressed: onTap,
+      child: Text(
+        label,
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700),
+      ),
+    ),
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -371,56 +433,81 @@ class _EmailSetupScreenState extends ConsumerState<EmailSetupScreen> {
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 640),
-            child: Column(children: [
-              ScreenHeader(back: true, title: context.t('email_backup')),
-              Expanded(
-                child: ListView(padding: const EdgeInsets.fromLTRB(18, 6, 18, 24), children: [
-                  GsvCard(
-                    child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      const Icon3D('mail', size: 52),
-                      const SizedBox(width: 12),
-                      Expanded(child: Text(context.t('email_how'), style: const TextStyle(fontSize: 16, height: 1.55))),
-                    ]),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(controller: _to, keyboardType: TextInputType.emailAddress, style: const TextStyle(fontSize: 18), decoration: InputDecoration(labelText: context.t('email_to'))),
-                  const SizedBox(height: 12),
-                  TextField(controller: _from, keyboardType: TextInputType.emailAddress, style: const TextStyle(fontSize: 18), decoration: InputDecoration(labelText: context.t('email_from'))),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: _pass,
-                    obscureText: _hide,
-                    autocorrect: false,
-                    enableSuggestions: false,
-                    style: const TextStyle(fontSize: 18, letterSpacing: 1.5),
-                    decoration: InputDecoration(
-                      labelText: context.t('email_pass'),
-                      suffixIcon: IconButton(
-                        tooltip: _hide ? 'Show' : 'Hide',
-                        onPressed: () => setState(() => _hide = !_hide),
-                        icon: Icon(_hide ? Icons.visibility_rounded : Icons.visibility_off_rounded),
+            child: Column(
+              children: [
+                ScreenHeader(back: true, title: context.t('email_backup')),
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(18, 6, 18, 24),
+                    children: [
+                      GsvCard(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon3D('mail', size: 52),
+                            const SizedBox(width: 12),
+                            Expanded(child: Text(context.t('email_how'), style: const TextStyle(fontSize: 16, height: 1.55))),
+                          ],
+                        ),
                       ),
-                    ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: _to,
+                        keyboardType: TextInputType.emailAddress,
+                        style: const TextStyle(fontSize: 18),
+                        decoration: InputDecoration(labelText: context.t('email_to')),
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: _from,
+                        keyboardType: TextInputType.emailAddress,
+                        style: const TextStyle(fontSize: 18),
+                        decoration: InputDecoration(labelText: context.t('email_from')),
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: _pass,
+                        obscureText: _hide,
+                        autocorrect: false,
+                        enableSuggestions: false,
+                        style: const TextStyle(fontSize: 18, letterSpacing: 1.5),
+                        decoration: InputDecoration(
+                          labelText: context.t('email_pass'),
+                          suffixIcon: IconButton(
+                            tooltip: _hide ? 'Show' : 'Hide',
+                            onPressed: () => setState(() => _hide = !_hide),
+                            icon: Icon(_hide ? Icons.visibility_rounded : Icons.visibility_off_rounded),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      PrimaryButton(
+                        label: _busy ? context.t('backup_working') : context.t('email_save_test'),
+                        icon: 'mail',
+                        onPressed: _busy ? null : _saveAndTest,
+                      ),
+                      if (_result != null) ...[
+                        const SizedBox(height: 12),
+                        Text(
+                          _result!,
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: _ok ? GsvColors.good : GsvColors.bad),
+                        ),
+                      ],
+                      const SizedBox(height: 18),
+                      TextButton(
+                        onPressed: () async {
+                          await ref.read(backupServiceProvider).clearEmailConfig();
+                          ref.invalidate(backupStatusProvider);
+                          if (!context.mounted) return;
+                          Navigator.of(context).maybePop();
+                        },
+                        child: Text(context.t('email_remove'), style: TextStyle(fontSize: 16, color: c.mute)),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 18),
-                  PrimaryButton(label: _busy ? context.t('backup_working') : context.t('email_save_test'), icon: 'mail', onPressed: _busy ? null : _saveAndTest),
-                  if (_result != null) ...[
-                    const SizedBox(height: 12),
-                    Text(_result!, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: _ok ? GsvColors.good : GsvColors.bad)),
-                  ],
-                  const SizedBox(height: 18),
-                  TextButton(
-                    onPressed: () async {
-                      await ref.read(backupServiceProvider).clearEmailConfig();
-                      ref.invalidate(backupStatusProvider);
-                      if (!context.mounted) return;
-                      Navigator.of(context).maybePop();
-                    },
-                    child: Text(context.t('email_remove'), style: TextStyle(fontSize: 16, color: c.mute)),
-                  ),
-                ]),
-              ),
-            ]),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -517,8 +604,15 @@ class _RestoreScreenState extends ConsumerState<RestoreScreen> {
             title: Text(ctx.t('restore_replace')),
             content: Text(ctx.t(key), style: const TextStyle(fontSize: 17, height: 1.5)),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(ctx.t('cancel'), style: const TextStyle(fontSize: 17))),
-              FilledButton(style: FilledButton.styleFrom(backgroundColor: GsvColors.bad), onPressed: () => Navigator.pop(ctx, true), child: Text(ctx.t('restore_replace'), style: const TextStyle(fontSize: 17))),
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: Text(ctx.t('cancel'), style: const TextStyle(fontSize: 17)),
+              ),
+              FilledButton(
+                style: FilledButton.styleFrom(backgroundColor: GsvColors.bad),
+                onPressed: () => Navigator.pop(ctx, true),
+                child: Text(ctx.t('restore_replace'), style: const TextStyle(fontSize: 17)),
+              ),
             ],
           ),
         );
@@ -553,83 +647,102 @@ class _RestoreScreenState extends ConsumerState<RestoreScreen> {
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 640),
-            child: Column(children: [
-              ScreenHeader(back: true, title: context.t('restore_title')),
-              Expanded(
-                child: ListView(padding: const EdgeInsets.fromLTRB(18, 6, 18, 24), children: [
-                  GsvCard(
-                    child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      const Icon3D('restore', size: 52),
-                      const SizedBox(width: 12),
-                      Expanded(child: Text(context.t('restore_how'), style: const TextStyle(fontSize: 16, height: 1.55))),
-                    ]),
-                  ),
-                  const SizedBox(height: 14),
-                  PrimaryButton(label: context.t('restore_pick'), icon: 'download', onPressed: _busy ? null : _pick),
-                  if (_local.isNotEmpty && h == null) ...[
-                    const SizedBox(height: 16),
-                    Text(context.t('restore_phone_copies'), style: Theme.of(context).textTheme.titleMedium),
-                    for (final f in _local)
-                      ListTile(
-                        minTileHeight: 54,
-                        leading: const Icon3D('shield', size: 38),
-                        title: Text(f.uri.pathSegments.last.replaceAll('.$backupExtension', ''), style: const TextStyle(fontSize: 16)),
-                        onTap: () async => _load(await f.readAsBytes()),
+            child: Column(
+              children: [
+                ScreenHeader(back: true, title: context.t('restore_title')),
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(18, 6, 18, 24),
+                    children: [
+                      GsvCard(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon3D('restore', size: 52),
+                            const SizedBox(width: 12),
+                            Expanded(child: Text(context.t('restore_how'), style: const TextStyle(fontSize: 16, height: 1.55))),
+                          ],
+                        ),
                       ),
-                  ],
-                  if (_busy) ...[const SizedBox(height: 18), const LinearProgressIndicator()],
-                  if (_error != null) ...[
-                    const SizedBox(height: 14),
-                    Text(_error!, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: GsvColors.bad)),
-                  ],
-                  if (h != null) ...[
-                    const SizedBox(height: 16),
-                    GsvCard(
-                      child: Row(children: [
-                        const Icon3D('shield', size: 48),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            '${_when(context, h.created)} ${context.t('restore_of')}\n${localDigits(h.poems, lang)} ${context.t('poems')}',
-                            style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: c.ink),
+                      const SizedBox(height: 14),
+                      PrimaryButton(label: context.t('restore_pick'), icon: 'download', onPressed: _busy ? null : _pick),
+                      if (_local.isNotEmpty && h == null) ...[
+                        const SizedBox(height: 16),
+                        Text(context.t('restore_phone_copies'), style: Theme.of(context).textTheme.titleMedium),
+                        for (final f in _local)
+                          ListTile(
+                            minTileHeight: 54,
+                            leading: const Icon3D('shield', size: 44),
+                            title: Text(f.uri.pathSegments.last.replaceAll('.$backupExtension', ''), style: const TextStyle(fontSize: 16)),
+                            onTap: () async => _load(await f.readAsBytes()),
+                          ),
+                      ],
+                      if (_busy) ...[const SizedBox(height: 18), const LinearProgressIndicator()],
+                      if (_error != null) ...[
+                        const SizedBox(height: 14),
+                        Text(
+                          _error!,
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: GsvColors.bad),
+                        ),
+                      ],
+                      if (h != null) ...[
+                        const SizedBox(height: 16),
+                        GsvCard(
+                          child: Row(
+                            children: [
+                              const Icon3D('shield', size: 48),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  '${_when(context, h.created)} ${context.t('restore_of')}\n${localDigits(h.poems, lang)} ${context.t('poems')}',
+                                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: c.ink),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ]),
-                    ),
-                  ],
-                  if (_data != null && _done == null) ...[
-                    const SizedBox(height: 14),
-                    if (_adopted) Text(context.t('restore_key_adopted'), style: TextStyle(fontSize: 15, color: c.accentText)),
-                    Text(context.t('restore_merge_note'), style: TextStyle(fontSize: 15, color: c.mute)),
-                    const SizedBox(height: 10),
-                    PrimaryButton(label: context.t('restore_merge'), icon: 'check', onPressed: _busy ? null : () => _restore(replace: false)),
-                    const SizedBox(height: 8),
-                    TextButton(
-                      onPressed: _busy ? null : () => _restore(replace: true),
-                      child: Text(context.t('restore_replace'), style: const TextStyle(fontSize: 15, color: GsvColors.bad)),
-                    ),
-                  ],
-                  if (_done != null) ...[
-                    const SizedBox(height: 16),
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(color: c.alertBg, borderRadius: BorderRadius.circular(18), border: Border.all(color: c.alertBorder)),
-                      child: Row(children: [
-                        const Icon3D('check', size: 52),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            '${context.t('restore_done')}: ${localDigits(_done!.added, lang)} ${context.t('restore_added')} · '
-                            '${localDigits(_done!.updated, lang)} ${context.t('restore_updated')} · ${localDigits(_done!.unchanged, lang)} ${context.t('restore_same')}',
-                            style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: c.ink),
+                      ],
+                      if (_data != null && _done == null) ...[
+                        const SizedBox(height: 14),
+                        if (_adopted) Text(context.t('restore_key_adopted'), style: TextStyle(fontSize: 15, color: c.accentText)),
+                        Text(context.t('restore_merge_note'), style: TextStyle(fontSize: 15, color: c.mute)),
+                        const SizedBox(height: 10),
+                        PrimaryButton(label: context.t('restore_merge'), icon: 'check', onPressed: _busy ? null : () => _restore(replace: false)),
+                        const SizedBox(height: 8),
+                        TextButton(
+                          onPressed: _busy ? null : () => _restore(replace: true),
+                          child: Text(context.t('restore_replace'), style: const TextStyle(fontSize: 15, color: GsvColors.bad)),
+                        ),
+                      ],
+                      if (_done != null) ...[
+                        const SizedBox(height: 16),
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: c.alertBg,
+                            borderRadius: BorderRadius.circular(18),
+                            border: Border.all(color: c.alertBorder),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon3D('check', size: 52),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  '${context.t('restore_done')}: ${localDigits(_done!.added, lang)} ${context.t('restore_added')} · '
+                                  '${localDigits(_done!.updated, lang)} ${context.t('restore_updated')} · ${localDigits(_done!.unchanged, lang)} ${context.t('restore_same')}',
+                                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: c.ink),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ]),
-                    ),
-                  ],
-                ]),
-              ),
-            ]),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

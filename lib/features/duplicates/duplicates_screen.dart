@@ -28,8 +28,14 @@ class DuplicatesScreen extends ConsumerWidget {
         title: Text(ctx.t('dup_remove_all')),
         content: Text('${localDigits(extra, ctx.lang)} ${ctx.t('dup_remove_all_body')}', style: const TextStyle(fontSize: 17, height: 1.5)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(ctx.t('cancel'), style: const TextStyle(fontSize: 17))),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(ctx.t('dup_yes'), style: const TextStyle(fontSize: 17))),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(ctx.t('cancel'), style: const TextStyle(fontSize: 17)),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(ctx.t('dup_yes'), style: const TextStyle(fontSize: 17)),
+          ),
         ],
       ),
     );
@@ -55,63 +61,90 @@ class DuplicatesScreen extends ConsumerWidget {
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 760),
-            child: Column(children: [
-              ScreenHeader(back: true, title: context.t('dup_title'), subtitle: context.t('dup_note')),
-              Expanded(
-                child: groups == null
-                    ? const Center(child: CircularProgressIndicator())
-                    : groups.isEmpty
-                        ? ListView(children: [EmptyState(icon: 'check', text: context.t('dup_none'))])
-                        : ListView(padding: const EdgeInsets.fromLTRB(18, 6, 18, 24), children: [
+            child: Column(
+              children: [
+                ScreenHeader(back: true, title: context.t('dup_title'), subtitle: context.t('dup_note')),
+                Expanded(
+                  child: groups == null
+                      ? const Center(child: CircularProgressIndicator())
+                      : groups.isEmpty
+                      ? ListView(
+                          children: [EmptyState(icon: 'check', text: context.t('dup_none'))],
+                        )
+                      : ListView(
+                          padding: const EdgeInsets.fromLTRB(18, 6, 18, 24),
+                          children: [
                             PrimaryButton(label: context.t('dup_remove_all'), icon: 'trash', onPressed: () => _removeAll(context, ref, groups)),
                             const SizedBox(height: 16),
                             for (final g in groups)
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 14),
                                 child: GsvCard(
-                                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                    Row(children: [
-                                      const Icon3D('collection', size: 40),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: Text(poemTitle(g.first),
-                                            style: TextStyle(fontFamily: poemFont(g.first.lang), fontSize: 18, fontWeight: FontWeight.w700, color: c.ink)),
-                                      ),
-                                      Text('× ${localDigits(g.length, lang)}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: c.accentText)),
-                                    ]),
-                                    const SizedBox(height: 6),
-                                    for (final p in g)
-                                      Container(
-                                        margin: const EdgeInsets.only(top: 6),
-                                        padding: const EdgeInsets.fromLTRB(12, 6, 6, 6),
-                                        decoration: BoxDecoration(color: c.tint, borderRadius: BorderRadius.circular(14)),
-                                        child: Row(children: [
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          const Icon3D('collection', size: 44),
+                                          const SizedBox(width: 8),
                                           Expanded(
-                                            child: InkWell(
-                                              onTap: () => openPoem(context, g, g.indexOf(p)),
-                                              child: Text(
-                                                [
-                                                  if (cats[p.categoryId] != null) categoryName(cats[p.categoryId]!, lang),
-                                                  if (p.number != null) '#${localDigits(p.number!, lang)}',
-                                                  friendlyDate(context, p.createdAt),
-                                                ].join(' · '),
-                                                style: TextStyle(fontSize: 15, color: c.ink),
+                                            child: Text(
+                                              poemTitle(g.first),
+                                              style: TextStyle(
+                                                fontFamily: poemFont(g.first.lang),
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.w700,
+                                                color: c.ink,
                                               ),
                                             ),
                                           ),
-                                          TextButton(
-                                            style: TextButton.styleFrom(minimumSize: const Size(48, 44)),
-                                            onPressed: () => ref.read(repoProvider).removeDuplicates(g, keepId: p.id),
-                                            child: Text(context.t('dup_keep_this'), style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: c.primary)),
+                                          Text(
+                                            '× ${localDigits(g.length, lang)}',
+                                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: c.accentText),
                                           ),
-                                        ]),
+                                        ],
                                       ),
-                                  ]),
+                                      const SizedBox(height: 6),
+                                      for (final p in g)
+                                        Container(
+                                          margin: const EdgeInsets.only(top: 6),
+                                          padding: const EdgeInsets.fromLTRB(12, 6, 6, 6),
+                                          decoration: BoxDecoration(color: c.tint, borderRadius: BorderRadius.circular(14)),
+                                          child: Row(
+                                            children: [
+                                              Expanded(
+                                                child: InkWell(
+                                                  onTap: () => openPoem(context, g, g.indexOf(p)),
+                                                  child: Text(
+                                                    [
+                                                      if (cats[p.categoryId] != null) categoryName(cats[p.categoryId]!, lang),
+                                                      if (p.number != null) '#${localDigits(p.number!, lang)}',
+                                                      friendlyDate(context, p.createdAt),
+                                                    ].join(' · '),
+                                                    style: TextStyle(fontSize: 15, color: c.ink),
+                                                  ),
+                                                ),
+                                              ),
+                                              TextButton(
+                                                style: TextButton.styleFrom(minimumSize: const Size(48, 44)),
+                                                onPressed: () => ref.read(repoProvider).removeDuplicates(g, keepId: p.id),
+                                                child: Text(
+                                                  context.t('dup_keep_this'),
+                                                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: c.primary),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                    ],
+                                  ),
                                 ),
                               ),
-                          ]),
-              ),
-            ]),
+                          ],
+                        ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -138,18 +171,29 @@ class DuplicateNotice extends ConsumerWidget {
           onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const DuplicatesScreen())),
           child: Container(
             padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), border: Border.all(color: c.alertBorder, width: 1.5)),
-            child: Row(children: [
-              const Icon3D('collection', size: 48),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text('${localDigits(n, context.lang)} ${context.t('dup_found')}', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: c.ink)),
-                  Text(context.t('dup_review'), style: TextStyle(fontSize: 15, color: c.mute)),
-                ]),
-              ),
-              Icon(Icons.chevron_right_rounded, color: c.accent),
-            ]),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: c.alertBorder, width: 1.5),
+            ),
+            child: Row(
+              children: [
+                const Icon3D('collection', size: 48),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${localDigits(n, context.lang)} ${context.t('dup_found')}',
+                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: c.ink),
+                      ),
+                      Text(context.t('dup_review'), style: TextStyle(fontSize: 15, color: c.mute)),
+                    ],
+                  ),
+                ),
+                Icon(Icons.chevron_right_rounded, color: c.accent),
+              ],
+            ),
           ),
         ),
       ),

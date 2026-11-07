@@ -54,13 +54,19 @@ Future<void> askNotificationPermission() async {
 }
 
 Future<void> _show(int id, String title, String body, {required String channel, required String channelName}) => _notes.show(
-      id: id,
-      title: title,
-      body: body,
-      notificationDetails: NotificationDetails(
-        android: AndroidNotificationDetails(channel, channelName, importance: Importance.high, priority: Priority.high, styleInformation: BigTextStyleInformation(body)),
-      ),
-    );
+  id: id,
+  title: title,
+  body: body,
+  notificationDetails: NotificationDetails(
+    android: AndroidNotificationDetails(
+      channel,
+      channelName,
+      importance: Importance.high,
+      priority: Priority.high,
+      styleInformation: BigTextStyleInformation(body),
+    ),
+  ),
+);
 
 Future<(AppDatabase, PoemRepository, PoemLang)> _open() async {
   DartPluginRegistrant.ensureInitialized();
@@ -93,8 +99,15 @@ Future<void> nightlyBackupAlarm() async {
     await _show(2, tr('backup_failed', lang), '$e', channel: 'backup', channelName: 'Backup');
   } finally {
     await db.close();
-    await AndroidAlarmManager.oneShotAt(nextAt(23, 59), _nightlyId, nightlyBackupAlarm,
-        exact: true, wakeup: true, allowWhileIdle: true, rescheduleOnReboot: true).catchError((_) => false);
+    await AndroidAlarmManager.oneShotAt(
+      nextAt(23, 59),
+      _nightlyId,
+      nightlyBackupAlarm,
+      exact: true,
+      wakeup: true,
+      allowWhileIdle: true,
+      rescheduleOnReboot: true,
+    ).catchError((_) => false);
   }
 }
 
@@ -110,12 +123,24 @@ Future<void> festivalReminderAlarm() async {
     if (f.isNotEmpty) {
       await _initNotes();
       final p = panchangFor(tomorrow, place);
-      await _show(1, '${tr('tomorrow_is', lang)} ${f.map((x) => x.names[lang.index]).join(' · ')}', dateLine(p, lang.index),
-          channel: 'festivals', channelName: tr('upcoming_fest', lang));
+      await _show(
+        1,
+        '${tr('tomorrow_is', lang)} ${f.map((x) => x.names[lang.index]).join(' · ')}',
+        dateLine(p, lang.index),
+        channel: 'festivals',
+        channelName: tr('upcoming_fest', lang),
+      );
     }
   } finally {
     await db.close();
-    await AndroidAlarmManager.oneShotAt(nextAt(19, 0), _reminderId, festivalReminderAlarm,
-        exact: true, wakeup: true, allowWhileIdle: true, rescheduleOnReboot: true).catchError((_) => false);
+    await AndroidAlarmManager.oneShotAt(
+      nextAt(19, 0),
+      _reminderId,
+      festivalReminderAlarm,
+      exact: true,
+      wakeup: true,
+      allowWhileIdle: true,
+      rescheduleOnReboot: true,
+    ).catchError((_) => false);
   }
 }

@@ -10,22 +10,10 @@ class $PoemsTable extends Poems with TableInfo<$PoemsTable, Poem> {
   $PoemsTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
-  late final GeneratedColumn<String> id = GeneratedColumn<String>(
-    'id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
+  late final GeneratedColumn<String> id = GeneratedColumn<String>('id', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _numberMeta = const VerificationMeta('number');
   @override
-  late final GeneratedColumn<int> number = GeneratedColumn<int>(
-    'number',
-    aliasedName,
-    true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-  );
+  late final GeneratedColumn<int> number = GeneratedColumn<int>('number', aliasedName, true, type: DriftSqlType.int, requiredDuringInsert: false);
   static const VerificationMeta _titleMeta = const VerificationMeta('title');
   @override
   late final GeneratedColumn<String> title = GeneratedColumn<String>(
@@ -55,9 +43,7 @@ class $PoemsTable extends Poems with TableInfo<$PoemsTable, Poem> {
     requiredDuringInsert: false,
     defaultValue: const Constant('gu'),
   );
-  static const VerificationMeta _categoryIdMeta = const VerificationMeta(
-    'categoryId',
-  );
+  static const VerificationMeta _categoryIdMeta = const VerificationMeta('categoryId');
   @override
   late final GeneratedColumn<String> categoryId = GeneratedColumn<String>(
     'category_id',
@@ -66,9 +52,7 @@ class $PoemsTable extends Poems with TableInfo<$PoemsTable, Poem> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
-  static const VerificationMeta _isFavoriteMeta = const VerificationMeta(
-    'isFavorite',
-  );
+  static const VerificationMeta _isFavoriteMeta = const VerificationMeta('isFavorite');
   @override
   late final GeneratedColumn<bool> isFavorite = GeneratedColumn<bool>(
     'is_favorite',
@@ -76,14 +60,10 @@ class $PoemsTable extends Poems with TableInfo<$PoemsTable, Poem> {
     false,
     type: DriftSqlType.bool,
     requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("is_favorite" IN (0, 1))',
-    ),
+    defaultConstraints: GeneratedColumn.constraintIsAlways('CHECK ("is_favorite" IN (0, 1))'),
     defaultValue: const Constant(false),
   );
-  static const VerificationMeta _wordCountMeta = const VerificationMeta(
-    'wordCount',
-  );
+  static const VerificationMeta _wordCountMeta = const VerificationMeta('wordCount');
   @override
   late final GeneratedColumn<int> wordCount = GeneratedColumn<int>(
     'word_count',
@@ -93,9 +73,7 @@ class $PoemsTable extends Poems with TableInfo<$PoemsTable, Poem> {
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
-  static const VerificationMeta _searchBlobMeta = const VerificationMeta(
-    'searchBlob',
-  );
+  static const VerificationMeta _searchBlobMeta = const VerificationMeta('searchBlob');
   @override
   late final GeneratedColumn<String> searchBlob = GeneratedColumn<String>(
     'search_blob',
@@ -105,9 +83,7 @@ class $PoemsTable extends Poems with TableInfo<$PoemsTable, Poem> {
     requiredDuringInsert: false,
     defaultValue: const Constant(''),
   );
-  static const VerificationMeta _createdAtMeta = const VerificationMeta(
-    'createdAt',
-  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
   @override
   late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
     'created_at',
@@ -116,9 +92,7 @@ class $PoemsTable extends Poems with TableInfo<$PoemsTable, Poem> {
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
-    'updatedAt',
-  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta('updatedAt');
   @override
   late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
     'updated_at',
@@ -127,9 +101,7 @@ class $PoemsTable extends Poems with TableInfo<$PoemsTable, Poem> {
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
-    'deletedAt',
-  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta('deletedAt');
   @override
   late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
     'deleted_at',
@@ -148,9 +120,7 @@ class $PoemsTable extends Poems with TableInfo<$PoemsTable, Poem> {
     requiredDuringInsert: false,
     defaultValue: const Constant('app'),
   );
-  static const VerificationMeta _sourceKeyMeta = const VerificationMeta(
-    'sourceKey',
-  );
+  static const VerificationMeta _sourceKeyMeta = const VerificationMeta('sourceKey');
   @override
   late final GeneratedColumn<String> sourceKey = GeneratedColumn<String>(
     'source_key',
@@ -159,9 +129,7 @@ class $PoemsTable extends Poems with TableInfo<$PoemsTable, Poem> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
-  static const VerificationMeta _contentKeyMeta = const VerificationMeta(
-    'contentKey',
-  );
+  static const VerificationMeta _contentKeyMeta = const VerificationMeta('contentKey');
   @override
   late final GeneratedColumn<String> contentKey = GeneratedColumn<String>(
     'content_key',
@@ -194,10 +162,7 @@ class $PoemsTable extends Poems with TableInfo<$PoemsTable, Poem> {
   String get actualTableName => $name;
   static const String $name = 'poems';
   @override
-  VerificationContext validateIntegrity(
-    Insertable<Poem> instance, {
-    bool isInserting = false,
-  }) {
+  VerificationContext validateIntegrity(Insertable<Poem> instance, {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
@@ -206,94 +171,52 @@ class $PoemsTable extends Poems with TableInfo<$PoemsTable, Poem> {
       context.missing(_idMeta);
     }
     if (data.containsKey('number')) {
-      context.handle(
-        _numberMeta,
-        number.isAcceptableOrUnknown(data['number']!, _numberMeta),
-      );
+      context.handle(_numberMeta, number.isAcceptableOrUnknown(data['number']!, _numberMeta));
     }
     if (data.containsKey('title')) {
-      context.handle(
-        _titleMeta,
-        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
-      );
+      context.handle(_titleMeta, title.isAcceptableOrUnknown(data['title']!, _titleMeta));
     }
     if (data.containsKey('body')) {
-      context.handle(
-        _bodyMeta,
-        body.isAcceptableOrUnknown(data['body']!, _bodyMeta),
-      );
+      context.handle(_bodyMeta, body.isAcceptableOrUnknown(data['body']!, _bodyMeta));
     } else if (isInserting) {
       context.missing(_bodyMeta);
     }
     if (data.containsKey('lang')) {
-      context.handle(
-        _langMeta,
-        lang.isAcceptableOrUnknown(data['lang']!, _langMeta),
-      );
+      context.handle(_langMeta, lang.isAcceptableOrUnknown(data['lang']!, _langMeta));
     }
     if (data.containsKey('category_id')) {
-      context.handle(
-        _categoryIdMeta,
-        categoryId.isAcceptableOrUnknown(data['category_id']!, _categoryIdMeta),
-      );
+      context.handle(_categoryIdMeta, categoryId.isAcceptableOrUnknown(data['category_id']!, _categoryIdMeta));
     }
     if (data.containsKey('is_favorite')) {
-      context.handle(
-        _isFavoriteMeta,
-        isFavorite.isAcceptableOrUnknown(data['is_favorite']!, _isFavoriteMeta),
-      );
+      context.handle(_isFavoriteMeta, isFavorite.isAcceptableOrUnknown(data['is_favorite']!, _isFavoriteMeta));
     }
     if (data.containsKey('word_count')) {
-      context.handle(
-        _wordCountMeta,
-        wordCount.isAcceptableOrUnknown(data['word_count']!, _wordCountMeta),
-      );
+      context.handle(_wordCountMeta, wordCount.isAcceptableOrUnknown(data['word_count']!, _wordCountMeta));
     }
     if (data.containsKey('search_blob')) {
-      context.handle(
-        _searchBlobMeta,
-        searchBlob.isAcceptableOrUnknown(data['search_blob']!, _searchBlobMeta),
-      );
+      context.handle(_searchBlobMeta, searchBlob.isAcceptableOrUnknown(data['search_blob']!, _searchBlobMeta));
     }
     if (data.containsKey('created_at')) {
-      context.handle(
-        _createdAtMeta,
-        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
-      );
+      context.handle(_createdAtMeta, createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
     } else if (isInserting) {
       context.missing(_createdAtMeta);
     }
     if (data.containsKey('updated_at')) {
-      context.handle(
-        _updatedAtMeta,
-        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
-      );
+      context.handle(_updatedAtMeta, updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
     } else if (isInserting) {
       context.missing(_updatedAtMeta);
     }
     if (data.containsKey('deleted_at')) {
-      context.handle(
-        _deletedAtMeta,
-        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
-      );
+      context.handle(_deletedAtMeta, deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta));
     }
     if (data.containsKey('source')) {
-      context.handle(
-        _sourceMeta,
-        source.isAcceptableOrUnknown(data['source']!, _sourceMeta),
-      );
+      context.handle(_sourceMeta, source.isAcceptableOrUnknown(data['source']!, _sourceMeta));
     }
     if (data.containsKey('source_key')) {
-      context.handle(
-        _sourceKeyMeta,
-        sourceKey.isAcceptableOrUnknown(data['source_key']!, _sourceKeyMeta),
-      );
+      context.handle(_sourceKeyMeta, sourceKey.isAcceptableOrUnknown(data['source_key']!, _sourceKeyMeta));
     }
     if (data.containsKey('content_key')) {
-      context.handle(
-        _contentKeyMeta,
-        contentKey.isAcceptableOrUnknown(data['content_key']!, _contentKeyMeta),
-      );
+      context.handle(_contentKeyMeta, contentKey.isAcceptableOrUnknown(data['content_key']!, _contentKeyMeta));
     }
     return context;
   }
@@ -304,66 +227,21 @@ class $PoemsTable extends Poems with TableInfo<$PoemsTable, Poem> {
   Poem map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Poem(
-      id: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}id'],
-      )!,
-      number: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}number'],
-      ),
-      title: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}title'],
-      )!,
-      body: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}body'],
-      )!,
-      lang: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}lang'],
-      )!,
-      categoryId: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}category_id'],
-      ),
-      isFavorite: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}is_favorite'],
-      )!,
-      wordCount: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}word_count'],
-      )!,
-      searchBlob: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}search_blob'],
-      )!,
-      createdAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}created_at'],
-      )!,
-      updatedAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}updated_at'],
-      )!,
-      deletedAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}deleted_at'],
-      ),
-      source: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}source'],
-      )!,
-      sourceKey: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}source_key'],
-      ),
-      contentKey: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}content_key'],
-      ),
+      id: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      number: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}number']),
+      title: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}title'])!,
+      body: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}body'])!,
+      lang: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}lang'])!,
+      categoryId: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}category_id']),
+      isFavorite: attachedDatabase.typeMapping.read(DriftSqlType.bool, data['${effectivePrefix}is_favorite'])!,
+      wordCount: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}word_count'])!,
+      searchBlob: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}search_blob'])!,
+      createdAt: attachedDatabase.typeMapping.read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping.read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      deletedAt: attachedDatabase.typeMapping.read(DriftSqlType.dateTime, data['${effectivePrefix}deleted_at']),
+      source: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}source'])!,
+      sourceKey: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}source_key']),
+      contentKey: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}content_key']),
     );
   }
 
@@ -444,37 +322,24 @@ class Poem extends DataClass implements Insertable<Poem> {
   PoemsCompanion toCompanion(bool nullToAbsent) {
     return PoemsCompanion(
       id: Value(id),
-      number: number == null && nullToAbsent
-          ? const Value.absent()
-          : Value(number),
+      number: number == null && nullToAbsent ? const Value.absent() : Value(number),
       title: Value(title),
       body: Value(body),
       lang: Value(lang),
-      categoryId: categoryId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(categoryId),
+      categoryId: categoryId == null && nullToAbsent ? const Value.absent() : Value(categoryId),
       isFavorite: Value(isFavorite),
       wordCount: Value(wordCount),
       searchBlob: Value(searchBlob),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
-      deletedAt: deletedAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(deletedAt),
+      deletedAt: deletedAt == null && nullToAbsent ? const Value.absent() : Value(deletedAt),
       source: Value(source),
-      sourceKey: sourceKey == null && nullToAbsent
-          ? const Value.absent()
-          : Value(sourceKey),
-      contentKey: contentKey == null && nullToAbsent
-          ? const Value.absent()
-          : Value(contentKey),
+      sourceKey: sourceKey == null && nullToAbsent ? const Value.absent() : Value(sourceKey),
+      contentKey: contentKey == null && nullToAbsent ? const Value.absent() : Value(contentKey),
     );
   }
 
-  factory Poem.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
+  factory Poem.fromJson(Map<String, dynamic> json, {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Poem(
       id: serializer.fromJson<String>(json['id']),
@@ -556,24 +421,16 @@ class Poem extends DataClass implements Insertable<Poem> {
       title: data.title.present ? data.title.value : this.title,
       body: data.body.present ? data.body.value : this.body,
       lang: data.lang.present ? data.lang.value : this.lang,
-      categoryId: data.categoryId.present
-          ? data.categoryId.value
-          : this.categoryId,
-      isFavorite: data.isFavorite.present
-          ? data.isFavorite.value
-          : this.isFavorite,
+      categoryId: data.categoryId.present ? data.categoryId.value : this.categoryId,
+      isFavorite: data.isFavorite.present ? data.isFavorite.value : this.isFavorite,
       wordCount: data.wordCount.present ? data.wordCount.value : this.wordCount,
-      searchBlob: data.searchBlob.present
-          ? data.searchBlob.value
-          : this.searchBlob,
+      searchBlob: data.searchBlob.present ? data.searchBlob.value : this.searchBlob,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
       source: data.source.present ? data.source.value : this.source,
       sourceKey: data.sourceKey.present ? data.sourceKey.value : this.sourceKey,
-      contentKey: data.contentKey.present
-          ? data.contentKey.value
-          : this.contentKey,
+      contentKey: data.contentKey.present ? data.contentKey.value : this.contentKey,
     );
   }
 
@@ -848,21 +705,14 @@ class PoemsCompanion extends UpdateCompanion<Poem> {
   }
 }
 
-class $PoemCategoriesTable extends PoemCategories
-    with TableInfo<$PoemCategoriesTable, PoemCategory> {
+class $PoemCategoriesTable extends PoemCategories with TableInfo<$PoemCategoriesTable, PoemCategory> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
   $PoemCategoriesTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
-  late final GeneratedColumn<String> id = GeneratedColumn<String>(
-    'id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
+  late final GeneratedColumn<String> id = GeneratedColumn<String>('id', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _nameGuMeta = const VerificationMeta('nameGu');
   @override
   late final GeneratedColumn<String> nameGu = GeneratedColumn<String>(
@@ -890,9 +740,7 @@ class $PoemCategoriesTable extends PoemCategories
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _iconKeyMeta = const VerificationMeta(
-    'iconKey',
-  );
+  static const VerificationMeta _iconKeyMeta = const VerificationMeta('iconKey');
   @override
   late final GeneratedColumn<String> iconKey = GeneratedColumn<String>(
     'icon_key',
@@ -901,9 +749,7 @@ class $PoemCategoriesTable extends PoemCategories
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _sortOrderMeta = const VerificationMeta(
-    'sortOrder',
-  );
+  static const VerificationMeta _sortOrderMeta = const VerificationMeta('sortOrder');
   @override
   late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
     'sort_order',
@@ -914,24 +760,14 @@ class $PoemCategoriesTable extends PoemCategories
     defaultValue: const Constant(0),
   );
   @override
-  List<GeneratedColumn> get $columns => [
-    id,
-    nameGu,
-    nameHi,
-    nameEn,
-    iconKey,
-    sortOrder,
-  ];
+  List<GeneratedColumn> get $columns => [id, nameGu, nameHi, nameEn, iconKey, sortOrder];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
   static const String $name = 'poem_categories';
   @override
-  VerificationContext validateIntegrity(
-    Insertable<PoemCategory> instance, {
-    bool isInserting = false,
-  }) {
+  VerificationContext validateIntegrity(Insertable<PoemCategory> instance, {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
@@ -940,42 +776,27 @@ class $PoemCategoriesTable extends PoemCategories
       context.missing(_idMeta);
     }
     if (data.containsKey('name_gu')) {
-      context.handle(
-        _nameGuMeta,
-        nameGu.isAcceptableOrUnknown(data['name_gu']!, _nameGuMeta),
-      );
+      context.handle(_nameGuMeta, nameGu.isAcceptableOrUnknown(data['name_gu']!, _nameGuMeta));
     } else if (isInserting) {
       context.missing(_nameGuMeta);
     }
     if (data.containsKey('name_hi')) {
-      context.handle(
-        _nameHiMeta,
-        nameHi.isAcceptableOrUnknown(data['name_hi']!, _nameHiMeta),
-      );
+      context.handle(_nameHiMeta, nameHi.isAcceptableOrUnknown(data['name_hi']!, _nameHiMeta));
     } else if (isInserting) {
       context.missing(_nameHiMeta);
     }
     if (data.containsKey('name_en')) {
-      context.handle(
-        _nameEnMeta,
-        nameEn.isAcceptableOrUnknown(data['name_en']!, _nameEnMeta),
-      );
+      context.handle(_nameEnMeta, nameEn.isAcceptableOrUnknown(data['name_en']!, _nameEnMeta));
     } else if (isInserting) {
       context.missing(_nameEnMeta);
     }
     if (data.containsKey('icon_key')) {
-      context.handle(
-        _iconKeyMeta,
-        iconKey.isAcceptableOrUnknown(data['icon_key']!, _iconKeyMeta),
-      );
+      context.handle(_iconKeyMeta, iconKey.isAcceptableOrUnknown(data['icon_key']!, _iconKeyMeta));
     } else if (isInserting) {
       context.missing(_iconKeyMeta);
     }
     if (data.containsKey('sort_order')) {
-      context.handle(
-        _sortOrderMeta,
-        sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
-      );
+      context.handle(_sortOrderMeta, sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta));
     }
     return context;
   }
@@ -986,30 +807,12 @@ class $PoemCategoriesTable extends PoemCategories
   PoemCategory map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return PoemCategory(
-      id: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}id'],
-      )!,
-      nameGu: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}name_gu'],
-      )!,
-      nameHi: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}name_hi'],
-      )!,
-      nameEn: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}name_en'],
-      )!,
-      iconKey: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}icon_key'],
-      )!,
-      sortOrder: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}sort_order'],
-      )!,
+      id: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      nameGu: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}name_gu'])!,
+      nameHi: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}name_hi'])!,
+      nameEn: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}name_en'])!,
+      iconKey: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}icon_key'])!,
+      sortOrder: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}sort_order'])!,
     );
   }
 
@@ -1057,10 +860,7 @@ class PoemCategory extends DataClass implements Insertable<PoemCategory> {
     );
   }
 
-  factory PoemCategory.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
+  factory PoemCategory.fromJson(Map<String, dynamic> json, {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return PoemCategory(
       id: serializer.fromJson<String>(json['id']),
@@ -1084,14 +884,7 @@ class PoemCategory extends DataClass implements Insertable<PoemCategory> {
     };
   }
 
-  PoemCategory copyWith({
-    String? id,
-    String? nameGu,
-    String? nameHi,
-    String? nameEn,
-    String? iconKey,
-    int? sortOrder,
-  }) => PoemCategory(
+  PoemCategory copyWith({String? id, String? nameGu, String? nameHi, String? nameEn, String? iconKey, int? sortOrder}) => PoemCategory(
     id: id ?? this.id,
     nameGu: nameGu ?? this.nameGu,
     nameHi: nameHi ?? this.nameHi,
@@ -1124,8 +917,7 @@ class PoemCategory extends DataClass implements Insertable<PoemCategory> {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, nameGu, nameHi, nameEn, iconKey, sortOrder);
+  int get hashCode => Object.hash(id, nameGu, nameHi, nameEn, iconKey, sortOrder);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1250,8 +1042,7 @@ class PoemCategoriesCompanion extends UpdateCompanion<PoemCategory> {
   }
 }
 
-class $PoemVersionsTable extends PoemVersions
-    with TableInfo<$PoemVersionsTable, PoemVersion> {
+class $PoemVersionsTable extends PoemVersions with TableInfo<$PoemVersionsTable, PoemVersion> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -1265,9 +1056,7 @@ class $PoemVersionsTable extends PoemVersions
     hasAutoIncrement: true,
     type: DriftSqlType.int,
     requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'PRIMARY KEY AUTOINCREMENT',
-    ),
+    defaultConstraints: GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'),
   );
   static const VerificationMeta _poemIdMeta = const VerificationMeta('poemId');
   @override
@@ -1277,9 +1066,7 @@ class $PoemVersionsTable extends PoemVersions
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES poems (id)',
-    ),
+    defaultConstraints: GeneratedColumn.constraintIsAlways('REFERENCES poems (id)'),
   );
   static const VerificationMeta _titleMeta = const VerificationMeta('title');
   @override
@@ -1299,9 +1086,7 @@ class $PoemVersionsTable extends PoemVersions
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _savedAtMeta = const VerificationMeta(
-    'savedAt',
-  );
+  static const VerificationMeta _savedAtMeta = const VerificationMeta('savedAt');
   @override
   late final GeneratedColumn<DateTime> savedAt = GeneratedColumn<DateTime>(
     'saved_at',
@@ -1318,44 +1103,29 @@ class $PoemVersionsTable extends PoemVersions
   String get actualTableName => $name;
   static const String $name = 'poem_versions';
   @override
-  VerificationContext validateIntegrity(
-    Insertable<PoemVersion> instance, {
-    bool isInserting = false,
-  }) {
+  VerificationContext validateIntegrity(Insertable<PoemVersion> instance, {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
     if (data.containsKey('poem_id')) {
-      context.handle(
-        _poemIdMeta,
-        poemId.isAcceptableOrUnknown(data['poem_id']!, _poemIdMeta),
-      );
+      context.handle(_poemIdMeta, poemId.isAcceptableOrUnknown(data['poem_id']!, _poemIdMeta));
     } else if (isInserting) {
       context.missing(_poemIdMeta);
     }
     if (data.containsKey('title')) {
-      context.handle(
-        _titleMeta,
-        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
-      );
+      context.handle(_titleMeta, title.isAcceptableOrUnknown(data['title']!, _titleMeta));
     } else if (isInserting) {
       context.missing(_titleMeta);
     }
     if (data.containsKey('body')) {
-      context.handle(
-        _bodyMeta,
-        body.isAcceptableOrUnknown(data['body']!, _bodyMeta),
-      );
+      context.handle(_bodyMeta, body.isAcceptableOrUnknown(data['body']!, _bodyMeta));
     } else if (isInserting) {
       context.missing(_bodyMeta);
     }
     if (data.containsKey('saved_at')) {
-      context.handle(
-        _savedAtMeta,
-        savedAt.isAcceptableOrUnknown(data['saved_at']!, _savedAtMeta),
-      );
+      context.handle(_savedAtMeta, savedAt.isAcceptableOrUnknown(data['saved_at']!, _savedAtMeta));
     } else if (isInserting) {
       context.missing(_savedAtMeta);
     }
@@ -1368,26 +1138,11 @@ class $PoemVersionsTable extends PoemVersions
   PoemVersion map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return PoemVersion(
-      id: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}id'],
-      )!,
-      poemId: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}poem_id'],
-      )!,
-      title: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}title'],
-      )!,
-      body: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}body'],
-      )!,
-      savedAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}saved_at'],
-      )!,
+      id: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      poemId: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}poem_id'])!,
+      title: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}title'])!,
+      body: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}body'])!,
+      savedAt: attachedDatabase.typeMapping.read(DriftSqlType.dateTime, data['${effectivePrefix}saved_at'])!,
     );
   }
 
@@ -1403,13 +1158,7 @@ class PoemVersion extends DataClass implements Insertable<PoemVersion> {
   final String title;
   final String body;
   final DateTime savedAt;
-  const PoemVersion({
-    required this.id,
-    required this.poemId,
-    required this.title,
-    required this.body,
-    required this.savedAt,
-  });
+  const PoemVersion({required this.id, required this.poemId, required this.title, required this.body, required this.savedAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1422,19 +1171,10 @@ class PoemVersion extends DataClass implements Insertable<PoemVersion> {
   }
 
   PoemVersionsCompanion toCompanion(bool nullToAbsent) {
-    return PoemVersionsCompanion(
-      id: Value(id),
-      poemId: Value(poemId),
-      title: Value(title),
-      body: Value(body),
-      savedAt: Value(savedAt),
-    );
+    return PoemVersionsCompanion(id: Value(id), poemId: Value(poemId), title: Value(title), body: Value(body), savedAt: Value(savedAt));
   }
 
-  factory PoemVersion.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
+  factory PoemVersion.fromJson(Map<String, dynamic> json, {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return PoemVersion(
       id: serializer.fromJson<int>(json['id']),
@@ -1456,13 +1196,7 @@ class PoemVersion extends DataClass implements Insertable<PoemVersion> {
     };
   }
 
-  PoemVersion copyWith({
-    int? id,
-    String? poemId,
-    String? title,
-    String? body,
-    DateTime? savedAt,
-  }) => PoemVersion(
+  PoemVersion copyWith({int? id, String? poemId, String? title, String? body, DateTime? savedAt}) => PoemVersion(
     id: id ?? this.id,
     poemId: poemId ?? this.poemId,
     title: title ?? this.title,
@@ -1543,13 +1277,7 @@ class PoemVersionsCompanion extends UpdateCompanion<PoemVersion> {
     });
   }
 
-  PoemVersionsCompanion copyWith({
-    Value<int>? id,
-    Value<String>? poemId,
-    Value<String>? title,
-    Value<String>? body,
-    Value<DateTime>? savedAt,
-  }) {
+  PoemVersionsCompanion copyWith({Value<int>? id, Value<String>? poemId, Value<String>? title, Value<String>? body, Value<DateTime>? savedAt}) {
     return PoemVersionsCompanion(
       id: id ?? this.id,
       poemId: poemId ?? this.poemId,
@@ -1593,21 +1321,14 @@ class PoemVersionsCompanion extends UpdateCompanion<PoemVersion> {
   }
 }
 
-class $AppSettingsTable extends AppSettings
-    with TableInfo<$AppSettingsTable, AppSetting> {
+class $AppSettingsTable extends AppSettings with TableInfo<$AppSettingsTable, AppSetting> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
   $AppSettingsTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _keyMeta = const VerificationMeta('key');
   @override
-  late final GeneratedColumn<String> key = GeneratedColumn<String>(
-    'key',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
+  late final GeneratedColumn<String> key = GeneratedColumn<String>('key', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _valueMeta = const VerificationMeta('value');
   @override
   late final GeneratedColumn<String> value = GeneratedColumn<String>(
@@ -1625,25 +1346,16 @@ class $AppSettingsTable extends AppSettings
   String get actualTableName => $name;
   static const String $name = 'app_settings';
   @override
-  VerificationContext validateIntegrity(
-    Insertable<AppSetting> instance, {
-    bool isInserting = false,
-  }) {
+  VerificationContext validateIntegrity(Insertable<AppSetting> instance, {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('key')) {
-      context.handle(
-        _keyMeta,
-        key.isAcceptableOrUnknown(data['key']!, _keyMeta),
-      );
+      context.handle(_keyMeta, key.isAcceptableOrUnknown(data['key']!, _keyMeta));
     } else if (isInserting) {
       context.missing(_keyMeta);
     }
     if (data.containsKey('value')) {
-      context.handle(
-        _valueMeta,
-        value.isAcceptableOrUnknown(data['value']!, _valueMeta),
-      );
+      context.handle(_valueMeta, value.isAcceptableOrUnknown(data['value']!, _valueMeta));
     } else if (isInserting) {
       context.missing(_valueMeta);
     }
@@ -1656,14 +1368,8 @@ class $AppSettingsTable extends AppSettings
   AppSetting map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return AppSetting(
-      key: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}key'],
-      )!,
-      value: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}value'],
-      )!,
+      key: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}key'])!,
+      value: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}value'])!,
     );
   }
 
@@ -1689,32 +1395,19 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     return AppSettingsCompanion(key: Value(key), value: Value(value));
   }
 
-  factory AppSetting.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
+  factory AppSetting.fromJson(Map<String, dynamic> json, {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return AppSetting(
-      key: serializer.fromJson<String>(json['key']),
-      value: serializer.fromJson<String>(json['value']),
-    );
+    return AppSetting(key: serializer.fromJson<String>(json['key']), value: serializer.fromJson<String>(json['value']));
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'key': serializer.toJson<String>(key),
-      'value': serializer.toJson<String>(value),
-    };
+    return <String, dynamic>{'key': serializer.toJson<String>(key), 'value': serializer.toJson<String>(value)};
   }
 
-  AppSetting copyWith({String? key, String? value}) =>
-      AppSetting(key: key ?? this.key, value: value ?? this.value);
+  AppSetting copyWith({String? key, String? value}) => AppSetting(key: key ?? this.key, value: value ?? this.value);
   AppSetting copyWithCompanion(AppSettingsCompanion data) {
-    return AppSetting(
-      key: data.key.present ? data.key.value : this.key,
-      value: data.value.present ? data.value.value : this.value,
-    );
+    return AppSetting(key: data.key.present ? data.key.value : this.key, value: data.value.present ? data.value.value : this.value);
   }
 
   @override
@@ -1729,50 +1422,23 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
   @override
   int get hashCode => Object.hash(key, value);
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is AppSetting &&
-          other.key == this.key &&
-          other.value == this.value);
+  bool operator ==(Object other) => identical(this, other) || (other is AppSetting && other.key == this.key && other.value == this.value);
 }
 
 class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
   final Value<String> key;
   final Value<String> value;
   final Value<int> rowid;
-  const AppSettingsCompanion({
-    this.key = const Value.absent(),
-    this.value = const Value.absent(),
-    this.rowid = const Value.absent(),
-  });
-  AppSettingsCompanion.insert({
-    required String key,
-    required String value,
-    this.rowid = const Value.absent(),
-  }) : key = Value(key),
-       value = Value(value);
-  static Insertable<AppSetting> custom({
-    Expression<String>? key,
-    Expression<String>? value,
-    Expression<int>? rowid,
-  }) {
-    return RawValuesInsertable({
-      if (key != null) 'key': key,
-      if (value != null) 'value': value,
-      if (rowid != null) 'rowid': rowid,
-    });
+  const AppSettingsCompanion({this.key = const Value.absent(), this.value = const Value.absent(), this.rowid = const Value.absent()});
+  AppSettingsCompanion.insert({required String key, required String value, this.rowid = const Value.absent()})
+    : key = Value(key),
+      value = Value(value);
+  static Insertable<AppSetting> custom({Expression<String>? key, Expression<String>? value, Expression<int>? rowid}) {
+    return RawValuesInsertable({if (key != null) 'key': key, if (value != null) 'value': value, if (rowid != null) 'rowid': rowid});
   }
 
-  AppSettingsCompanion copyWith({
-    Value<String>? key,
-    Value<String>? value,
-    Value<int>? rowid,
-  }) {
-    return AppSettingsCompanion(
-      key: key ?? this.key,
-      value: value ?? this.value,
-      rowid: rowid ?? this.rowid,
-    );
+  AppSettingsCompanion copyWith({Value<String>? key, Value<String>? value, Value<int>? rowid}) {
+    return AppSettingsCompanion(key: key ?? this.key, value: value ?? this.value, rowid: rowid ?? this.rowid);
   }
 
   @override
@@ -1809,15 +1475,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $PoemVersionsTable poemVersions = $PoemVersionsTable(this);
   late final $AppSettingsTable appSettings = $AppSettingsTable(this);
   @override
-  Iterable<TableInfo<Table, Object?>> get allTables =>
-      allSchemaEntities.whereType<TableInfo<Table, Object?>>();
+  Iterable<TableInfo<Table, Object?>> get allTables => allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [
-    poems,
-    poemCategories,
-    poemVersions,
-    appSettings,
-  ];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [poems, poemCategories, poemVersions, appSettings];
 }
 
 typedef $$PoemsTableCreateCompanionBuilder = PoemsCompanion Function({
@@ -1857,26 +1517,17 @@ typedef $$PoemsTableUpdateCompanionBuilder = PoemsCompanion Function({
   Value<int> rowid,
 });
 
-final class $$PoemsTableReferences
-    extends BaseReferences<_$AppDatabase, $PoemsTable, Poem> {
+final class $$PoemsTableReferences extends BaseReferences<_$AppDatabase, $PoemsTable, Poem> {
   $$PoemsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
-  static MultiTypedResultKey<$PoemVersionsTable, List<PoemVersion>>
-  _poemVersionsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-    db.poemVersions,
-    aliasName: 'poems__id__poem_versions__poem_id',
-  );
+  static MultiTypedResultKey<$PoemVersionsTable, List<PoemVersion>> _poemVersionsRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(db.poemVersions, aliasName: 'poems__id__poem_versions__poem_id');
 
   $$PoemVersionsTableProcessedTableManager get poemVersionsRefs {
-    final manager = $$PoemVersionsTableTableManager(
-      $_db,
-      $_db.poemVersions,
-    ).filter((f) => f.poemId.id.sqlEquals($_itemColumn<String>('id')!));
+    final manager = $$PoemVersionsTableTableManager($_db, $_db.poemVersions).filter((f) => f.poemId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_poemVersionsRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
+    return ProcessedTableManager(manager.$state.copyWith(prefetchedData: cache));
   }
 }
 
@@ -1888,109 +1539,55 @@ class $$PoemsTableFilterComposer extends Composer<_$AppDatabase, $PoemsTable> {
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnFilters<String> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnFilters(column),
-  );
+  ColumnFilters<String> get id => $composableBuilder(column: $table.id, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<int> get number => $composableBuilder(
-    column: $table.number,
-    builder: (column) => ColumnFilters(column),
-  );
+  ColumnFilters<int> get number => $composableBuilder(column: $table.number, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get title => $composableBuilder(
-    column: $table.title,
-    builder: (column) => ColumnFilters(column),
-  );
+  ColumnFilters<String> get title => $composableBuilder(column: $table.title, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get body => $composableBuilder(
-    column: $table.body,
-    builder: (column) => ColumnFilters(column),
-  );
+  ColumnFilters<String> get body => $composableBuilder(column: $table.body, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get lang => $composableBuilder(
-    column: $table.lang,
-    builder: (column) => ColumnFilters(column),
-  );
+  ColumnFilters<String> get lang => $composableBuilder(column: $table.lang, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get categoryId => $composableBuilder(
-    column: $table.categoryId,
-    builder: (column) => ColumnFilters(column),
-  );
+  ColumnFilters<String> get categoryId => $composableBuilder(column: $table.categoryId, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<bool> get isFavorite => $composableBuilder(
-    column: $table.isFavorite,
-    builder: (column) => ColumnFilters(column),
-  );
+  ColumnFilters<bool> get isFavorite => $composableBuilder(column: $table.isFavorite, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<int> get wordCount => $composableBuilder(
-    column: $table.wordCount,
-    builder: (column) => ColumnFilters(column),
-  );
+  ColumnFilters<int> get wordCount => $composableBuilder(column: $table.wordCount, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get searchBlob => $composableBuilder(
-    column: $table.searchBlob,
-    builder: (column) => ColumnFilters(column),
-  );
+  ColumnFilters<String> get searchBlob => $composableBuilder(column: $table.searchBlob, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<DateTime> get createdAt => $composableBuilder(
-    column: $table.createdAt,
-    builder: (column) => ColumnFilters(column),
-  );
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(column: $table.createdAt, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
-    column: $table.updatedAt,
-    builder: (column) => ColumnFilters(column),
-  );
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(column: $table.updatedAt, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
-    column: $table.deletedAt,
-    builder: (column) => ColumnFilters(column),
-  );
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(column: $table.deletedAt, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get source => $composableBuilder(
-    column: $table.source,
-    builder: (column) => ColumnFilters(column),
-  );
+  ColumnFilters<String> get source => $composableBuilder(column: $table.source, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get sourceKey => $composableBuilder(
-    column: $table.sourceKey,
-    builder: (column) => ColumnFilters(column),
-  );
+  ColumnFilters<String> get sourceKey => $composableBuilder(column: $table.sourceKey, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get contentKey => $composableBuilder(
-    column: $table.contentKey,
-    builder: (column) => ColumnFilters(column),
-  );
+  ColumnFilters<String> get contentKey => $composableBuilder(column: $table.contentKey, builder: (column) => ColumnFilters(column));
 
-  Expression<bool> poemVersionsRefs(
-    Expression<bool> Function($$PoemVersionsTableFilterComposer f) f,
-  ) {
+  Expression<bool> poemVersionsRefs(Expression<bool> Function($$PoemVersionsTableFilterComposer f) f) {
     final $$PoemVersionsTableFilterComposer composer = $composerBuilder(
       composer: this,
       getCurrentColumn: (t) => t.id,
       referencedTable: $db.poemVersions,
       getReferencedColumn: (t) => t.poemId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$PoemVersionsTableFilterComposer(
-            $db: $db,
-            $table: $db.poemVersions,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
+      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) => $$PoemVersionsTableFilterComposer(
+        $db: $db,
+        $table: $db.poemVersions,
+        $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+        joinBuilder: joinBuilder,
+        $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
+      ),
     );
     return f(composer);
   }
 }
 
-class $$PoemsTableOrderingComposer
-    extends Composer<_$AppDatabase, $PoemsTable> {
+class $$PoemsTableOrderingComposer extends Composer<_$AppDatabase, $PoemsTable> {
   $$PoemsTableOrderingComposer({
     required super.$db,
     required super.$table,
@@ -1998,84 +1595,38 @@ class $$PoemsTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnOrderings<String> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnOrderings(column),
-  );
+  ColumnOrderings<String> get id => $composableBuilder(column: $table.id, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<int> get number => $composableBuilder(
-    column: $table.number,
-    builder: (column) => ColumnOrderings(column),
-  );
+  ColumnOrderings<int> get number => $composableBuilder(column: $table.number, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get title => $composableBuilder(
-    column: $table.title,
-    builder: (column) => ColumnOrderings(column),
-  );
+  ColumnOrderings<String> get title => $composableBuilder(column: $table.title, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get body => $composableBuilder(
-    column: $table.body,
-    builder: (column) => ColumnOrderings(column),
-  );
+  ColumnOrderings<String> get body => $composableBuilder(column: $table.body, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get lang => $composableBuilder(
-    column: $table.lang,
-    builder: (column) => ColumnOrderings(column),
-  );
+  ColumnOrderings<String> get lang => $composableBuilder(column: $table.lang, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get categoryId => $composableBuilder(
-    column: $table.categoryId,
-    builder: (column) => ColumnOrderings(column),
-  );
+  ColumnOrderings<String> get categoryId => $composableBuilder(column: $table.categoryId, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<bool> get isFavorite => $composableBuilder(
-    column: $table.isFavorite,
-    builder: (column) => ColumnOrderings(column),
-  );
+  ColumnOrderings<bool> get isFavorite => $composableBuilder(column: $table.isFavorite, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<int> get wordCount => $composableBuilder(
-    column: $table.wordCount,
-    builder: (column) => ColumnOrderings(column),
-  );
+  ColumnOrderings<int> get wordCount => $composableBuilder(column: $table.wordCount, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get searchBlob => $composableBuilder(
-    column: $table.searchBlob,
-    builder: (column) => ColumnOrderings(column),
-  );
+  ColumnOrderings<String> get searchBlob => $composableBuilder(column: $table.searchBlob, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
-    column: $table.createdAt,
-    builder: (column) => ColumnOrderings(column),
-  );
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
-    column: $table.updatedAt,
-    builder: (column) => ColumnOrderings(column),
-  );
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
-    column: $table.deletedAt,
-    builder: (column) => ColumnOrderings(column),
-  );
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get source => $composableBuilder(
-    column: $table.source,
-    builder: (column) => ColumnOrderings(column),
-  );
+  ColumnOrderings<String> get source => $composableBuilder(column: $table.source, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get sourceKey => $composableBuilder(
-    column: $table.sourceKey,
-    builder: (column) => ColumnOrderings(column),
-  );
+  ColumnOrderings<String> get sourceKey => $composableBuilder(column: $table.sourceKey, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get contentKey => $composableBuilder(
-    column: $table.contentKey,
-    builder: (column) => ColumnOrderings(column),
-  );
+  ColumnOrderings<String> get contentKey => $composableBuilder(column: $table.contentKey, builder: (column) => ColumnOrderings(column));
 }
 
-class $$PoemsTableAnnotationComposer
-    extends Composer<_$AppDatabase, $PoemsTable> {
+class $$PoemsTableAnnotationComposer extends Composer<_$AppDatabase, $PoemsTable> {
   $$PoemsTableAnnotationComposer({
     required super.$db,
     required super.$table,
@@ -2083,80 +1634,49 @@ class $$PoemsTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<String> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
+  GeneratedColumn<String> get id => $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<int> get number =>
-      $composableBuilder(column: $table.number, builder: (column) => column);
+  GeneratedColumn<int> get number => $composableBuilder(column: $table.number, builder: (column) => column);
 
-  GeneratedColumn<String> get title =>
-      $composableBuilder(column: $table.title, builder: (column) => column);
+  GeneratedColumn<String> get title => $composableBuilder(column: $table.title, builder: (column) => column);
 
-  GeneratedColumn<String> get body =>
-      $composableBuilder(column: $table.body, builder: (column) => column);
+  GeneratedColumn<String> get body => $composableBuilder(column: $table.body, builder: (column) => column);
 
-  GeneratedColumn<String> get lang =>
-      $composableBuilder(column: $table.lang, builder: (column) => column);
+  GeneratedColumn<String> get lang => $composableBuilder(column: $table.lang, builder: (column) => column);
 
-  GeneratedColumn<String> get categoryId => $composableBuilder(
-    column: $table.categoryId,
-    builder: (column) => column,
-  );
+  GeneratedColumn<String> get categoryId => $composableBuilder(column: $table.categoryId, builder: (column) => column);
 
-  GeneratedColumn<bool> get isFavorite => $composableBuilder(
-    column: $table.isFavorite,
-    builder: (column) => column,
-  );
+  GeneratedColumn<bool> get isFavorite => $composableBuilder(column: $table.isFavorite, builder: (column) => column);
 
-  GeneratedColumn<int> get wordCount =>
-      $composableBuilder(column: $table.wordCount, builder: (column) => column);
+  GeneratedColumn<int> get wordCount => $composableBuilder(column: $table.wordCount, builder: (column) => column);
 
-  GeneratedColumn<String> get searchBlob => $composableBuilder(
-    column: $table.searchBlob,
-    builder: (column) => column,
-  );
+  GeneratedColumn<String> get searchBlob => $composableBuilder(column: $table.searchBlob, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+  GeneratedColumn<DateTime> get createdAt => $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get updatedAt =>
-      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+  GeneratedColumn<DateTime> get updatedAt => $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get deletedAt =>
-      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+  GeneratedColumn<DateTime> get deletedAt => $composableBuilder(column: $table.deletedAt, builder: (column) => column);
 
-  GeneratedColumn<String> get source =>
-      $composableBuilder(column: $table.source, builder: (column) => column);
+  GeneratedColumn<String> get source => $composableBuilder(column: $table.source, builder: (column) => column);
 
-  GeneratedColumn<String> get sourceKey =>
-      $composableBuilder(column: $table.sourceKey, builder: (column) => column);
+  GeneratedColumn<String> get sourceKey => $composableBuilder(column: $table.sourceKey, builder: (column) => column);
 
-  GeneratedColumn<String> get contentKey => $composableBuilder(
-    column: $table.contentKey,
-    builder: (column) => column,
-  );
+  GeneratedColumn<String> get contentKey => $composableBuilder(column: $table.contentKey, builder: (column) => column);
 
-  Expression<T> poemVersionsRefs<T extends Object>(
-    Expression<T> Function($$PoemVersionsTableAnnotationComposer a) f,
-  ) {
+  Expression<T> poemVersionsRefs<T extends Object>(Expression<T> Function($$PoemVersionsTableAnnotationComposer a) f) {
     final $$PoemVersionsTableAnnotationComposer composer = $composerBuilder(
       composer: this,
       getCurrentColumn: (t) => t.id,
       referencedTable: $db.poemVersions,
       getReferencedColumn: (t) => t.poemId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$PoemVersionsTableAnnotationComposer(
-            $db: $db,
-            $table: $db.poemVersions,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
+      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) => $$PoemVersionsTableAnnotationComposer(
+        $db: $db,
+        $table: $db.poemVersions,
+        $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+        joinBuilder: joinBuilder,
+        $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
+      ),
     );
     return f(composer);
   }
@@ -2182,12 +1702,9 @@ class $$PoemsTableTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $$PoemsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$PoemsTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$PoemsTableAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () => $$PoemsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () => $$PoemsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () => $$PoemsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
@@ -2260,14 +1777,7 @@ class $$PoemsTableTableManager
                 contentKey: contentKey,
                 rowid: rowid,
               ),
-          withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable<$PoemsTable, Poem>(table),
-                  $$PoemsTableReferences(db, table, e),
-                ),
-              )
-              .toList(),
+          withReferenceMapper: (p0) => p0.map((e) => (e.readTable<$PoemsTable, Poem>(table), $$PoemsTableReferences(db, table, e))).toList(),
           prefetchHooksCallback: ({poemVersionsRefs = false}) {
             return PrefetchHooks(
               db: db,
@@ -2276,20 +1786,10 @@ class $$PoemsTableTableManager
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (poemVersionsRefs)
-                    await $_getPrefetchedDataByColumns<
-                      Poem,
-                      $PoemsTable,
-                      PoemVersion,
-                      $PoemVersionsTable
-                    >(
+                    await $_getPrefetchedDataByColumns<Poem, $PoemsTable, PoemVersion, $PoemVersionsTable>(
                       currentTable: table,
-                      referencedTable: $$PoemsTableReferences
-                          ._poemVersionsRefsTable(db),
-                      managerFromTypedResult: (p0) => $$PoemsTableReferences(
-                        db,
-                        table,
-                        p0,
-                      ).poemVersionsRefs,
+                      referencedTable: $$PoemsTableReferences._poemVersionsRefsTable(db),
+                      managerFromTypedResult: (p0) => $$PoemsTableReferences(db, table, p0).poemVersionsRefs,
                       currentColumn: 'id',
                       referencedColumn: 'poem_id',
                       typedResults: items,
@@ -2316,29 +1816,26 @@ typedef $$PoemsTableProcessedTableManager =
       Poem,
       PrefetchHooks Function({bool poemVersionsRefs})
     >;
-typedef $$PoemCategoriesTableCreateCompanionBuilder =
-    PoemCategoriesCompanion Function({
-      required String id,
-      required String nameGu,
-      required String nameHi,
-      required String nameEn,
-      required String iconKey,
-      Value<int> sortOrder,
-      Value<int> rowid,
-    });
-typedef $$PoemCategoriesTableUpdateCompanionBuilder =
-    PoemCategoriesCompanion Function({
-      Value<String> id,
-      Value<String> nameGu,
-      Value<String> nameHi,
-      Value<String> nameEn,
-      Value<String> iconKey,
-      Value<int> sortOrder,
-      Value<int> rowid,
-    });
+typedef $$PoemCategoriesTableCreateCompanionBuilder = PoemCategoriesCompanion Function({
+  required String id,
+  required String nameGu,
+  required String nameHi,
+  required String nameEn,
+  required String iconKey,
+  Value<int> sortOrder,
+  Value<int> rowid,
+});
+typedef $$PoemCategoriesTableUpdateCompanionBuilder = PoemCategoriesCompanion Function({
+  Value<String> id,
+  Value<String> nameGu,
+  Value<String> nameHi,
+  Value<String> nameEn,
+  Value<String> iconKey,
+  Value<int> sortOrder,
+  Value<int> rowid,
+});
 
-class $$PoemCategoriesTableFilterComposer
-    extends Composer<_$AppDatabase, $PoemCategoriesTable> {
+class $$PoemCategoriesTableFilterComposer extends Composer<_$AppDatabase, $PoemCategoriesTable> {
   $$PoemCategoriesTableFilterComposer({
     required super.$db,
     required super.$table,
@@ -2346,39 +1843,20 @@ class $$PoemCategoriesTableFilterComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnFilters<String> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnFilters(column),
-  );
+  ColumnFilters<String> get id => $composableBuilder(column: $table.id, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get nameGu => $composableBuilder(
-    column: $table.nameGu,
-    builder: (column) => ColumnFilters(column),
-  );
+  ColumnFilters<String> get nameGu => $composableBuilder(column: $table.nameGu, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get nameHi => $composableBuilder(
-    column: $table.nameHi,
-    builder: (column) => ColumnFilters(column),
-  );
+  ColumnFilters<String> get nameHi => $composableBuilder(column: $table.nameHi, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get nameEn => $composableBuilder(
-    column: $table.nameEn,
-    builder: (column) => ColumnFilters(column),
-  );
+  ColumnFilters<String> get nameEn => $composableBuilder(column: $table.nameEn, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get iconKey => $composableBuilder(
-    column: $table.iconKey,
-    builder: (column) => ColumnFilters(column),
-  );
+  ColumnFilters<String> get iconKey => $composableBuilder(column: $table.iconKey, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<int> get sortOrder => $composableBuilder(
-    column: $table.sortOrder,
-    builder: (column) => ColumnFilters(column),
-  );
+  ColumnFilters<int> get sortOrder => $composableBuilder(column: $table.sortOrder, builder: (column) => ColumnFilters(column));
 }
 
-class $$PoemCategoriesTableOrderingComposer
-    extends Composer<_$AppDatabase, $PoemCategoriesTable> {
+class $$PoemCategoriesTableOrderingComposer extends Composer<_$AppDatabase, $PoemCategoriesTable> {
   $$PoemCategoriesTableOrderingComposer({
     required super.$db,
     required super.$table,
@@ -2386,39 +1864,20 @@ class $$PoemCategoriesTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnOrderings<String> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnOrderings(column),
-  );
+  ColumnOrderings<String> get id => $composableBuilder(column: $table.id, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get nameGu => $composableBuilder(
-    column: $table.nameGu,
-    builder: (column) => ColumnOrderings(column),
-  );
+  ColumnOrderings<String> get nameGu => $composableBuilder(column: $table.nameGu, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get nameHi => $composableBuilder(
-    column: $table.nameHi,
-    builder: (column) => ColumnOrderings(column),
-  );
+  ColumnOrderings<String> get nameHi => $composableBuilder(column: $table.nameHi, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get nameEn => $composableBuilder(
-    column: $table.nameEn,
-    builder: (column) => ColumnOrderings(column),
-  );
+  ColumnOrderings<String> get nameEn => $composableBuilder(column: $table.nameEn, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get iconKey => $composableBuilder(
-    column: $table.iconKey,
-    builder: (column) => ColumnOrderings(column),
-  );
+  ColumnOrderings<String> get iconKey => $composableBuilder(column: $table.iconKey, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<int> get sortOrder => $composableBuilder(
-    column: $table.sortOrder,
-    builder: (column) => ColumnOrderings(column),
-  );
+  ColumnOrderings<int> get sortOrder => $composableBuilder(column: $table.sortOrder, builder: (column) => ColumnOrderings(column));
 }
 
-class $$PoemCategoriesTableAnnotationComposer
-    extends Composer<_$AppDatabase, $PoemCategoriesTable> {
+class $$PoemCategoriesTableAnnotationComposer extends Composer<_$AppDatabase, $PoemCategoriesTable> {
   $$PoemCategoriesTableAnnotationComposer({
     required super.$db,
     required super.$table,
@@ -2426,23 +1885,17 @@ class $$PoemCategoriesTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<String> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
+  GeneratedColumn<String> get id => $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get nameGu =>
-      $composableBuilder(column: $table.nameGu, builder: (column) => column);
+  GeneratedColumn<String> get nameGu => $composableBuilder(column: $table.nameGu, builder: (column) => column);
 
-  GeneratedColumn<String> get nameHi =>
-      $composableBuilder(column: $table.nameHi, builder: (column) => column);
+  GeneratedColumn<String> get nameHi => $composableBuilder(column: $table.nameHi, builder: (column) => column);
 
-  GeneratedColumn<String> get nameEn =>
-      $composableBuilder(column: $table.nameEn, builder: (column) => column);
+  GeneratedColumn<String> get nameEn => $composableBuilder(column: $table.nameEn, builder: (column) => column);
 
-  GeneratedColumn<String> get iconKey =>
-      $composableBuilder(column: $table.iconKey, builder: (column) => column);
+  GeneratedColumn<String> get iconKey => $composableBuilder(column: $table.iconKey, builder: (column) => column);
 
-  GeneratedColumn<int> get sortOrder =>
-      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+  GeneratedColumn<int> get sortOrder => $composableBuilder(column: $table.sortOrder, builder: (column) => column);
 }
 
 class $$PoemCategoriesTableTableManager
@@ -2456,44 +1909,27 @@ class $$PoemCategoriesTableTableManager
           $$PoemCategoriesTableAnnotationComposer,
           $$PoemCategoriesTableCreateCompanionBuilder,
           $$PoemCategoriesTableUpdateCompanionBuilder,
-          (
-            PoemCategory,
-            BaseReferences<_$AppDatabase, $PoemCategoriesTable, PoemCategory>,
-          ),
+          (PoemCategory, BaseReferences<_$AppDatabase, $PoemCategoriesTable, PoemCategory>),
           PoemCategory,
           PrefetchHooks Function()
         > {
-  $$PoemCategoriesTableTableManager(
-    _$AppDatabase db,
-    $PoemCategoriesTable table,
-  ) : super(
+  $$PoemCategoriesTableTableManager(_$AppDatabase db, $PoemCategoriesTable table)
+    : super(
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $$PoemCategoriesTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$PoemCategoriesTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$PoemCategoriesTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback:
-              ({
-                Value<String> id = const Value.absent(),
-                Value<String> nameGu = const Value.absent(),
-                Value<String> nameHi = const Value.absent(),
-                Value<String> nameEn = const Value.absent(),
-                Value<String> iconKey = const Value.absent(),
-                Value<int> sortOrder = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
-              }) => PoemCategoriesCompanion(
-                id: id,
-                nameGu: nameGu,
-                nameHi: nameHi,
-                nameEn: nameEn,
-                iconKey: iconKey,
-                sortOrder: sortOrder,
-                rowid: rowid,
-              ),
+          createFilteringComposer: () => $$PoemCategoriesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () => $$PoemCategoriesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () => $$PoemCategoriesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> nameGu = const Value.absent(),
+            Value<String> nameHi = const Value.absent(),
+            Value<String> nameEn = const Value.absent(),
+            Value<String> iconKey = const Value.absent(),
+            Value<int> sortOrder = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) => PoemCategoriesCompanion(id: id, nameGu: nameGu, nameHi: nameHi, nameEn: nameEn, iconKey: iconKey, sortOrder: sortOrder, rowid: rowid),
           createCompanionCallback:
               ({
                 required String id,
@@ -2516,11 +1952,7 @@ class $$PoemCategoriesTableTableManager
               .map(
                 (e) => (
                   e.readTable<$PoemCategoriesTable, PoemCategory>(table),
-                  BaseReferences<
-                    _$AppDatabase,
-                    $PoemCategoriesTable,
-                    PoemCategory
-                  >(db, table, e),
+                  BaseReferences<_$AppDatabase, $PoemCategoriesTable, PoemCategory>(db, table, e),
                 ),
               )
               .toList(),
@@ -2539,54 +1971,41 @@ typedef $$PoemCategoriesTableProcessedTableManager =
       $$PoemCategoriesTableAnnotationComposer,
       $$PoemCategoriesTableCreateCompanionBuilder,
       $$PoemCategoriesTableUpdateCompanionBuilder,
-      (
-        PoemCategory,
-        BaseReferences<_$AppDatabase, $PoemCategoriesTable, PoemCategory>,
-      ),
+      (PoemCategory, BaseReferences<_$AppDatabase, $PoemCategoriesTable, PoemCategory>),
       PoemCategory,
       PrefetchHooks Function()
     >;
-typedef $$PoemVersionsTableCreateCompanionBuilder =
-    PoemVersionsCompanion Function({
-      Value<int> id,
-      required String poemId,
-      required String title,
-      required String body,
-      required DateTime savedAt,
-    });
-typedef $$PoemVersionsTableUpdateCompanionBuilder =
-    PoemVersionsCompanion Function({
-      Value<int> id,
-      Value<String> poemId,
-      Value<String> title,
-      Value<String> body,
-      Value<DateTime> savedAt,
-    });
+typedef $$PoemVersionsTableCreateCompanionBuilder = PoemVersionsCompanion Function({
+  Value<int> id,
+  required String poemId,
+  required String title,
+  required String body,
+  required DateTime savedAt,
+});
+typedef $$PoemVersionsTableUpdateCompanionBuilder = PoemVersionsCompanion Function({
+  Value<int> id,
+  Value<String> poemId,
+  Value<String> title,
+  Value<String> body,
+  Value<DateTime> savedAt,
+});
 
-final class $$PoemVersionsTableReferences
-    extends BaseReferences<_$AppDatabase, $PoemVersionsTable, PoemVersion> {
+final class $$PoemVersionsTableReferences extends BaseReferences<_$AppDatabase, $PoemVersionsTable, PoemVersion> {
   $$PoemVersionsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
-  static $PoemsTable _poemIdTable(_$AppDatabase db) =>
-      db.poems.createAlias('poem_versions__poem_id__poems__id');
+  static $PoemsTable _poemIdTable(_$AppDatabase db) => db.poems.createAlias('poem_versions__poem_id__poems__id');
 
   $$PoemsTableProcessedTableManager get poemId {
     final $_column = $_itemColumn<String>('poem_id')!;
 
-    final manager = $$PoemsTableTableManager(
-      $_db,
-      $_db.poems,
-    ).filter((f) => f.id.sqlEquals($_column));
+    final manager = $$PoemsTableTableManager($_db, $_db.poems).filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_poemIdTable($_db));
     if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
+    return ProcessedTableManager(manager.$state.copyWith(prefetchedData: [item]));
   }
 }
 
-class $$PoemVersionsTableFilterComposer
-    extends Composer<_$AppDatabase, $PoemVersionsTable> {
+class $$PoemVersionsTableFilterComposer extends Composer<_$AppDatabase, $PoemVersionsTable> {
   $$PoemVersionsTableFilterComposer({
     required super.$db,
     required super.$table,
@@ -2594,25 +2013,13 @@ class $$PoemVersionsTableFilterComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnFilters<int> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnFilters(column),
-  );
+  ColumnFilters<int> get id => $composableBuilder(column: $table.id, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get title => $composableBuilder(
-    column: $table.title,
-    builder: (column) => ColumnFilters(column),
-  );
+  ColumnFilters<String> get title => $composableBuilder(column: $table.title, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get body => $composableBuilder(
-    column: $table.body,
-    builder: (column) => ColumnFilters(column),
-  );
+  ColumnFilters<String> get body => $composableBuilder(column: $table.body, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<DateTime> get savedAt => $composableBuilder(
-    column: $table.savedAt,
-    builder: (column) => ColumnFilters(column),
-  );
+  ColumnFilters<DateTime> get savedAt => $composableBuilder(column: $table.savedAt, builder: (column) => ColumnFilters(column));
 
   $$PoemsTableFilterComposer get poemId {
     final $$PoemsTableFilterComposer composer = $composerBuilder(
@@ -2620,26 +2027,19 @@ class $$PoemVersionsTableFilterComposer
       getCurrentColumn: (t) => t.poemId,
       referencedTable: $db.poems,
       getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$PoemsTableFilterComposer(
-            $db: $db,
-            $table: $db.poems,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
+      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) => $$PoemsTableFilterComposer(
+        $db: $db,
+        $table: $db.poems,
+        $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+        joinBuilder: joinBuilder,
+        $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
+      ),
     );
     return composer;
   }
 }
 
-class $$PoemVersionsTableOrderingComposer
-    extends Composer<_$AppDatabase, $PoemVersionsTable> {
+class $$PoemVersionsTableOrderingComposer extends Composer<_$AppDatabase, $PoemVersionsTable> {
   $$PoemVersionsTableOrderingComposer({
     required super.$db,
     required super.$table,
@@ -2647,25 +2047,13 @@ class $$PoemVersionsTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnOrderings<int> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnOrderings(column),
-  );
+  ColumnOrderings<int> get id => $composableBuilder(column: $table.id, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get title => $composableBuilder(
-    column: $table.title,
-    builder: (column) => ColumnOrderings(column),
-  );
+  ColumnOrderings<String> get title => $composableBuilder(column: $table.title, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get body => $composableBuilder(
-    column: $table.body,
-    builder: (column) => ColumnOrderings(column),
-  );
+  ColumnOrderings<String> get body => $composableBuilder(column: $table.body, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<DateTime> get savedAt => $composableBuilder(
-    column: $table.savedAt,
-    builder: (column) => ColumnOrderings(column),
-  );
+  ColumnOrderings<DateTime> get savedAt => $composableBuilder(column: $table.savedAt, builder: (column) => ColumnOrderings(column));
 
   $$PoemsTableOrderingComposer get poemId {
     final $$PoemsTableOrderingComposer composer = $composerBuilder(
@@ -2673,26 +2061,19 @@ class $$PoemVersionsTableOrderingComposer
       getCurrentColumn: (t) => t.poemId,
       referencedTable: $db.poems,
       getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$PoemsTableOrderingComposer(
-            $db: $db,
-            $table: $db.poems,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
+      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) => $$PoemsTableOrderingComposer(
+        $db: $db,
+        $table: $db.poems,
+        $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+        joinBuilder: joinBuilder,
+        $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
+      ),
     );
     return composer;
   }
 }
 
-class $$PoemVersionsTableAnnotationComposer
-    extends Composer<_$AppDatabase, $PoemVersionsTable> {
+class $$PoemVersionsTableAnnotationComposer extends Composer<_$AppDatabase, $PoemVersionsTable> {
   $$PoemVersionsTableAnnotationComposer({
     required super.$db,
     required super.$table,
@@ -2700,17 +2081,13 @@ class $$PoemVersionsTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
+  GeneratedColumn<int> get id => $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get title =>
-      $composableBuilder(column: $table.title, builder: (column) => column);
+  GeneratedColumn<String> get title => $composableBuilder(column: $table.title, builder: (column) => column);
 
-  GeneratedColumn<String> get body =>
-      $composableBuilder(column: $table.body, builder: (column) => column);
+  GeneratedColumn<String> get body => $composableBuilder(column: $table.body, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get savedAt =>
-      $composableBuilder(column: $table.savedAt, builder: (column) => column);
+  GeneratedColumn<DateTime> get savedAt => $composableBuilder(column: $table.savedAt, builder: (column) => column);
 
   $$PoemsTableAnnotationComposer get poemId {
     final $$PoemsTableAnnotationComposer composer = $composerBuilder(
@@ -2718,19 +2095,13 @@ class $$PoemVersionsTableAnnotationComposer
       getCurrentColumn: (t) => t.poemId,
       referencedTable: $db.poems,
       getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$PoemsTableAnnotationComposer(
-            $db: $db,
-            $table: $db.poems,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
+      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) => $$PoemsTableAnnotationComposer(
+        $db: $db,
+        $table: $db.poems,
+        $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+        joinBuilder: joinBuilder,
+        $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
+      ),
     );
     return composer;
   }
@@ -2756,77 +2127,39 @@ class $$PoemVersionsTableTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $$PoemVersionsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$PoemVersionsTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$PoemVersionsTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                Value<String> poemId = const Value.absent(),
-                Value<String> title = const Value.absent(),
-                Value<String> body = const Value.absent(),
-                Value<DateTime> savedAt = const Value.absent(),
-              }) => PoemVersionsCompanion(
-                id: id,
-                poemId: poemId,
-                title: title,
-                body: body,
-                savedAt: savedAt,
-              ),
-          createCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                required String poemId,
-                required String title,
-                required String body,
-                required DateTime savedAt,
-              }) => PoemVersionsCompanion.insert(
-                id: id,
-                poemId: poemId,
-                title: title,
-                body: body,
-                savedAt: savedAt,
-              ),
-          withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable<$PoemVersionsTable, PoemVersion>(table),
-                  $$PoemVersionsTableReferences(db, table, e),
-                ),
-              )
-              .toList(),
+          createFilteringComposer: () => $$PoemVersionsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () => $$PoemVersionsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () => $$PoemVersionsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<String> poemId = const Value.absent(),
+            Value<String> title = const Value.absent(),
+            Value<String> body = const Value.absent(),
+            Value<DateTime> savedAt = const Value.absent(),
+          }) => PoemVersionsCompanion(id: id, poemId: poemId, title: title, body: body, savedAt: savedAt),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required String poemId,
+            required String title,
+            required String body,
+            required DateTime savedAt,
+          }) => PoemVersionsCompanion.insert(id: id, poemId: poemId, title: title, body: body, savedAt: savedAt),
+          withReferenceMapper: (p0) =>
+              p0.map((e) => (e.readTable<$PoemVersionsTable, PoemVersion>(table), $$PoemVersionsTableReferences(db, table, e))).toList(),
           prefetchHooksCallback: ({poemId = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [],
               addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
+                  <T extends TableManagerState<dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic>>(
+                    state,
+                  ) {
                     if (poemId) {
                       state = state.withJoin(
                         currentTable: table,
                         currentColumn: table.poemId,
-                        referencedTable: $$PoemVersionsTableReferences
-                            ._poemIdTable(db),
-                        referencedColumn: $$PoemVersionsTableReferences
-                            ._poemIdTable(db)
-                            .id,
+                        referencedTable: $$PoemVersionsTableReferences._poemIdTable(db),
+                        referencedColumn: $$PoemVersionsTableReferences._poemIdTable(db).id,
                       ) as T;
                     }
 
@@ -2855,21 +2188,10 @@ typedef $$PoemVersionsTableProcessedTableManager =
       PoemVersion,
       PrefetchHooks Function({bool poemId})
     >;
-typedef $$AppSettingsTableCreateCompanionBuilder =
-    AppSettingsCompanion Function({
-      required String key,
-      required String value,
-      Value<int> rowid,
-    });
-typedef $$AppSettingsTableUpdateCompanionBuilder =
-    AppSettingsCompanion Function({
-      Value<String> key,
-      Value<String> value,
-      Value<int> rowid,
-    });
+typedef $$AppSettingsTableCreateCompanionBuilder = AppSettingsCompanion Function({required String key, required String value, Value<int> rowid});
+typedef $$AppSettingsTableUpdateCompanionBuilder = AppSettingsCompanion Function({Value<String> key, Value<String> value, Value<int> rowid});
 
-class $$AppSettingsTableFilterComposer
-    extends Composer<_$AppDatabase, $AppSettingsTable> {
+class $$AppSettingsTableFilterComposer extends Composer<_$AppDatabase, $AppSettingsTable> {
   $$AppSettingsTableFilterComposer({
     required super.$db,
     required super.$table,
@@ -2877,19 +2199,12 @@ class $$AppSettingsTableFilterComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnFilters<String> get key => $composableBuilder(
-    column: $table.key,
-    builder: (column) => ColumnFilters(column),
-  );
+  ColumnFilters<String> get key => $composableBuilder(column: $table.key, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get value => $composableBuilder(
-    column: $table.value,
-    builder: (column) => ColumnFilters(column),
-  );
+  ColumnFilters<String> get value => $composableBuilder(column: $table.value, builder: (column) => ColumnFilters(column));
 }
 
-class $$AppSettingsTableOrderingComposer
-    extends Composer<_$AppDatabase, $AppSettingsTable> {
+class $$AppSettingsTableOrderingComposer extends Composer<_$AppDatabase, $AppSettingsTable> {
   $$AppSettingsTableOrderingComposer({
     required super.$db,
     required super.$table,
@@ -2897,19 +2212,12 @@ class $$AppSettingsTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnOrderings<String> get key => $composableBuilder(
-    column: $table.key,
-    builder: (column) => ColumnOrderings(column),
-  );
+  ColumnOrderings<String> get key => $composableBuilder(column: $table.key, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get value => $composableBuilder(
-    column: $table.value,
-    builder: (column) => ColumnOrderings(column),
-  );
+  ColumnOrderings<String> get value => $composableBuilder(column: $table.value, builder: (column) => ColumnOrderings(column));
 }
 
-class $$AppSettingsTableAnnotationComposer
-    extends Composer<_$AppDatabase, $AppSettingsTable> {
+class $$AppSettingsTableAnnotationComposer extends Composer<_$AppDatabase, $AppSettingsTable> {
   $$AppSettingsTableAnnotationComposer({
     required super.$db,
     required super.$table,
@@ -2917,11 +2225,9 @@ class $$AppSettingsTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<String> get key =>
-      $composableBuilder(column: $table.key, builder: (column) => column);
+  GeneratedColumn<String> get key => $composableBuilder(column: $table.key, builder: (column) => column);
 
-  GeneratedColumn<String> get value =>
-      $composableBuilder(column: $table.value, builder: (column) => column);
+  GeneratedColumn<String> get value => $composableBuilder(column: $table.value, builder: (column) => column);
 }
 
 class $$AppSettingsTableTableManager
@@ -2935,10 +2241,7 @@ class $$AppSettingsTableTableManager
           $$AppSettingsTableAnnotationComposer,
           $$AppSettingsTableCreateCompanionBuilder,
           $$AppSettingsTableUpdateCompanionBuilder,
-          (
-            AppSetting,
-            BaseReferences<_$AppDatabase, $AppSettingsTable, AppSetting>,
-          ),
+          (AppSetting, BaseReferences<_$AppDatabase, $AppSettingsTable, AppSetting>),
           AppSetting,
           PrefetchHooks Function()
         > {
@@ -2947,37 +2250,20 @@ class $$AppSettingsTableTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $$AppSettingsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$AppSettingsTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$AppSettingsTableAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () => $$AppSettingsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () => $$AppSettingsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () => $$AppSettingsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
             Value<String> key = const Value.absent(),
             Value<String> value = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) => AppSettingsCompanion(key: key, value: value, rowid: rowid),
-          createCompanionCallback:
-              ({
-                required String key,
-                required String value,
-                Value<int> rowid = const Value.absent(),
-              }) => AppSettingsCompanion.insert(
-                key: key,
-                value: value,
-                rowid: rowid,
-              ),
+          createCompanionCallback: ({required String key, required String value, Value<int> rowid = const Value.absent()}) =>
+              AppSettingsCompanion.insert(key: key, value: value, rowid: rowid),
           withReferenceMapper: (p0) => p0
               .map(
-                (e) => (
-                  e.readTable<$AppSettingsTable, AppSetting>(table),
-                  BaseReferences<_$AppDatabase, $AppSettingsTable, AppSetting>(
-                    db,
-                    table,
-                    e,
-                  ),
-                ),
+                (e) =>
+                    (e.readTable<$AppSettingsTable, AppSetting>(table), BaseReferences<_$AppDatabase, $AppSettingsTable, AppSetting>(db, table, e)),
               )
               .toList(),
           prefetchHooksCallback: null,
@@ -2995,10 +2281,7 @@ typedef $$AppSettingsTableProcessedTableManager =
       $$AppSettingsTableAnnotationComposer,
       $$AppSettingsTableCreateCompanionBuilder,
       $$AppSettingsTableUpdateCompanionBuilder,
-      (
-        AppSetting,
-        BaseReferences<_$AppDatabase, $AppSettingsTable, AppSetting>,
-      ),
+      (AppSetting, BaseReferences<_$AppDatabase, $AppSettingsTable, AppSetting>),
       AppSetting,
       PrefetchHooks Function()
     >;
@@ -3006,12 +2289,8 @@ typedef $$AppSettingsTableProcessedTableManager =
 class $AppDatabaseManager {
   final _$AppDatabase _db;
   $AppDatabaseManager(this._db);
-  $$PoemsTableTableManager get poems =>
-      $$PoemsTableTableManager(_db, _db.poems);
-  $$PoemCategoriesTableTableManager get poemCategories =>
-      $$PoemCategoriesTableTableManager(_db, _db.poemCategories);
-  $$PoemVersionsTableTableManager get poemVersions =>
-      $$PoemVersionsTableTableManager(_db, _db.poemVersions);
-  $$AppSettingsTableTableManager get appSettings =>
-      $$AppSettingsTableTableManager(_db, _db.appSettings);
+  $$PoemsTableTableManager get poems => $$PoemsTableTableManager(_db, _db.poems);
+  $$PoemCategoriesTableTableManager get poemCategories => $$PoemCategoriesTableTableManager(_db, _db.poemCategories);
+  $$PoemVersionsTableTableManager get poemVersions => $$PoemVersionsTableTableManager(_db, _db.poemVersions);
+  $$AppSettingsTableTableManager get appSettings => $$AppSettingsTableTableManager(_db, _db.appSettings);
 }

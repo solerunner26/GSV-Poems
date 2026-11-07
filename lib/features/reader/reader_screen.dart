@@ -441,7 +441,7 @@ class _Tool extends StatelessWidget {
                       label,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: primary ? c.onPrimary : c.primary),
+                      style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: primary ? c.onPrimary : c.primary),
                     ),
                   ],
                 ),

@@ -17,9 +17,11 @@ String poemTitle(Poem p) {
 }
 
 void openPoem(BuildContext context, List<Poem> list, int index) {
-  Navigator.of(context).push(MaterialPageRoute<void>(
-    builder: (_) => ReaderScreen(ids: [for (final p in list) p.id], initialIndex: index),
-  ));
+  Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (_) => ReaderScreen(ids: [for (final p in list) p.id], initialIndex: index),
+    ),
+  );
 }
 
 /// One poem row: category tile, title in the poem's script, date · category · words.
@@ -50,26 +52,40 @@ class PoemTile extends ConsumerWidget {
         onTap: onTap,
         padding: const EdgeInsets.fromLTRB(12, 10, 6, 10),
         radius: 18,
-        child: Row(children: [
-          if (showNumber && poem.number != null)
-            SizedBox(
-              width: 46,
-              child: Text('#${localDigits(poem.number!, lang)}',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: c.accentText)),
-            )
-          else
-            Padding(padding: const EdgeInsets.only(right: 10), child: Icon3D(cat?.iconKey ?? 'other', size: 48)),
-          Expanded(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(poemTitle(poem),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontFamily: poemFont(poem.lang), fontSize: 18, fontWeight: FontWeight.w600, color: c.ink)),
-              Text(meta, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 14, color: c.mute)),
-            ]),
-          ),
-          trailing ?? const SizedBox(width: 8),
-        ]),
+        child: Row(
+          children: [
+            if (showNumber && poem.number != null)
+              SizedBox(
+                width: 46,
+                child: Text(
+                  '#${localDigits(poem.number!, lang)}',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: c.accentText),
+                ),
+              )
+            else
+              Padding(padding: const EdgeInsets.only(right: 10), child: Icon3D(cat?.iconKey ?? 'other', size: 48)),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    poemTitle(poem),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontFamily: poemFont(poem.lang), fontSize: 18, fontWeight: FontWeight.w600, color: c.ink),
+                  ),
+                  Text(
+                    meta,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 14, color: c.mute),
+                  ),
+                ],
+              ),
+            ),
+            trailing ?? const SizedBox(width: 8),
+          ],
+        ),
       ),
     );
   }

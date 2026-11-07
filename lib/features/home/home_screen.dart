@@ -402,7 +402,7 @@ class _FestivalAlert extends ConsumerWidget {
           ),
           child: Row(
             children: [
-              Icon3D(first.festival.icon, size: 54),
+              Icon3D(first.festival.icon, size: 56),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -555,7 +555,7 @@ class _FavCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon3D('star', size: 34),
+            const Icon3D('star', size: 36),
             const SizedBox(height: 4),
             Text(
               poemTitle(poem),

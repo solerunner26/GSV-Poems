@@ -169,72 +169,82 @@ class _PinScreenState extends ConsumerState<PinScreen> {
             : Center(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-                  child: Column(children: [
-                    const Icon3D('lotus', size: 96, well: true),
-                    const SizedBox(height: 14),
-                    Text(context.t(title),
+                  child: Column(
+                    children: [
+                      const Icon3D('lotus', size: 96, well: true),
+                      const SizedBox(height: 14),
+                      Text(
+                        context.t(title),
                         textAlign: TextAlign.center,
-                        style: TextStyle(fontFamily: 'NotoSerifGujarati', fontSize: 26, fontWeight: FontWeight.w700, color: c.ink)),
-                    const SizedBox(height: 4),
-                    Text(context.t(sub), style: TextStyle(fontSize: 16, color: c.mute)),
-                    const SizedBox(height: 22),
-                    Semantics(
-                      liveRegion: true,
-                      label: '${_digits.length} / 4',
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: List.generate(4, (i) {
-                          final on = i < _digits.length;
-                          return AnimatedContainer(
-                            duration: const Duration(milliseconds: 120),
-                            margin: const EdgeInsets.symmetric(horizontal: 11),
-                            width: 18,
-                            height: 18,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: on ? c.primary : Colors.transparent,
-                              border: Border.all(color: on ? c.primary : c.accent, width: 2),
-                            ),
-                          );
-                        }),
+                        style: TextStyle(fontFamily: 'NotoSerifGujarati', fontSize: 26, fontWeight: FontWeight.w700, color: c.ink),
                       ),
-                    ),
-                    SizedBox(
-                      height: 44,
-                      child: Center(
-                        child: _error == null
-                            ? (_busy ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5)) : null)
-                            : Text(context.t(_error!),
-                                textAlign: TextAlign.center, style: const TextStyle(color: GsvColors.bad, fontSize: 16, fontWeight: FontWeight.w600)),
+                      const SizedBox(height: 4),
+                      Text(context.t(sub), style: TextStyle(fontSize: 16, color: c.mute)),
+                      const SizedBox(height: 22),
+                      Semantics(
+                        liveRegion: true,
+                        label: '${_digits.length} / 4',
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: List.generate(4, (i) {
+                            final on = i < _digits.length;
+                            return AnimatedContainer(
+                              duration: const Duration(milliseconds: 120),
+                              margin: const EdgeInsets.symmetric(horizontal: 11),
+                              width: 18,
+                              height: 18,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: on ? c.primary : Colors.transparent,
+                                border: Border.all(color: on ? c.primary : c.accent, width: 2),
+                              ),
+                            );
+                          }),
+                        ),
                       ),
-                    ),
-                    SizedBox(
-                      width: 300,
-                      child: GridView.count(
-                        crossAxisCount: 3,
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        mainAxisSpacing: 14,
-                        crossAxisSpacing: 26,
-                        children: [
-                          for (final d in [1, 2, 3, 4, 5, 6, 7, 8, 9]) _Key(label: localDigits(d, lang), semantic: '$d', onTap: () => _press(d)),
-                          if (_bioAvailable)
-                            _IconKey(icon: 'fingerprint', label: context.t('unlock_fingerprint'), onTap: _tryBiometric)
-                          else
-                            const SizedBox.shrink(),
-                          _Key(label: localDigits(0, lang), semantic: '0', onTap: () => _press(0)),
-                          _IconKey(icon: 'undo', label: context.t('delete_digit'), onTap: _back),
-                        ],
+                      SizedBox(
+                        height: 44,
+                        child: Center(
+                          child: _error == null
+                              ? (_busy ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5)) : null)
+                              : Text(
+                                  context.t(_error!),
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(color: GsvColors.bad, fontSize: 16, fontWeight: FontWeight.w600),
+                                ),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 18),
-                    if (step == _Step.enter)
-                      TextButton(
-                        onPressed: _forgot,
-                        style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
-                        child: Text(context.t('pin_forgot'), style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: c.primary)),
+                      SizedBox(
+                        width: 300,
+                        child: GridView.count(
+                          crossAxisCount: 3,
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          mainAxisSpacing: 14,
+                          crossAxisSpacing: 26,
+                          children: [
+                            for (final d in [1, 2, 3, 4, 5, 6, 7, 8, 9]) _Key(label: localDigits(d, lang), semantic: '$d', onTap: () => _press(d)),
+                            if (_bioAvailable)
+                              _IconKey(icon: 'fingerprint', label: context.t('unlock_fingerprint'), onTap: _tryBiometric)
+                            else
+                              const SizedBox.shrink(),
+                            _Key(label: localDigits(0, lang), semantic: '0', onTap: () => _press(0)),
+                            _IconKey(icon: 'undo', label: context.t('delete_digit'), onTap: _back),
+                          ],
+                        ),
                       ),
-                  ]),
+                      const SizedBox(height: 18),
+                      if (step == _Step.enter)
+                        TextButton(
+                          onPressed: _forgot,
+                          style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
+                          child: Text(
+                            context.t('pin_forgot'),
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: c.primary),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               ),
       ),
@@ -262,7 +272,12 @@ class _Key extends StatelessWidget {
         child: InkWell(
           customBorder: const CircleBorder(),
           onTap: onTap,
-          child: Center(child: Text(label, style: TextStyle(fontSize: 30, fontWeight: FontWeight.w600, color: c.ink))),
+          child: Center(
+            child: Text(
+              label,
+              style: TextStyle(fontSize: 30, fontWeight: FontWeight.w600, color: c.ink),
+            ),
+          ),
         ),
       ),
     );
@@ -276,9 +291,12 @@ class _IconKey extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Semantics(
-        button: true,
-        label: label,
-        excludeSemantics: true,
-        child: InkResponse(onTap: onTap, child: Center(child: Icon3D(icon, size: 58))),
-      );
+    button: true,
+    label: label,
+    excludeSemantics: true,
+    child: InkResponse(
+      onTap: onTap,
+      child: Center(child: Icon3D(icon, size: 58)),
+    ),
+  );
 }

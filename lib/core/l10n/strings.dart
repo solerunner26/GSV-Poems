@@ -84,6 +84,12 @@ const Map<String, List<String>> _t = {
   'stop': ['બંધ', 'रोकें', 'Stop'],
   'favorite': ['મનગમતી', 'पसंदीदा', 'Favourite'],
   'share': ['મોકલો', 'भेजें', 'Share'],
+  'splash_photo': ['શરૂઆતનો ફોટો', 'शुरुआत की फ़ोटो', 'Opening photo'],
+  'splash_photo_original': ['મૂળ ફોટો', 'मूल फ़ोटो', 'Original photo'],
+  'splash_photo_custom': ['પસંદ કરેલો ફોટો', 'चुनी हुई फ़ोटो', 'Chosen photo'],
+  'splash_photo_pick': ['નવો ફોટો પસંદ કરો', 'नई फ़ोटो चुनें', 'Choose a new photo'],
+  'splash_photo_reset': ['મૂળ ફોટો પાછો મૂકો', 'मूल फ़ोटो वापस लगाएँ', 'Use the original photo'],
+  'splash_photo_saved': ['આગલી વખતે એપ ખોલશો ત્યારે દેખાશે', 'अगली बार ऐप खोलने पर दिखेगी', 'Shows the next time the app opens'],
   'moon': ['ચંદ્ર', 'चंद्र', 'Moon'],
   'moon_waxing': ['વધતો ચંદ્ર', 'बढ़ता चंद्र', 'waxing'],
   'moon_waning': ['ઘટતો ચંદ્ર', 'घटता चंद्र', 'waning'],
@@ -281,10 +287,10 @@ const Map<String, List<String>> _t = {
   'backup_done': ['બેકઅપ થઈ ગયો', 'बैकअप हो गया', 'Backup done'],
   'backup_last': ['છેલ્લો બેકઅપ', 'पिछला बैकअप', 'Last backup'],
   'backup_never': ['હજી બેકઅપ નથી', 'अभी कोई बैकअप नहीं', 'No backup yet'],
-  'backup_nightly': ['દરરોજ રાત્રે 11:59 વાગ્યે આપમેળે', 'हर रात 11:59 बजे अपने-आप', 'Every night at 11:59 PM by itself'],
+  'backup_nightly': ['દરરોજ રાત્રે ૧૧:૫૯ વાગ્યે આપમેળે', 'हर रात ११:५९ बजे अपने-आप', 'Every night at 11:59 PM by itself'],
   'backup_on_phone': ['ફોનમાં બેકઅપ', 'फ़ोन में बैकअप', 'backups on the phone'],
   'backup_safe': ['બધી કવિતા સુરક્ષિત છે', 'सभी कविताएँ सुरक्षित हैं', 'All poems are safe'],
-  'backup_locked': ['તાળાબંધ (encrypted)', 'ताला-बंद (encrypted)', 'Encrypted'],
+  'backup_locked': ['તાળાબંધ', 'ताला-बंद', 'Encrypted'],
   'backup_whatsapp': ['WhatsApp પર મોકલો', 'WhatsApp पर भेजें', 'Send to WhatsApp'],
   'backup_share_text': [
     'GSV Poems બેકઅપ. ખોલવા Recovery key જોઈશે.',
@@ -442,9 +448,9 @@ const Map<String, List<String>> helpText = {
     'The month is at the top; below are the chosen day\'s Panchang and Choghadiya. A coloured dot marks a festival or vrat day. "Today" jumps back to today; "Change" sets the place.',
   ],
   'settings': [
-    'થીમ, ભાષા, અક્ષરનું કદ, PIN અને સ્થળ અહીં બદલો. લીલા ખાનામાં બેકઅપ છે: દરરોજ રાત્રે 11:59 વાગ્યે આપમેળે થાય છે. "હમણાં બેકઅપ લો" દબાવી ગમે ત્યારે લઈ શકાય. "WhatsApp પર મોકલો" થી બેકઅપ ફાઈલ કોઈ પણ ચેટમાં મોકલો. નવા ફોનમાં "બેકઅપમાંથી પાછું લાવો" દબાવી એ ફાઈલ પસંદ કરો અને Recovery key લખો.',
-    'थीम, भाषा, अक्षर का आकार, PIN और स्थान यहाँ बदलें। हरे खाने में बैकअप है: हर रात 11:59 बजे अपने-आप होता है। "अभी बैकअप लें" से कभी भी ले सकते हैं। "WhatsApp पर भेजें" से बैकअप फ़ाइल किसी भी चैट में भेजें। नए फ़ोन में "बैकअप से वापस लाएँ" दबाकर वह फ़ाइल चुनें और Recovery key लिखें।',
-    'Change theme, language, text size, PIN and place here. The green box is the backup: it runs every night at 11:59 PM by itself. "Back up now" takes one any time. "Send to WhatsApp" sends the backup file to any chat. On a new phone, tap "Restore from a backup", pick that file and type the recovery key.',
+    'થીમ, ભાષા, અક્ષરનું કદ, PIN અને સ્થળ અહીં બદલો. બેકઅપના ખાનામાં બધું છે: બેકઅપ દરરોજ રાત્રે ૧૧:૫૯ વાગ્યે આપમેળે થાય છે. "હમણાં બેકઅપ લો" દબાવી ગમે ત્યારે લઈ શકાય. "WhatsApp પર મોકલો" થી બેકઅપ ફાઈલ કોઈ પણ ચેટમાં મોકલો. નવા ફોનમાં "બેકઅપમાંથી પાછું લાવો" દબાવી એ ફાઈલ પસંદ કરો અને Recovery key લખો.',
+    'थीम, भाषा, अक्षर का आकार, PIN और स्थान यहाँ बदलें। बैकअप वाले खाने में सब है: बैकअप हर रात ११:५९ बजे अपने-आप होता है। "अभी बैकअप लें" से कभी भी ले सकते हैं। "WhatsApp पर भेजें" से बैकअप फ़ाइल किसी भी चैट में भेजें। नए फ़ोन में "बैकअप से वापस लाएँ" दबाकर वह फ़ाइल चुनें और Recovery key लिखें।',
+    'Change theme, language, text size, PIN and place here. The backup card shows it all: a backup runs every night at 11:59 PM by itself. "Back up now" takes one any time. "Send to WhatsApp" sends the backup file to any chat. On a new phone, tap "Restore from a backup", pick that file and type the recovery key.',
   ],
 };
 

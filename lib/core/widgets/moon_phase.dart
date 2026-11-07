@@ -17,10 +17,10 @@ class MoonPhase extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Semantics(
-        label: semanticLabel,
-        image: true,
-        child: CustomPaint(size: Size.square(size), painter: _MoonPainter(elongation % 360, glow)),
-      );
+    label: semanticLabel,
+    image: true,
+    child: CustomPaint(size: Size.square(size), painter: _MoonPainter(elongation % 360, glow)),
+  );
 }
 
 class _MoonPainter extends CustomPainter {

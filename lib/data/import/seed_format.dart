@@ -8,21 +8,21 @@ import 'keep_parser.dart';
 const seedAsset = 'assets/poems/seed.json';
 
 String encodeSeed(List<ImportedPoem> poems) => const JsonEncoder.withIndent(' ').convert({
-      'format': 1,
-      'poems': [
-        for (final p in poems)
-          {
-            'key': p.sourceKey,
-            'collection': p.collection,
-            'number': p.number,
-            'title': p.title,
-            'body': p.body,
-            'lang': p.lang.name,
-            'created': p.createdAt.toIso8601String(),
-            'updated': p.updatedAt.toIso8601String(),
-          },
-      ],
-    });
+  'format': 1,
+  'poems': [
+    for (final p in poems)
+      {
+        'key': p.sourceKey,
+        'collection': p.collection,
+        'number': p.number,
+        'title': p.title,
+        'body': p.body,
+        'lang': p.lang.name,
+        'created': p.createdAt.toIso8601String(),
+        'updated': p.updatedAt.toIso8601String(),
+      },
+  ],
+});
 
 List<ImportedPoem> decodeSeed(String json) {
   final m = jsonDecode(json) as Map<String, dynamic>;
@@ -41,4 +41,3 @@ List<ImportedPoem> decodeSeed(String json) {
       ),
   ];
 }
-

@@ -497,6 +497,49 @@ Path _p(String d) => _pathCache.putIfAbsent(d, () => d.isEmpty ? Path() : parseS
 
 Color _mix(Color a, Color b, double t) => Color.lerp(a, b, t)!;
 
+/// Where and how large a symbol sits on the tile (tile units; the tile face
+/// spans 7..57 × 6..56).
+typedef GlyphFit = ({double dx, double dy, double scale});
+
+final _fitCache = <IconArt, GlyphFit>{};
+
+/// Measures a symbol's ink (filled shapes plus the width of its strokes) and
+/// returns the transform that centres it on the tile face at a common optical
+/// size: its longer side becomes 30 units, nudged up slightly to balance the
+/// extrusion drawn below it.
+GlyphFit _glyphFit(IconArt art, Path f, Path s, Path c) => _fitCache.putIfAbsent(art, () {
+  Rect? box;
+  void add(Path p, double pad) {
+    if (p.computeMetrics().isEmpty) return;
+    final b = p.getBounds().inflate(pad);
+    box = box == null ? b : box!.expandToInclude(b);
+  }
+
+  add(f, 0);
+  add(s, 1.35);
+  add(c, 0.75);
+  final b = box ?? const Rect.fromLTWH(0, 0, 24, 24);
+  final longest = b.width > b.height ? b.width : b.height;
+  final scale = (30 / (longest <= 0 ? 24 : longest)).clamp(1.15, 1.8).toDouble();
+  const cx = 32.0, cy = 31.0 - 0.6;
+  return (dx: cx - b.center.dx * scale, dy: cy - b.center.dy * scale, scale: scale);
+});
+
+/// Exposed for tests: the glyph's ink box on the tile after fitting.
+Rect debugGlyphBoxOnTile(String icon) {
+  final art = iconArt[icon]!;
+  final f = _p(art.f), s = _p(art.s), c = _p(art.c);
+  final fit = _glyphFit(art, f, s, c);
+  Rect? box;
+  for (final (p, pad) in [(f, 0.0), (s, 1.35), (c, 0.75)]) {
+    if (p.computeMetrics().isEmpty) continue;
+    final b = p.getBounds().inflate(pad);
+    box = box == null ? b : box.expandToInclude(b);
+  }
+  final b = box!;
+  return Rect.fromLTRB(b.left * fit.scale + fit.dx, b.top * fit.scale + fit.dy, b.right * fit.scale + fit.dx, b.bottom * fit.scale + fit.dy);
+}
+
 /// Part of [paths] from the start up to [fraction] of their total length.
 Path contourUpTo(List<Path> paths, double fraction) {
   final out = Path();
@@ -608,10 +651,13 @@ class _Icon3DPainter extends CustomPainter {
         ).createShader(tileRect),
     );
 
-    canvas.translate(14, 13);
-    canvas.scale(1.5);
-    final k = unit * 1.5; // pixels per glyph unit
     final f = _p(art.f), s = _p(art.s), h = _p(art.h), c = _p(art.c);
+    // Every symbol is measured and set optically centred on the tile at one
+    // shared size, whatever room its drawing takes inside its 24-unit box.
+    final fit = _glyphFit(art, f, s, c);
+    canvas.translate(fit.dx, fit.dy);
+    canvas.scale(fit.scale);
+    final k = unit * fit.scale; // pixels per glyph unit
     final extr = _mix(base, black, 0.5), carve = _mix(base, black, 0.3);
     Paint stroke(double w) => Paint()
       ..style = PaintingStyle.stroke

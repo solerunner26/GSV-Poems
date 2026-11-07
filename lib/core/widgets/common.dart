@@ -78,12 +78,15 @@ class PrimaryButton extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      if (icon != null) ...[Icon3D(icon!, size: 40), const SizedBox(width: 6)],
+                      if (icon != null) ...[Icon3D(icon!, size: 36), const SizedBox(width: 6)],
                       Flexible(
-                        child: Text(
-                          label,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(color: c.onPrimary, fontSize: 19, fontWeight: FontWeight.w700),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            label,
+                            maxLines: 1,
+                            style: TextStyle(color: c.onPrimary, fontSize: 18, fontWeight: FontWeight.w700),
+                          ),
                         ),
                       ),
                     ],

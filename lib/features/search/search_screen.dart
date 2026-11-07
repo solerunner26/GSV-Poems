@@ -72,67 +72,76 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 760),
-          child: Column(children: [
-            ScreenHeader(title: context.t('nav_search'), actions: const [HelpButton('search')]),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 18),
-              child: TextField(
-                controller: _q,
-                textInputAction: TextInputAction.search,
-                style: TextStyle(fontSize: 20, color: c.ink),
-                decoration: InputDecoration(
-                  hintText: context.t('search_hint'),
-                  prefixIcon: const Padding(padding: EdgeInsets.all(6), child: Icon3D('search', size: 40)),
-                  suffixIcon: _q.text.isEmpty
-                      ? null
-                      : IconButton(tooltip: context.t('close'), icon: const Icon(Icons.close_rounded), onPressed: _q.clear),
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            SizedBox(
-              height: 48,
-              child: ListView(
+          child: Column(
+            children: [
+              ScreenHeader(title: context.t('nav_search'), actions: const [HelpButton('search')]),
+              Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 18),
-                scrollDirection: Axis.horizontal,
-                children: [
-                  for (final (code, key) in chips)
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: ChoiceChip(
-                        label: Text(code == null ? context.t(key) : tr(key, langFromCode(code)), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                        selected: _lang == code,
-                        showCheckmark: false,
-                        selectedColor: c.primary.withValues(alpha: 0.18),
-                        onSelected: (_) {
-                          setState(() => _lang = code);
-                          _run();
-                        },
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  _searched ? '${localDigits(_results.length, lang)} ${context.t('found')}' : (_q.text.isEmpty ? context.t('cross_script') : context.t('search_min3')),
-                  style: TextStyle(fontSize: 15, color: c.mute),
+                child: TextField(
+                  controller: _q,
+                  textInputAction: TextInputAction.search,
+                  style: TextStyle(fontSize: 20, color: c.ink),
+                  decoration: InputDecoration(
+                    hintText: context.t('search_hint'),
+                    prefixIcon: const Padding(padding: EdgeInsets.all(6), child: Icon3D('search', size: 36)),
+                    suffixIcon: _q.text.isEmpty
+                        ? null
+                        : IconButton(tooltip: context.t('close'), icon: const Icon(Icons.close_rounded), onPressed: _q.clear),
+                  ),
                 ),
               ),
-            ),
-            Expanded(
-              child: _searched && _results.isEmpty
-                  ? ListView(children: [EmptyState(icon: 'search', text: context.t('no_results'))])
-                  : ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(18, 4, 18, 140),
-                      itemCount: _results.length,
-                      itemBuilder: (_, i) => _Result(poem: _results[i], query: _q.text, onTap: () => openPoem(context, _results, i)),
-                    ),
-            ),
-          ]),
+              const SizedBox(height: 10),
+              SizedBox(
+                height: 48,
+                child: ListView(
+                  padding: const EdgeInsets.symmetric(horizontal: 18),
+                  scrollDirection: Axis.horizontal,
+                  children: [
+                    for (final (code, key) in chips)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: ChoiceChip(
+                          label: Text(
+                            code == null ? context.t(key) : tr(key, langFromCode(code)),
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                          ),
+                          selected: _lang == code,
+                          showCheckmark: false,
+                          selectedColor: c.primary.withValues(alpha: 0.18),
+                          onSelected: (_) {
+                            setState(() => _lang = code);
+                            _run();
+                          },
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    _searched
+                        ? '${localDigits(_results.length, lang)} ${context.t('found')}'
+                        : (_q.text.isEmpty ? context.t('cross_script') : context.t('search_min3')),
+                    style: TextStyle(fontSize: 15, color: c.mute),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: _searched && _results.isEmpty
+                    ? ListView(
+                        children: [EmptyState(icon: 'search', text: context.t('no_results'))],
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.fromLTRB(18, 4, 18, 140),
+                        itemCount: _results.length,
+                        itemBuilder: (_, i) => _Result(poem: _results[i], query: _q.text, onTap: () => openPoem(context, _results, i)),
+                      ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -156,31 +165,46 @@ class _Result extends StatelessWidget {
     final base = TextStyle(fontFamily: font, fontSize: 16, height: 1.6, color: c.mute);
     final snippet = at < 0
         ? TextSpan(text: hitLine, style: base)
-        : TextSpan(style: base, children: [
-            TextSpan(text: hitLine.substring(0, at)),
-            TextSpan(
-              text: hitLine.substring(at, at + q.length),
-              style: TextStyle(backgroundColor: c.accent.withValues(alpha: 0.35), color: c.ink, fontWeight: FontWeight.w700),
-            ),
-            TextSpan(text: hitLine.substring(at + q.length)),
-          ]);
+        : TextSpan(
+            style: base,
+            children: [
+              TextSpan(text: hitLine.substring(0, at)),
+              TextSpan(
+                text: hitLine.substring(at, at + q.length),
+                style: TextStyle(backgroundColor: c.accent.withValues(alpha: 0.35), color: c.ink, fontWeight: FontWeight.w700),
+              ),
+              TextSpan(text: hitLine.substring(at + q.length)),
+            ],
+          );
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: GsvCard(
         onTap: onTap,
         radius: 18,
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [
-            Expanded(
-              child: Text(poemTitle(poem),
-                  maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: font, fontSize: 18, fontWeight: FontWeight.w700, color: c.ink)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    poemTitle(poem),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontFamily: font, fontSize: 18, fontWeight: FontWeight.w700, color: c.ink),
+                  ),
+                ),
+                if (poem.number != null)
+                  Text(
+                    '#${localDigits(poem.number!, context.lang)}',
+                    style: TextStyle(fontSize: 13, color: c.accentText, fontWeight: FontWeight.w700),
+                  ),
+              ],
             ),
-            if (poem.number != null)
-              Text('#${localDigits(poem.number!, context.lang)}', style: TextStyle(fontSize: 13, color: c.accentText, fontWeight: FontWeight.w700)),
-          ]),
-          const SizedBox(height: 2),
-          Text.rich(snippet, maxLines: 2, overflow: TextOverflow.ellipsis),
-        ]),
+            const SizedBox(height: 2),
+            Text.rich(snippet, maxLines: 2, overflow: TextOverflow.ellipsis),
+          ],
+        ),
       ),
     );
   }

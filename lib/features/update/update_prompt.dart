@@ -21,7 +21,11 @@ Future<void> checkForUpdate(BuildContext context, {bool quiet = true}) async {
     }
     return;
   }
-  await showDialog<void>(context: context, barrierDismissible: false, builder: (_) => _UpdateDialog(release: release, currentVersion: info.version));
+  await showDialog<void>(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) => _UpdateDialog(release: release, currentVersion: info.version),
+  );
 }
 
 class _UpdateDialog extends StatefulWidget {
@@ -68,34 +72,49 @@ class _UpdateDialogState extends State<_UpdateDialog> {
     return AlertDialog(
       icon: const Icon3D('download', size: 64),
       title: Text(context.t('update_title'), textAlign: TextAlign.center),
-      content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('${r.name}$mb', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: c.ink)),
-        Text('${context.t('update_current')}: ${widget.currentVersion}', style: TextStyle(fontSize: 14, color: c.mute)),
-        const SizedBox(height: 8),
-        Text(context.t('update_safe'), style: const TextStyle(fontSize: 16, height: 1.5)),
-        if (r.notes.trim().isNotEmpty) ...[
-          const SizedBox(height: 8),
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: 160),
-            child: SingleChildScrollView(child: Text(r.notes.trim(), style: TextStyle(fontSize: 14, color: c.mute))),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '${r.name}$mb',
+            style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: c.ink),
           ),
+          Text('${context.t('update_current')}: ${widget.currentVersion}', style: TextStyle(fontSize: 14, color: c.mute)),
+          const SizedBox(height: 8),
+          Text(context.t('update_safe'), style: const TextStyle(fontSize: 16, height: 1.5)),
+          if (r.notes.trim().isNotEmpty) ...[
+            const SizedBox(height: 8),
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 160),
+              child: SingleChildScrollView(
+                child: Text(r.notes.trim(), style: TextStyle(fontSize: 14, color: c.mute)),
+              ),
+            ),
+          ],
+          if (_progress != null) ...[
+            const SizedBox(height: 14),
+            LinearProgressIndicator(value: _progress == 0 ? null : _progress),
+            const SizedBox(height: 4),
+            Text('${context.t('update_downloading')} ${((_progress ?? 0) * 100).round()}%', style: TextStyle(fontSize: 14, color: c.mute)),
+          ],
+          if (_error != null) ...[
+            const SizedBox(height: 10),
+            Text('${context.t('update_failed')}\n$_error', style: const TextStyle(fontSize: 14, color: GsvColors.bad)),
+          ],
         ],
-        if (_progress != null) ...[
-          const SizedBox(height: 14),
-          LinearProgressIndicator(value: _progress == 0 ? null : _progress),
-          const SizedBox(height: 4),
-          Text('${context.t('update_downloading')} ${((_progress ?? 0) * 100).round()}%', style: TextStyle(fontSize: 14, color: c.mute)),
-        ],
-        if (_error != null) ...[
-          const SizedBox(height: 10),
-          Text('${context.t('update_failed')}\n$_error', style: const TextStyle(fontSize: 14, color: GsvColors.bad)),
-        ],
-      ]),
+      ),
       actions: [
         if (_progress == null)
-          TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(context.t('update_later'), style: const TextStyle(fontSize: 17))),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(context.t('update_later'), style: const TextStyle(fontSize: 17)),
+          ),
         if (_progress == null)
-          SizedBox(width: 180, child: PrimaryButton(label: context.t('update_now'), height: 52, onPressed: _update)),
+          SizedBox(
+            width: 180,
+            child: PrimaryButton(label: context.t('update_now'), height: 52, onPressed: _update),
+          ),
       ],
     );
   }

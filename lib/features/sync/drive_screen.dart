@@ -37,23 +37,23 @@ class SyncCoordinator {
   Future<bool> connected() async => (await ref.read(repoProvider).getSetting('driveEmail'))?.isNotEmpty ?? false;
 
   Future<SyncResult> run({String? typedKey}) => _running ??= () async {
-        final repo = ref.read(repoProvider);
-        try {
-          final drive = await ref.read(driveServiceProvider.future);
-          if (!await drive.signInQuietly()) {
-            await repo.setSetting('driveNeedsReconnect', '1');
-            throw StateError('Google Drive needs to be connected again');
-          }
-          final svc = SyncService(repo, ref.read(backupServiceProvider), drive);
-          final r = await svc.sync(typedKey: typedKey);
-          await repo.setSetting('driveNeedsReconnect', '');
-          return r;
-        } finally {
-          ref.invalidate(driveReconnectProvider);
-          _running = null;
-          ref.invalidate(backupStatusProvider);
-        }
-      }();
+    final repo = ref.read(repoProvider);
+    try {
+      final drive = await ref.read(driveServiceProvider.future);
+      if (!await drive.signInQuietly()) {
+        await repo.setSetting('driveNeedsReconnect', '1');
+        throw StateError('Google Drive needs to be connected again');
+      }
+      final svc = SyncService(repo, ref.read(backupServiceProvider), drive);
+      final r = await svc.sync(typedKey: typedKey);
+      await repo.setSetting('driveNeedsReconnect', '');
+      return r;
+    } finally {
+      ref.invalidate(driveReconnectProvider);
+      _running = null;
+      ref.invalidate(backupStatusProvider);
+    }
+  }();
 
   /// A quiet sync a little after an edit, when Drive is connected.
   void soon() {
@@ -97,15 +97,23 @@ class DriveReconnectNotice extends ConsumerWidget {
           onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const DriveScreen())),
           child: Container(
             padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), border: Border.all(color: c.alertBorder, width: 1.5)),
-            child: Row(children: [
-              const Icon3D('cloud', size: 48),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(context.t('drive_reconnect'), style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: c.ink)),
-              ),
-              Icon(Icons.chevron_right_rounded, color: c.accent),
-            ]),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: c.alertBorder, width: 1.5),
+            ),
+            child: Row(
+              children: [
+                const Icon3D('cloud', size: 48),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    context.t('drive_reconnect'),
+                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: c.ink),
+                  ),
+                ),
+                Icon(Icons.chevron_right_rounded, color: c.accent),
+              ],
+            ),
           ),
         ),
       ),
@@ -181,19 +189,19 @@ class _DriveScreenState extends ConsumerState<DriveScreen> {
   }
 
   Future<void> _connect() => _do(() async {
-        final drive = await ref.read(driveServiceProvider.future);
-        final email = await drive.connect();
-        await ref.read(repoProvider).setSetting('driveEmail', email);
-        await ref.read(repoProvider).setSetting('driveNeedsReconnect', '');
-        final r = await ref.read(syncProvider).run();
-        if (mounted) setState(() => _set(_describe(r), !r.needsKey));
-      });
+    final drive = await ref.read(driveServiceProvider.future);
+    final email = await drive.connect();
+    await ref.read(repoProvider).setSetting('driveEmail', email);
+    await ref.read(repoProvider).setSetting('driveNeedsReconnect', '');
+    final r = await ref.read(syncProvider).run();
+    if (mounted) setState(() => _set(_describe(r), !r.needsKey));
+  });
 
   Future<void> _syncNow({String? key}) => _do(() async {
-        final r = await ref.read(syncProvider).run(typedKey: key);
-        if (!mounted) return;
-        setState(() => _set(r.needsKey && key != null ? context.t('restore_wrong_key') : _describe(r), !r.needsKey));
-      });
+    final r = await ref.read(syncProvider).run(typedKey: key);
+    if (!mounted) return;
+    setState(() => _set(r.needsKey && key != null ? context.t('restore_wrong_key') : _describe(r), !r.needsKey));
+  });
 
   Future<void> _enterKey() async {
     final k = await askRecoveryKey(context, title: context.t('drive_needs_key'), body: context.t('drive_needs_key_body'));
@@ -201,10 +209,10 @@ class _DriveScreenState extends ConsumerState<DriveScreen> {
   }
 
   Future<void> _disconnect() => _do(() async {
-        final drive = await ref.read(driveServiceProvider.future);
-        await drive.disconnect();
-        await ref.read(repoProvider).setSetting('driveEmail', '');
-      });
+    final drive = await ref.read(driveServiceProvider.future);
+    await drive.disconnect();
+    await ref.read(repoProvider).setSetting('driveEmail', '');
+  });
 
   Future<void> _saveClientId() async {
     await ref.read(repoProvider).setSetting('driveClientId', _clientId.text.trim());
@@ -222,93 +230,132 @@ class _DriveScreenState extends ConsumerState<DriveScreen> {
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 680),
-            child: Column(children: [
-              ScreenHeader(back: true, title: context.t('drive_title')),
-              Expanded(
-                child: ListView(padding: const EdgeInsets.fromLTRB(18, 6, 18, 24), children: [
-                  GsvCard(
-                    child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      const Icon3D('cloud', size: 56),
-                      const SizedBox(width: 12),
-                      Expanded(child: Text(context.t('drive_intro'), style: const TextStyle(fontSize: 16, height: 1.55))),
-                    ]),
-                  ),
-                  const SizedBox(height: 14),
-                  GsvCard(
-                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Text(_email == null ? context.t('drive_not_connected') : '${context.t('drive_connected_as')}: $_email',
-                          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: c.ink)),
-                      Text('${context.t('drive_last_sync')}: ${last == null ? context.t('backup_never') : friendlyDate(context, last)}',
-                          style: TextStyle(fontSize: 15, color: c.mute)),
-                    ]),
-                  ),
-                  if (_needsKey) ...[
-                    const SizedBox(height: 12),
-                    Container(
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(color: c.alertBg, borderRadius: BorderRadius.circular(18), border: Border.all(color: c.alertBorder, width: 1.5)),
-                      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                        Row(children: [
-                          const Icon3D('key', size: 44),
-                          const SizedBox(width: 10),
-                          Expanded(child: Text(context.t('drive_needs_key'), style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: c.ink))),
-                        ]),
-                        const SizedBox(height: 6),
-                        Text(context.t('drive_needs_key_body'), style: const TextStyle(fontSize: 15, height: 1.5)),
-                        const SizedBox(height: 10),
-                        FilledButton(
-                          style: FilledButton.styleFrom(minimumSize: const Size(48, 52)),
-                          onPressed: _busy ? null : _enterKey,
-                          child: Text(context.t('drive_enter_key'), style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+            child: Column(
+              children: [
+                ScreenHeader(back: true, title: context.t('drive_title')),
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(18, 6, 18, 24),
+                    children: [
+                      GsvCard(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon3D('cloud', size: 56),
+                            const SizedBox(width: 12),
+                            Expanded(child: Text(context.t('drive_intro'), style: const TextStyle(fontSize: 16, height: 1.55))),
+                          ],
                         ),
-                      ]),
-                    ),
-                  ],
-                  const SizedBox(height: 16),
-                  if (_email == null || _reconnect)
-                    PrimaryButton(label: context.t('drive_connect'), icon: 'cloud', onPressed: _busy ? null : _connect)
-                  else
-                    PrimaryButton(label: _busy ? context.t('drive_syncing') : context.t('drive_sync_now'), icon: 'cloud', onPressed: _busy ? null : _syncNow),
-                  if (_busy) ...[const SizedBox(height: 12), const LinearProgressIndicator()],
-                  if (_message != null) ...[
-                    const SizedBox(height: 12),
-                    Text(_message!, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: _ok ? GsvColors.good : GsvColors.bad)),
-                  ],
-                  if (_email != null) ...[
-                    const SizedBox(height: 8),
-                    TextButton(
-                      onPressed: _busy ? null : _disconnect,
-                      child: Text(context.t('drive_disconnect'), style: TextStyle(fontSize: 15, color: c.mute)),
-                    ),
-                  ],
-                  const SizedBox(height: 18),
-                  Card(
-                    elevation: 0,
-                    color: c.tint,
-                    child: ExpansionTile(
-                      leading: const Icon3D('settings', size: 38),
-                      title: Text(context.t('drive_setup_title'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                      childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                      children: [
-                        _copyRow('Package name', appPackage),
-                        _copyRow('SHA-1', releaseSha1),
-                        const SizedBox(height: 10),
-                        TextField(
-                          controller: _clientId,
-                          style: const TextStyle(fontSize: 14),
-                          decoration: InputDecoration(labelText: context.t('drive_client_id'), hintText: '…apps.googleusercontent.com'),
+                      ),
+                      const SizedBox(height: 14),
+                      GsvCard(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _email == null ? context.t('drive_not_connected') : '${context.t('drive_connected_as')}: $_email',
+                              style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: c.ink),
+                            ),
+                            Text(
+                              '${context.t('drive_last_sync')}: ${last == null ? context.t('backup_never') : friendlyDate(context, last)}',
+                              style: TextStyle(fontSize: 15, color: c.mute),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 10),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: FilledButton(onPressed: _saveClientId, child: Text(context.t('save'), style: const TextStyle(fontSize: 16))),
+                      ),
+                      if (_needsKey) ...[
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: c.alertBg,
+                            borderRadius: BorderRadius.circular(18),
+                            border: Border.all(color: c.alertBorder, width: 1.5),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Row(
+                                children: [
+                                  const Icon3D('key', size: 44),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Text(
+                                      context.t('drive_needs_key'),
+                                      style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: c.ink),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 6),
+                              Text(context.t('drive_needs_key_body'), style: const TextStyle(fontSize: 15, height: 1.5)),
+                              const SizedBox(height: 10),
+                              FilledButton(
+                                style: FilledButton.styleFrom(minimumSize: const Size(48, 52)),
+                                onPressed: _busy ? null : _enterKey,
+                                child: Text(context.t('drive_enter_key'), style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
-                    ),
+                      const SizedBox(height: 16),
+                      if (_email == null || _reconnect)
+                        PrimaryButton(label: context.t('drive_connect'), icon: 'cloud', onPressed: _busy ? null : _connect)
+                      else
+                        PrimaryButton(
+                          label: _busy ? context.t('drive_syncing') : context.t('drive_sync_now'),
+                          icon: 'cloud',
+                          onPressed: _busy ? null : _syncNow,
+                        ),
+                      if (_busy) ...[const SizedBox(height: 12), const LinearProgressIndicator()],
+                      if (_message != null) ...[
+                        const SizedBox(height: 12),
+                        Text(
+                          _message!,
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: _ok ? GsvColors.good : GsvColors.bad),
+                        ),
+                      ],
+                      if (_email != null) ...[
+                        const SizedBox(height: 8),
+                        TextButton(
+                          onPressed: _busy ? null : _disconnect,
+                          child: Text(context.t('drive_disconnect'), style: TextStyle(fontSize: 15, color: c.mute)),
+                        ),
+                      ],
+                      const SizedBox(height: 18),
+                      Card(
+                        elevation: 0,
+                        color: c.tint,
+                        child: ExpansionTile(
+                          leading: const Icon3D('settings', size: 44),
+                          title: Text(context.t('drive_setup_title'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                          childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                          children: [
+                            _copyRow('Package name', appPackage),
+                            _copyRow('SHA-1', releaseSha1),
+                            const SizedBox(height: 10),
+                            TextField(
+                              controller: _clientId,
+                              style: const TextStyle(fontSize: 14),
+                              decoration: InputDecoration(labelText: context.t('drive_client_id'), hintText: '…apps.googleusercontent.com'),
+                            ),
+                            const SizedBox(height: 10),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: FilledButton(
+                                onPressed: _saveClientId,
+                                child: Text(context.t('save'), style: const TextStyle(fontSize: 16)),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                ]),
-              ),
-            ]),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -316,13 +363,13 @@ class _DriveScreenState extends ConsumerState<DriveScreen> {
   }
 
   Widget _copyRow(String label, String value) => ListTile(
-        contentPadding: EdgeInsets.zero,
-        title: Text(label, style: const TextStyle(fontSize: 13)),
-        subtitle: SelectableText(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-        trailing: IconButton(
-          tooltip: 'Copy',
-          icon: const Icon(Icons.copy_rounded),
-          onPressed: () => Clipboard.setData(ClipboardData(text: value)),
-        ),
-      );
+    contentPadding: EdgeInsets.zero,
+    title: Text(label, style: const TextStyle(fontSize: 13)),
+    subtitle: SelectableText(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+    trailing: IconButton(
+      tooltip: 'Copy',
+      icon: const Icon(Icons.copy_rounded),
+      onPressed: () => Clipboard.setData(ClipboardData(text: value)),
+    ),
+  );
 }

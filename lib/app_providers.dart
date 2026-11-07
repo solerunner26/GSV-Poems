@@ -13,7 +13,14 @@ final repoProvider = Provider<PoemRepository>((ref) => PoemRepository(ref.watch(
 final pinServiceProvider = Provider<PinService>((ref) => PinService(const SecureSecretStore()));
 
 class AppPrefs {
-  const AppPrefs({this.themeId = 'mor', this.lang = PoemLang.gu, this.textScale = 1.0, this.recentClearedAt, this.place = Place.ahmedabad, this.placeChosen = false});
+  const AppPrefs({
+    this.themeId = 'mor',
+    this.lang = PoemLang.gu,
+    this.textScale = 1.0,
+    this.recentClearedAt,
+    this.place = Place.ahmedabad,
+    this.placeChosen = false,
+  });
   final String themeId;
   final PoemLang lang;
   final double textScale;
@@ -26,13 +33,13 @@ class AppPrefs {
   final bool placeChosen;
 
   AppPrefs copyWith({String? themeId, PoemLang? lang, double? textScale, DateTime? recentClearedAt, Place? place, bool? placeChosen}) => AppPrefs(
-        themeId: themeId ?? this.themeId,
-        lang: lang ?? this.lang,
-        textScale: textScale ?? this.textScale,
-        recentClearedAt: recentClearedAt ?? this.recentClearedAt,
-        place: place ?? this.place,
-        placeChosen: placeChosen ?? this.placeChosen,
-      );
+    themeId: themeId ?? this.themeId,
+    lang: lang ?? this.lang,
+    textScale: textScale ?? this.textScale,
+    recentClearedAt: recentClearedAt ?? this.recentClearedAt,
+    place: place ?? this.place,
+    placeChosen: placeChosen ?? this.placeChosen,
+  );
 
   static AppPrefs fromMap(Map<String, String> m) {
     final lat = double.tryParse(m['placeLat'] ?? ''), lon = double.tryParse(m['placeLon'] ?? '');
@@ -126,7 +133,7 @@ final upcomingFestivalsProvider = Provider<List<({DateTime date, Festival festiv
 
 /// Category name in the interface language.
 String categoryName(PoemCategory c, PoemLang lang) => switch (lang) {
-      PoemLang.gu => c.nameGu,
-      PoemLang.hi => c.nameHi,
-      PoemLang.en => c.nameEn,
-    };
+  PoemLang.gu => c.nameGu,
+  PoemLang.hi => c.nameHi,
+  PoemLang.en => c.nameEn,
+};

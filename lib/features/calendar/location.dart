@@ -26,8 +26,11 @@ Future<Place?> placeFromGps() async {
     var perm = await Geolocator.checkPermission();
     if (perm == LocationPermission.denied) perm = await Geolocator.requestPermission();
     if (perm == LocationPermission.denied || perm == LocationPermission.deniedForever) return null;
-    final pos = await Geolocator.getLastKnownPosition() ??
-        await Geolocator.getCurrentPosition(locationSettings: const LocationSettings(accuracy: LocationAccuracy.low, timeLimit: Duration(seconds: 20)));
+    final pos =
+        await Geolocator.getLastKnownPosition() ??
+        await Geolocator.getCurrentPosition(
+          locationSettings: const LocationSettings(accuracy: LocationAccuracy.low, timeLimit: Duration(seconds: 20)),
+        );
     final lat = (pos.latitude * 100).round() / 100, lon = (pos.longitude * 100).round() / 100;
     // Name it after the nearest listed city when close by, else "GPS".
     var best = 'GPS';

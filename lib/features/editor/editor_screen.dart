@@ -125,8 +125,14 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
           title: Text(ctx.t('dup_save_anyway')),
           content: Text(ctx.t('dup_save_anyway_body'), style: const TextStyle(fontSize: 17, height: 1.5)),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(ctx.t('cancel'), style: const TextStyle(fontSize: 17))),
-            FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(ctx.t('save_anyway'), style: const TextStyle(fontSize: 17))),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(ctx.t('cancel'), style: const TextStyle(fontSize: 17)),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text(ctx.t('save_anyway'), style: const TextStyle(fontSize: 17)),
+            ),
           ],
         ),
       );
@@ -148,9 +154,11 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
       await _stopListening();
       return;
     }
-    final ok = await _speech.initialize(onStatus: (s) {
-      if ((s == 'done' || s == 'notListening') && mounted) setState(() => _listening = false);
-    });
+    final ok = await _speech.initialize(
+      onStatus: (s) {
+        if ((s == 'done' || s == 'notListening') && mounted) setState(() => _listening = false);
+      },
+    );
     if (!ok) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.t('voice_unavailable'))));
       return;
@@ -217,172 +225,218 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
     final words = wordCount(_body.text);
     return LangScope(
       lang: poemLang,
-      child: Builder(builder: (context) {
-        final status = _savedOnce && !_dirty
-            ? '✓ ${context.t('autosaved')} · ${localDigits(words, poemLang)} ${context.t('words')}'
-            : '${localDigits(words, poemLang)} ${context.t('words')}';
-        return Scaffold(
-          body: SafeArea(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 820),
-                child: Column(children: [
-                  ScreenHeader(
-                    back: true,
-                    title: widget.poemId == null ? context.t('editor_new') : context.t('editor_edit'),
-                    subtitle: _number == null ? status : '#${localDigits(_number!, poemLang)} · $status',
-                    actions: [
-                      Icon3DButton('undo', label: context.t('undo'), size: 44, onPressed: () => _undo.undo()),
-                      const HelpButton('editor'),
-                    ],
-                  ),
-                  Expanded(
-                    child: !_loaded
-                        ? const Center(child: CircularProgressIndicator())
-                        : ListView(padding: const EdgeInsets.fromLTRB(18, 4, 18, 16), children: [
-                            TextField(
-                              controller: _title,
-                              textCapitalization: TextCapitalization.sentences,
-                              style: TextStyle(fontFamily: poemFont(poemLang.name), fontSize: 20, fontWeight: FontWeight.w700, color: c.ink),
-                              decoration: InputDecoration(labelText: context.t('title_hint')),
-                            ),
-                            const SizedBox(height: 12),
-                            SizedBox(
-                              height: 48,
-                              child: ListView(scrollDirection: Axis.horizontal, children: [
-                                // First chip: add a new topic.
-                                Padding(
-                                  padding: const EdgeInsets.only(right: 8),
-                                  child: ActionChip(
-                                    avatar: Icon(Icons.add_rounded, color: c.primary),
-                                    label: Text(context.t('topic_new'), style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: c.primary)),
-                                    side: BorderSide(color: c.primary, width: 1.5),
-                                    onPressed: () async {
-                                      final id = await addTopic(context, ref);
-                                      if (id == null || !mounted) return;
-                                      setState(() => _categoryId = id);
-                                      _changed();
-                                    },
+      child: Builder(
+        builder: (context) {
+          final status = _savedOnce && !_dirty
+              ? '✓ ${context.t('autosaved')} · ${localDigits(words, poemLang)} ${context.t('words')}'
+              : '${localDigits(words, poemLang)} ${context.t('words')}';
+          return Scaffold(
+            body: SafeArea(
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 820),
+                  child: Column(
+                    children: [
+                      ScreenHeader(
+                        back: true,
+                        title: widget.poemId == null ? context.t('editor_new') : context.t('editor_edit'),
+                        subtitle: _number == null ? status : '#${localDigits(_number!, poemLang)} · $status',
+                        actions: [
+                          Icon3DButton('undo', label: context.t('undo'), size: 44, onPressed: () => _undo.undo()),
+                          const HelpButton('editor'),
+                        ],
+                      ),
+                      Expanded(
+                        child: !_loaded
+                            ? const Center(child: CircularProgressIndicator())
+                            : ListView(
+                                padding: const EdgeInsets.fromLTRB(18, 4, 18, 16),
+                                children: [
+                                  TextField(
+                                    controller: _title,
+                                    textCapitalization: TextCapitalization.sentences,
+                                    style: TextStyle(fontFamily: poemFont(poemLang.name), fontSize: 20, fontWeight: FontWeight.w700, color: c.ink),
+                                    decoration: InputDecoration(labelText: context.t('title_hint')),
                                   ),
-                                ),
-                                for (final cat in cats)
-                                  Padding(
-                                    padding: const EdgeInsets.only(right: 8),
-                                    child: ChoiceChip(
-                                      avatar: Icon3D(cat.iconKey, size: 30),
-                                      label: Text(categoryName(cat, context.lang), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                                      selected: _categoryId == cat.id,
-                                      showCheckmark: false,
-                                      selectedColor: c.primary.withValues(alpha: 0.18),
-                                      onSelected: (on) {
-                                        setState(() => _categoryId = on ? cat.id : null);
-                                        _changed();
-                                      },
+                                  const SizedBox(height: 12),
+                                  SizedBox(
+                                    height: 48,
+                                    child: ListView(
+                                      scrollDirection: Axis.horizontal,
+                                      children: [
+                                        // First chip: add a new topic.
+                                        Padding(
+                                          padding: const EdgeInsets.only(right: 8),
+                                          child: ActionChip(
+                                            avatar: Icon(Icons.add_rounded, color: c.primary),
+                                            label: Text(
+                                              context.t('topic_new'),
+                                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: c.primary),
+                                            ),
+                                            side: BorderSide(color: c.primary, width: 1.5),
+                                            onPressed: () async {
+                                              final id = await addTopic(context, ref);
+                                              if (id == null || !mounted) return;
+                                              setState(() => _categoryId = id);
+                                              _changed();
+                                            },
+                                          ),
+                                        ),
+                                        for (final cat in cats)
+                                          Padding(
+                                            padding: const EdgeInsets.only(right: 8),
+                                            child: ChoiceChip(
+                                              avatar: Icon3D(cat.iconKey, size: 30),
+                                              label: Text(
+                                                categoryName(cat, context.lang),
+                                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                                              ),
+                                              selected: _categoryId == cat.id,
+                                              showCheckmark: false,
+                                              selectedColor: c.primary.withValues(alpha: 0.18),
+                                              onSelected: (on) {
+                                                setState(() => _categoryId = on ? cat.id : null);
+                                                _changed();
+                                              },
+                                            ),
+                                          ),
+                                      ],
                                     ),
                                   ),
-                              ]),
-                            ),
-                            const SizedBox(height: 12),
-                            if (_dups.isNotEmpty)
-                              Container(
-                                margin: const EdgeInsets.only(bottom: 12),
-                                padding: const EdgeInsets.fromLTRB(12, 10, 6, 10),
-                                decoration: BoxDecoration(
-                                  color: c.alertBg,
-                                  borderRadius: BorderRadius.circular(18),
-                                  border: Border.all(color: c.alertBorder, width: 1.5),
+                                  const SizedBox(height: 12),
+                                  if (_dups.isNotEmpty)
+                                    Container(
+                                      margin: const EdgeInsets.only(bottom: 12),
+                                      padding: const EdgeInsets.fromLTRB(12, 10, 6, 10),
+                                      decoration: BoxDecoration(
+                                        color: c.alertBg,
+                                        borderRadius: BorderRadius.circular(18),
+                                        border: Border.all(color: c.alertBorder, width: 1.5),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          const Icon3D('collection', size: 44),
+                                          const SizedBox(width: 10),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  context.t('dup_in_editor'),
+                                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: c.ink),
+                                                ),
+                                                Text(
+                                                  poemTitle(_dups.first),
+                                                  maxLines: 1,
+                                                  overflow: TextOverflow.ellipsis,
+                                                  style: TextStyle(fontFamily: poemFont(_dups.first.lang), fontSize: 15, color: c.mute),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          TextButton(
+                                            style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
+                                            onPressed: () => openPoem(context, _dups, 0),
+                                            child: Text(
+                                              context.t('dup_open'),
+                                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: c.primary),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  Container(
+                                    constraints: const BoxConstraints(minHeight: 340),
+                                    padding: const EdgeInsets.fromLTRB(18, 6, 18, 6),
+                                    decoration: BoxDecoration(
+                                      color: c.surface,
+                                      borderRadius: BorderRadius.circular(20),
+                                      boxShadow: [BoxShadow(color: c.ink.withValues(alpha: 0.08), blurRadius: 16, offset: const Offset(0, 6))],
+                                    ),
+                                    child: CustomPaint(
+                                      painter: _LinedPaper(color: c.accent.withValues(alpha: 0.22), lineHeight: 38),
+                                      child: TextField(
+                                        controller: _body,
+                                        undoController: _undo,
+                                        maxLines: null,
+                                        minLines: 9,
+                                        keyboardType: TextInputType.multiline,
+                                        style: TextStyle(fontFamily: poemFont(poemLang.name), fontSize: 21, height: 38 / 21, color: c.ink),
+                                        decoration: InputDecoration(
+                                          hintText: context.t('body_hint'),
+                                          border: InputBorder.none,
+                                          enabledBorder: InputBorder.none,
+                                          focusedBorder: InputBorder.none,
+                                          filled: false,
+                                          contentPadding: EdgeInsets.zero,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  if (_partial.isNotEmpty)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 8),
+                                      child: Text(
+                                        '… $_partial',
+                                        style: TextStyle(fontFamily: poemFont(poemLang.name), fontSize: 18, color: c.accentText),
+                                      ),
+                                    ),
+                                  const SizedBox(height: 8),
+                                  Text(context.t('keyboard_tip'), style: TextStyle(fontSize: 14, color: c.mute)),
+                                ],
+                              ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(18, 8, 18, 14),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: SizedBox(
+                                height: 60,
+                                child: OutlinedButton(
+                                  onPressed: _toggleMic,
+                                  style: OutlinedButton.styleFrom(
+                                    backgroundColor: _listening ? c.accent : c.surface,
+                                    foregroundColor: _listening ? Colors.white : c.primary,
+                                    side: BorderSide(color: _listening ? c.accent : c.primary, width: 2),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(60 / 2.6)),
+                                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Icon3D('mic', size: 36),
+                                      const SizedBox(width: 6),
+                                      Flexible(
+                                        child: FittedBox(
+                                          fit: BoxFit.scaleDown,
+                                          child: Text(
+                                            _listening ? context.t('listening') : context.t('voice'),
+                                            maxLines: 1,
+                                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                child: Row(children: [
-                                  const Icon3D('collection', size: 44),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                      Text(context.t('dup_in_editor'), style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: c.ink)),
-                                      Text(poemTitle(_dups.first),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(fontFamily: poemFont(_dups.first.lang), fontSize: 15, color: c.mute)),
-                                    ]),
-                                  ),
-                                  TextButton(
-                                    style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
-                                    onPressed: () => openPoem(context, _dups, 0),
-                                    child: Text(context.t('dup_open'), style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: c.primary)),
-                                  ),
-                                ]),
-                              ),
-                            Container(
-                              constraints: const BoxConstraints(minHeight: 340),
-                              padding: const EdgeInsets.fromLTRB(18, 6, 18, 6),
-                              decoration: BoxDecoration(
-                                color: c.surface,
-                                borderRadius: BorderRadius.circular(20),
-                                boxShadow: [BoxShadow(color: c.ink.withValues(alpha: 0.08), blurRadius: 16, offset: const Offset(0, 6))],
-                              ),
-                              child: CustomPaint(
-                                painter: _LinedPaper(color: c.accent.withValues(alpha: 0.22), lineHeight: 38),
-                                child: TextField(
-                                  controller: _body,
-                                  undoController: _undo,
-                                  maxLines: null,
-                                  minLines: 9,
-                                  keyboardType: TextInputType.multiline,
-                                  style: TextStyle(fontFamily: poemFont(poemLang.name), fontSize: 21, height: 38 / 21, color: c.ink),
-                                  decoration: InputDecoration(
-                                    hintText: context.t('body_hint'),
-                                    border: InputBorder.none,
-                                    enabledBorder: InputBorder.none,
-                                    focusedBorder: InputBorder.none,
-                                    filled: false,
-                                    contentPadding: EdgeInsets.zero,
-                                  ),
-                                ),
                               ),
                             ),
-                            if (_partial.isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 8),
-                                child: Text('… $_partial', style: TextStyle(fontFamily: poemFont(poemLang.name), fontSize: 18, color: c.accentText)),
-                              ),
-                            const SizedBox(height: 8),
-                            Text(context.t('keyboard_tip'), style: TextStyle(fontSize: 14, color: c.mute)),
-                          ]),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(18, 8, 18, 14),
-                    child: Row(children: [
-                      Expanded(
-                        child: SizedBox(
-                          height: 60,
-                          child: OutlinedButton(
-                            onPressed: _toggleMic,
-                            style: OutlinedButton.styleFrom(
-                              backgroundColor: _listening ? c.accent : c.surface,
-                              foregroundColor: _listening ? Colors.white : c.primary,
-                              side: BorderSide(color: _listening ? c.accent : c.primary, width: 2),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: PrimaryButton(label: context.t('save'), icon: 'check', onPressed: _saveAndClose),
                             ),
-                            child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                              const Icon3D('mic', size: 40),
-                              const SizedBox(width: 4),
-                              Flexible(
-                                child: Text(_listening ? context.t('listening') : context.t('voice'),
-                                    overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
-                              ),
-                            ]),
-                          ),
+                          ],
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(child: PrimaryButton(label: context.t('save'), icon: 'check', onPressed: _saveAndClose)),
-                    ]),
+                    ],
                   ),
-                ]),
+                ),
               ),
             ),
-          ),
-        );
-      }),
+          );
+        },
+      ),
     );
   }
 }
