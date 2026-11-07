@@ -466,24 +466,32 @@ class _Icon3DState extends State<Icon3D> with SingleTickerProviderStateMixin {
         onPointerDown: _down,
         onPointerUp: _up,
         onPointerCancel: _up,
-        child: RepaintBoundary(
-          child: CustomPaint(
-            size: Size.square(widget.size),
-            painter: _Icon3DPainter(
-              art,
-              deepWell: widget.well,
-              base: base,
-              glyph: glyph,
-              recess: recess,
-              dark: theme?.isDark ?? false,
-              glow: theme == null ? null : glow,
-              primary: widget.primary ?? widget.size >= 52,
-              intensity: tokens.glowIntensity,
-              pulse: pulse,
-              pulseCycle: tokens.iconPulse,
-              traceColor: traceColor,
-              progress: trace,
-              held: _held,
+        // Always lays out at its own size, centred in whatever box it gets.
+        child: Center(
+          widthFactor: 1,
+          heightFactor: 1,
+          child: SizedBox.square(
+            dimension: widget.size,
+            child: RepaintBoundary(
+              child: CustomPaint(
+                size: Size.square(widget.size),
+                painter: _Icon3DPainter(
+                  art,
+                  deepWell: widget.well,
+                  base: base,
+                  glyph: glyph,
+                  recess: recess,
+                  dark: theme?.isDark ?? false,
+                  glow: theme == null ? null : glow,
+                  primary: widget.primary ?? widget.size >= 52,
+                  intensity: tokens.glowIntensity,
+                  pulse: pulse,
+                  pulseCycle: tokens.iconPulse,
+                  traceColor: traceColor,
+                  progress: trace,
+                  held: _held,
+                ),
+              ),
             ),
           ),
         ),
@@ -583,8 +591,12 @@ class _Icon3DPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final unit = size.width / 64; // pixels per tile unit
+    // Fit the 64-unit tile into the shorter side and centre it, so a symbol
+    // never spills over its neighbours whatever box it is given.
+    final side = size.shortestSide;
+    final unit = side / 64; // pixels per tile unit
     canvas.save();
+    canvas.translate((size.width - side) / 2, (size.height - side) / 2);
     canvas.scale(unit);
     const black = Color(0xFF000000), white = Color(0xFFFFFFFF);
     final shadow = _mix(base, black, 0.7);
@@ -714,7 +726,7 @@ class _Icon3DPainter extends CustomPainter {
       final drawn = held ? 1.0 : Curves.easeOut.transform((t / 0.64).clamp(0.0, 1.0));
       final bloom = held ? 3.0 : (t < 0.64 ? 1 + 4 * (t / 0.64) : 5 - 3 * ((t - 0.64) / 0.36));
       final contour = contourUpTo([f, s, c], drawn);
-      final core = (size.width * 0.05).clamp(1.6, 3.2) / k;
+      final core = (side * 0.05).clamp(1.6, 3.2) / k;
       canvas.drawPath(
         contour,
         stroke(core * 2.4)

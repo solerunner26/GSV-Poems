@@ -215,6 +215,7 @@ const Map<String, List<String>> _t = {
   ],
   'update_now': ['હમણાં અપડેટ કરો', 'अभी अपडेट करें', 'Update Now'],
   'update_later': ['પછી', 'बाद में', 'Later'],
+  'update_whats_new': ['આમાં નવું શું છે', 'इसमें नया क्या है', "What's new"],
   'update_downloading': ['ડાઉનલોડ થાય છે…', 'डाउनलोड हो रहा है…', 'Downloading…'],
   'update_failed': [
     'અપડેટ ન થયું. ઇન્ટરનેટ ચાલુ છે તે જુઓ.',
