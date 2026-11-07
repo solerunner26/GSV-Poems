@@ -23,7 +23,10 @@ class CollectionScreen extends ConsumerStatefulWidget {
 
 class _CollectionScreenState extends ConsumerState<CollectionScreen> {
   String? _cat;
-  PoemSort _sort = PoemSort.newest;
+  PoemSort _sort = PoemSort.number;
+
+  /// Gujarati or Hindi section. Starts on Hindi only when the interface is Hindi.
+  PoemLang? _section;
 
   Future<void> _actions(Poem p) async {
     final repo = ref.read(repoProvider);
@@ -59,14 +62,22 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
   Widget build(BuildContext context) {
     final c = context.gc;
     final lang = context.lang;
-    final cats = ref.watch(categoriesProvider).asData?.value ?? const <PoemCategory>[];
-    final all = ref.watch(poemsProvider((lang: null, categoryId: null, sort: _sort))).asData?.value ?? const <Poem>[];
+    final section = _section ?? (lang == PoemLang.hi ? PoemLang.hi : PoemLang.gu);
+    final allCats = ref.watch(categoriesProvider).asData?.value ?? const <PoemCategory>[];
+    // Each section lists only its own language's poems (English poems sit with Gujarati).
+    final all = (ref.watch(poemsProvider((lang: null, categoryId: null, sort: _sort))).asData?.value ?? const <Poem>[])
+        .where((p) => section == PoemLang.hi ? p.lang == 'hi' : p.lang != 'hi')
+        .toList();
     final stats = ref.watch(statsProvider).asData?.value ?? const PoemStats();
     final counts = <String, int>{};
     for (final p in all) {
       counts[p.categoryId ?? 'other'] = (counts[p.categoryId ?? 'other'] ?? 0) + 1;
     }
+    // Collections that hold poems in this section, plus "Others" always.
+    final cats = allCats.where((c) => (counts[c.id] ?? 0) > 0 || c.id == 'other').toList();
     final shown = _cat == null ? all : all.where((p) => (p.categoryId ?? 'other') == _cat).toList();
+    // Collection names follow the section's script (जीवन मंथन in Hindi, જીવન મંથન in Gujarati).
+    final nameLang = lang == PoemLang.en ? PoemLang.en : section;
     final cols = MediaQuery.sizeOf(context).width >= 600 ? 5 : 3;
 
     return SafeArea(
@@ -87,6 +98,24 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
                 const HelpButton('collection'),
               ]),
             ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(18, 0, 18, 14),
+                child: SegmentedButton<PoemLang>(
+                  showSelectedIcon: false,
+                  style: SegmentedButton.styleFrom(minimumSize: const Size(48, 54), textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+                  segments: [
+                    ButtonSegment(value: PoemLang.gu, label: Text('${tr('lang_gu', PoemLang.gu)} · ${localDigits(stats.gu + stats.en, lang)}')),
+                    ButtonSegment(value: PoemLang.hi, label: Text('${tr('lang_hi', PoemLang.hi)} · ${localDigits(stats.hi, lang)}')),
+                  ],
+                  selected: {section},
+                  onSelectionChanged: (s) => setState(() {
+                    _section = s.first;
+                    _cat = null;
+                  }),
+                ),
+              ),
+            ),
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 18),
               sliver: SliverGrid.count(
@@ -98,7 +127,7 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
                   for (final cat in cats)
                     _CatTile(
                       icon: cat.iconKey,
-                      name: categoryName(cat, lang),
+                      name: categoryName(cat, nameLang),
                       count: '${localDigits(counts[cat.id] ?? 0, lang)} ${context.t('poems')}',
                       selected: _cat == cat.id,
                       onTap: () => setState(() => _cat = _cat == cat.id ? null : cat.id),
@@ -114,7 +143,7 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
                     child: Text(
                       _cat == null
                           ? '${context.t('all_poems')} · ${localDigits(shown.length, lang)}'
-                          : '${categoryName(cats.firstWhere((x) => x.id == _cat), lang)} · ${localDigits(shown.length, lang)}',
+                          : '${categoryName(allCats.firstWhere((x) => x.id == _cat), nameLang)} · ${localDigits(shown.length, lang)}',
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                   ),

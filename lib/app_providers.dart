@@ -79,6 +79,7 @@ final recentProvider = StreamProvider<List<Poem>>((ref) {
   return ref.watch(repoProvider).watchRecent(clearedAt: cleared);
 });
 final poemProvider = StreamProvider.family<Poem?, String>((ref, id) => ref.watch(repoProvider).watchPoem(id));
+final duplicateCountProvider = StreamProvider<int>((ref) => ref.watch(repoProvider).watchDuplicateCount());
 final onThisDayProvider = FutureProvider<List<Poem>>((ref) => ref.watch(repoProvider).onThisDay());
 
 /// Category name in the interface language.

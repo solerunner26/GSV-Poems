@@ -159,6 +159,17 @@ class $PoemsTable extends Poems with TableInfo<$PoemsTable, Poem> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _contentKeyMeta = const VerificationMeta(
+    'contentKey',
+  );
+  @override
+  late final GeneratedColumn<String> contentKey = GeneratedColumn<String>(
+    'content_key',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -175,6 +186,7 @@ class $PoemsTable extends Poems with TableInfo<$PoemsTable, Poem> {
     deletedAt,
     source,
     sourceKey,
+    contentKey,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -277,6 +289,12 @@ class $PoemsTable extends Poems with TableInfo<$PoemsTable, Poem> {
         sourceKey.isAcceptableOrUnknown(data['source_key']!, _sourceKeyMeta),
       );
     }
+    if (data.containsKey('content_key')) {
+      context.handle(
+        _contentKeyMeta,
+        contentKey.isAcceptableOrUnknown(data['content_key']!, _contentKeyMeta),
+      );
+    }
     return context;
   }
 
@@ -342,6 +360,10 @@ class $PoemsTable extends Poems with TableInfo<$PoemsTable, Poem> {
         DriftSqlType.string,
         data['${effectivePrefix}source_key'],
       ),
+      contentKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}content_key'],
+      ),
     );
   }
 
@@ -368,6 +390,9 @@ class Poem extends DataClass implements Insertable<Poem> {
   final DateTime? deletedAt;
   final String source;
   final String? sourceKey;
+
+  /// Same text (ignoring spacing, punctuation and line breaks) → same key.
+  final String? contentKey;
   const Poem({
     required this.id,
     this.number,
@@ -383,6 +408,7 @@ class Poem extends DataClass implements Insertable<Poem> {
     this.deletedAt,
     required this.source,
     this.sourceKey,
+    this.contentKey,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -408,6 +434,9 @@ class Poem extends DataClass implements Insertable<Poem> {
     map['source'] = Variable<String>(source);
     if (!nullToAbsent || sourceKey != null) {
       map['source_key'] = Variable<String>(sourceKey);
+    }
+    if (!nullToAbsent || contentKey != null) {
+      map['content_key'] = Variable<String>(contentKey);
     }
     return map;
   }
@@ -436,6 +465,9 @@ class Poem extends DataClass implements Insertable<Poem> {
       sourceKey: sourceKey == null && nullToAbsent
           ? const Value.absent()
           : Value(sourceKey),
+      contentKey: contentKey == null && nullToAbsent
+          ? const Value.absent()
+          : Value(contentKey),
     );
   }
 
@@ -459,6 +491,7 @@ class Poem extends DataClass implements Insertable<Poem> {
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
       source: serializer.fromJson<String>(json['source']),
       sourceKey: serializer.fromJson<String?>(json['sourceKey']),
+      contentKey: serializer.fromJson<String?>(json['contentKey']),
     );
   }
   @override
@@ -479,6 +512,7 @@ class Poem extends DataClass implements Insertable<Poem> {
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
       'source': serializer.toJson<String>(source),
       'sourceKey': serializer.toJson<String?>(sourceKey),
+      'contentKey': serializer.toJson<String?>(contentKey),
     };
   }
 
@@ -497,6 +531,7 @@ class Poem extends DataClass implements Insertable<Poem> {
     Value<DateTime?> deletedAt = const Value.absent(),
     String? source,
     Value<String?> sourceKey = const Value.absent(),
+    Value<String?> contentKey = const Value.absent(),
   }) => Poem(
     id: id ?? this.id,
     number: number.present ? number.value : this.number,
@@ -512,6 +547,7 @@ class Poem extends DataClass implements Insertable<Poem> {
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
     source: source ?? this.source,
     sourceKey: sourceKey.present ? sourceKey.value : this.sourceKey,
+    contentKey: contentKey.present ? contentKey.value : this.contentKey,
   );
   Poem copyWithCompanion(PoemsCompanion data) {
     return Poem(
@@ -535,6 +571,9 @@ class Poem extends DataClass implements Insertable<Poem> {
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
       source: data.source.present ? data.source.value : this.source,
       sourceKey: data.sourceKey.present ? data.sourceKey.value : this.sourceKey,
+      contentKey: data.contentKey.present
+          ? data.contentKey.value
+          : this.contentKey,
     );
   }
 
@@ -554,7 +593,8 @@ class Poem extends DataClass implements Insertable<Poem> {
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('source: $source, ')
-          ..write('sourceKey: $sourceKey')
+          ..write('sourceKey: $sourceKey, ')
+          ..write('contentKey: $contentKey')
           ..write(')'))
         .toString();
   }
@@ -575,6 +615,7 @@ class Poem extends DataClass implements Insertable<Poem> {
     deletedAt,
     source,
     sourceKey,
+    contentKey,
   );
   @override
   bool operator ==(Object other) =>
@@ -593,7 +634,8 @@ class Poem extends DataClass implements Insertable<Poem> {
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
           other.source == this.source &&
-          other.sourceKey == this.sourceKey);
+          other.sourceKey == this.sourceKey &&
+          other.contentKey == this.contentKey);
 }
 
 class PoemsCompanion extends UpdateCompanion<Poem> {
@@ -611,6 +653,7 @@ class PoemsCompanion extends UpdateCompanion<Poem> {
   final Value<DateTime?> deletedAt;
   final Value<String> source;
   final Value<String?> sourceKey;
+  final Value<String?> contentKey;
   final Value<int> rowid;
   const PoemsCompanion({
     this.id = const Value.absent(),
@@ -627,6 +670,7 @@ class PoemsCompanion extends UpdateCompanion<Poem> {
     this.deletedAt = const Value.absent(),
     this.source = const Value.absent(),
     this.sourceKey = const Value.absent(),
+    this.contentKey = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   PoemsCompanion.insert({
@@ -644,6 +688,7 @@ class PoemsCompanion extends UpdateCompanion<Poem> {
     this.deletedAt = const Value.absent(),
     this.source = const Value.absent(),
     this.sourceKey = const Value.absent(),
+    this.contentKey = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        body = Value(body),
@@ -664,6 +709,7 @@ class PoemsCompanion extends UpdateCompanion<Poem> {
     Expression<DateTime>? deletedAt,
     Expression<String>? source,
     Expression<String>? sourceKey,
+    Expression<String>? contentKey,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -681,6 +727,7 @@ class PoemsCompanion extends UpdateCompanion<Poem> {
       if (deletedAt != null) 'deleted_at': deletedAt,
       if (source != null) 'source': source,
       if (sourceKey != null) 'source_key': sourceKey,
+      if (contentKey != null) 'content_key': contentKey,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -700,6 +747,7 @@ class PoemsCompanion extends UpdateCompanion<Poem> {
     Value<DateTime?>? deletedAt,
     Value<String>? source,
     Value<String?>? sourceKey,
+    Value<String?>? contentKey,
     Value<int>? rowid,
   }) {
     return PoemsCompanion(
@@ -717,6 +765,7 @@ class PoemsCompanion extends UpdateCompanion<Poem> {
       deletedAt: deletedAt ?? this.deletedAt,
       source: source ?? this.source,
       sourceKey: sourceKey ?? this.sourceKey,
+      contentKey: contentKey ?? this.contentKey,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -766,6 +815,9 @@ class PoemsCompanion extends UpdateCompanion<Poem> {
     if (sourceKey.present) {
       map['source_key'] = Variable<String>(sourceKey.value);
     }
+    if (contentKey.present) {
+      map['content_key'] = Variable<String>(contentKey.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -789,6 +841,7 @@ class PoemsCompanion extends UpdateCompanion<Poem> {
           ..write('deletedAt: $deletedAt, ')
           ..write('source: $source, ')
           ..write('sourceKey: $sourceKey, ')
+          ..write('contentKey: $contentKey, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1782,6 +1835,7 @@ typedef $$PoemsTableCreateCompanionBuilder = PoemsCompanion Function({
   Value<DateTime?> deletedAt,
   Value<String> source,
   Value<String?> sourceKey,
+  Value<String?> contentKey,
   Value<int> rowid,
 });
 typedef $$PoemsTableUpdateCompanionBuilder = PoemsCompanion Function({
@@ -1799,6 +1853,7 @@ typedef $$PoemsTableUpdateCompanionBuilder = PoemsCompanion Function({
   Value<DateTime?> deletedAt,
   Value<String> source,
   Value<String?> sourceKey,
+  Value<String?> contentKey,
   Value<int> rowid,
 });
 
@@ -1900,6 +1955,11 @@ class $$PoemsTableFilterComposer extends Composer<_$AppDatabase, $PoemsTable> {
 
   ColumnFilters<String> get sourceKey => $composableBuilder(
     column: $table.sourceKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get contentKey => $composableBuilder(
+    column: $table.contentKey,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2007,6 +2067,11 @@ class $$PoemsTableOrderingComposer
     column: $table.sourceKey,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get contentKey => $composableBuilder(
+    column: $table.contentKey,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$PoemsTableAnnotationComposer
@@ -2065,6 +2130,11 @@ class $$PoemsTableAnnotationComposer
 
   GeneratedColumn<String> get sourceKey =>
       $composableBuilder(column: $table.sourceKey, builder: (column) => column);
+
+  GeneratedColumn<String> get contentKey => $composableBuilder(
+    column: $table.contentKey,
+    builder: (column) => column,
+  );
 
   Expression<T> poemVersionsRefs<T extends Object>(
     Expression<T> Function($$PoemVersionsTableAnnotationComposer a) f,
@@ -2134,6 +2204,7 @@ class $$PoemsTableTableManager
                 Value<DateTime?> deletedAt = const Value.absent(),
                 Value<String> source = const Value.absent(),
                 Value<String?> sourceKey = const Value.absent(),
+                Value<String?> contentKey = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PoemsCompanion(
                 id: id,
@@ -2150,6 +2221,7 @@ class $$PoemsTableTableManager
                 deletedAt: deletedAt,
                 source: source,
                 sourceKey: sourceKey,
+                contentKey: contentKey,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -2168,6 +2240,7 @@ class $$PoemsTableTableManager
                 Value<DateTime?> deletedAt = const Value.absent(),
                 Value<String> source = const Value.absent(),
                 Value<String?> sourceKey = const Value.absent(),
+                Value<String?> contentKey = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PoemsCompanion.insert(
                 id: id,
@@ -2184,6 +2257,7 @@ class $$PoemsTableTableManager
                 deletedAt: deletedAt,
                 source: source,
                 sourceKey: sourceKey,
+                contentKey: contentKey,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

@@ -125,7 +125,7 @@ void main() {
     expect(inJivan.map((p) => p.lang).toSet(), {'gu', 'hi'});
     final family = await repo.watchPoems(categoryId: 'parivar').first;
     expect(family.single.title, 'घर', reason: '"परिवार" joins the built-in Family category');
-    expect(cats.firstWhere((c) => c.nameHi == 'संघर्षमय जीवन').iconKey, 'shield');
+    expect(cats.firstWhere((c) => c.nameHi == 'संघर्षमय जीवन').iconKey, 'mountain');
   });
 
   test('new poems are numbered inside their collection', () async {

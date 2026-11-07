@@ -97,6 +97,52 @@ bool _similar(String a, String b, {bool strict = false}) {
   return String.fromCharCodes(x.runes.take(n)) == String.fromCharCodes(y.runes.take(n));
 }
 
+/// A title with the poet's working marks removed:
+/// "ગુરુ જ્ઞાન.. .(વિદ્યાપીઠ).  ૬" → "ગુરુ જ્ઞાન (વિદ્યાપીઠ)", "औरत। :१::२::" → "औरत",
+/// "યુવા શક્તિ.   ૨૮/૨/૨૫." → "યુવા શક્તિ".
+String tidyTitle(String s) {
+  var t = s.replaceAll(_dateLine, ' ');
+  // Part of a date ("૫/૮/") and a leading poem number ("૩૨:- …").
+  t = t.replaceAll(RegExp(r'[0-9૦-૯०-९]{1,2}\s*/\s*[0-9૦-૯०-९]{1,2}\s*/?'), ' ');
+  t = t.replaceFirst(RegExp(r'^\s*[0-9૦-૯०-९]{1,4}\s*:+\s*-?\s*'), '');
+  // A cross-reference to another collection: "સંતોષ ૧:- જીવન મંથન" → "સંતોષ".
+  t = t.replaceFirst(RegExp(r'[\s.]+[0-9૦-૯०-९]{1,4}\s*:+\s*-\s*.*$'), '');
+  t = t.replaceAll(RegExp(r'(:+\s*[0-9૦-૯०-९]+\s*)+:+'), ' ');
+  t = t.replaceAll(RegExp(r'\(\s*[0-9૦-૯०-९\s:.,]*\)'), ' ');
+  t = t.replaceAll(RegExp(r'[\s.:;।,\-]*[0-9૦-૯०-९]+[\s.:;।,\-]*$'), '');
+  t = t.replaceAll(RegExp(r'(\s*\.){2,}\s*'), ' ');
+  t = t.replaceAll(RegExp(r'\s+'), ' ');
+  t = t.replaceAll(RegExp(r'^[\s:;.\-।]+'), '').replaceAll(RegExp(r'[\s.:;।,\-]+$'), '');
+  return t.trim();
+}
+
+/// Drops everything that is not part of the poem itself: date/place lines
+/// ("૨૬/૭/૨૬.. ઓકલેન્ડ.."), lines with no letters ("૭૪:-", "(૫૨)", "..."),
+/// leading spaces and runs of blank lines. Only the stanzas remain.
+List<String> tidyBody(List<String> lines) {
+  final out = <String>[];
+  for (final raw in lines) {
+    final l = raw.trim();
+    if (l.isEmpty) {
+      if (out.isNotEmpty && out.last.isNotEmpty) out.add('');
+      continue;
+    }
+    if (_isSeparator(l) || !hasLetter(l)) continue;
+    if (_dateLine.hasMatch(l)) {
+      final rest = l.replaceAll(_dateLine, ' ').replaceAll(RegExp(r'[.,:;।\-]'), ' ').trim();
+      if (rest.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length <= 5) continue;
+    }
+    out.add(l);
+  }
+  while (out.isNotEmpty && out.first.isEmpty) {
+    out.removeAt(0);
+  }
+  while (out.isNotEmpty && out.last.isEmpty) {
+    out.removeLast();
+  }
+  return out;
+}
+
 String _cleanTitle(String s) => s.trim().replaceAll(RegExp(r'[\s.:।]+$'), '').replaceAll(RegExp(r'^[\s:;\-]+'), '').trim();
 
 /// The collection name from a note title or file name:
@@ -115,7 +161,7 @@ String collectionName(String raw) {
   return words.join(' ').trim();
 }
 
-typedef SplitPoem = ({int? number, String title, String body, String? problem});
+typedef SplitPoem = ({int? number, String title, String body, String? problem, DateTime? written});
 
 /// Splits one note into poems.
 ///
@@ -124,7 +170,8 @@ typedef SplitPoem = ({int? number, String title, String body, String? problem});
 /// line of marks (****, ++++, ####…) or at the next poem's title. When there is
 /// a list of contents, only numbers from that list (in rising order) start a
 /// poem, so a numbered line inside a poem is never mistaken for a new one.
-({List<SplitPoem> poems, List<int> listed}) splitNote(String text) {
+({List<SplitPoem> poems, List<int> listed}) splitNote(String text, {DateTime? now}) {
+  final today = now ?? DateTime.now();
   final lines = text.replaceAll('\r\n', '\n').split('\n');
   final cands = <int>[];
   for (var i = 0; i < lines.length; i++) {
@@ -180,6 +227,9 @@ typedef SplitPoem = ({int? number, String title, String body, String? problem});
     final n = numAt(k);
     final emptyTitle = _cleanTitle(titleAt(k)).replaceAll('-', '').trim().isEmpty;
     var fits = toc.isEmpty ? n > last : n >= last && (used[n] ?? 0) < (toc[n] ?? 0);
+    // Poems written after the contents list was made carry on the numbering
+    // (contents 134–141, then 142, 143…).
+    if (!fits && toc.isNotEmpty && n == last + 1 && !toc.containsKey(n) && hasLetter(titleAt(k))) fits = true;
     // A numbered line inside a poem ("૨. …") is not the next poem when its text
     // differs from the listed title and the real one still comes later.
     if (fits && toc.isNotEmpty && !sameTitle(n, titleAt(k))) {
@@ -203,24 +253,19 @@ typedef SplitPoem = ({int? number, String title, String body, String? problem});
   for (var s = 0; s < starts.length; s++) {
     final m = _heading.firstMatch(lines[starts[s]])!;
     final end = s + 1 < starts.length ? starts[s + 1] : lines.length;
-    final body = <String>[];
+    final raw = <String>[];
     for (var i = starts[s] + 1; i < end; i++) {
-      if (_isSeparator(lines[i].trim())) continue;
-      body.add(lines[i].trimRight());
+      if (!_isSeparator(lines[i].trim())) raw.add(lines[i]);
     }
-    while (body.isNotEmpty && body.first.trim().isEmpty) {
-      body.removeAt(0);
-    }
-    while (body.isNotEmpty && body.last.trim().isEmpty) {
-      body.removeLast();
-    }
-    var title = _cleanTitle(m[2]!);
-    if (title.replaceAll('-', '').trim().isEmpty) title = '';
+    final written = _writtenOn(raw, today) ?? _writtenOn([m[2]!], today);
+    final body = tidyBody(raw);
+    var title = tidyTitle(m[2]!);
+    if (!hasLetter(title)) title = '';
     if (body.isEmpty && title.isEmpty) continue;
     String? problem;
     if (body.isEmpty) problem = 'Only a title, no poem text';
-    if (title.isEmpty) title = _cleanTitle(body.first);
-    poems.add((number: parseAnyDigits(m[1]!), title: title, body: body.join('\n'), problem: problem));
+    if (title.isEmpty) title = tidyTitle(body.first);
+    poems.add((number: parseAnyDigits(m[1]!), title: title, body: body.join('\n'), problem: problem, written: written));
   }
   return (poems: poems, listed: listed);
 }
@@ -258,13 +303,14 @@ KeepParseResult parseKeepTakeout(Map<String, String> files, {DateTime? now}) {
     if (collection.isEmpty) collection = collectionName(name.split(RegExp(r'[\\/]')).last);
     if (collection.isEmpty) collection = 'Google Keep';
 
-    final split = splitNote(text);
+    final split = splitNote(text, now: today);
     final found = <int>{};
     for (final p in split.poems) {
       if (p.number != null) found.add(p.number!);
-      final lines = p.body.split('\n');
-      final written = _writtenOn(lines, today);
-      final key = sha1.convert(utf8.encode('${p.number ?? ''}|${p.title}|${p.body.replaceAll(RegExp(r'\s+'), ' ')}')).toString();
+      final written = p.written;
+      // File + number + text: importing the same files again adds nothing, while the same
+      // poem in two different notes is kept and shown as a duplicate for review.
+      final key = sha1.convert(utf8.encode('$name|${p.number ?? ''}|${lettersOnly(p.title)}|${lettersOnly(p.body)}')).toString();
       poems.add(ImportedPoem(
         number: p.number,
         title: p.title,

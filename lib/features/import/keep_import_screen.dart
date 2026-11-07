@@ -12,6 +12,7 @@ import '../../core/widgets/common.dart';
 import '../../core/widgets/icon3d.dart';
 import '../../data/import/keep_parser.dart';
 import '../../data/poem_repository.dart';
+import '../duplicates/duplicates_screen.dart';
 
 /// Pick Google Takeout Keep .json files, preview what was found, then add.
 class KeepImportScreen extends ConsumerStatefulWidget {
@@ -153,6 +154,10 @@ class _KeepImportScreenState extends ConsumerState<KeepImportScreen> {
                             ),
                           ]),
                         ),
+                      if (_outcome != null && _outcome!.duplicates > 0) ...[
+                        const SizedBox(height: 12),
+                        const DuplicateNotice(),
+                      ],
                     ],
                   ],
                 ]),

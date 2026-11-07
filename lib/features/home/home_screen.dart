@@ -11,6 +11,7 @@ import '../../core/widgets/icon3d.dart';
 import '../../data/db/database.dart';
 import '../../data/poem_repository.dart';
 import '../common/poem_tile.dart';
+import '../duplicates/duplicates_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key, required this.onOpenCollection, required this.onWrite});
@@ -60,6 +61,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               const SizedBox(height: 16),
               _TodayCard(lang: lang),
               const SizedBox(height: 22),
+              const DuplicateNotice(),
               if (stats.total == 0)
                 EmptyState(
                   icon: 'write',

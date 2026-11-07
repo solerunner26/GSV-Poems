@@ -11,6 +11,8 @@ import '../../core/text/text_tools.dart';
 import '../../core/theme/app_themes.dart';
 import '../../core/widgets/common.dart';
 import '../../core/widgets/icon3d.dart';
+import '../../data/db/database.dart';
+import '../common/poem_tile.dart';
 
 /// Write a new poem ([poemId] null) or edit one. Saves itself a moment after
 /// each change; the text as it was before editing goes to the edit history once.
@@ -36,6 +38,7 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
   bool _savedOnce = false;
   String _partial = '';
   Timer? _debounce;
+  List<Poem> _dups = const [];
   int? _number;
   // Read once: the final save in dispose() runs after ref is gone.
   late final _repo = ref.read(repoProvider);
@@ -70,13 +73,24 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
     if (!_loaded) return;
     _dirty = true;
     _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 1500), _save);
+    _debounce = Timer(const Duration(milliseconds: 1500), () async {
+      await _checkDuplicate();
+      await _save();
+    });
     setState(() {});
+  }
+
+  /// Is this text (e.g. just pasted) already in the collection?
+  Future<void> _checkDuplicate() async {
+    final d = await _repo.findDuplicatesOf(_body.text, excludeId: _id);
+    if (mounted) setState(() => _dups = d);
   }
 
   Future<void> _save() async {
     _debounce?.cancel();
     if (!_dirty) return;
+    // A new poem that copies an existing one is not saved silently.
+    if (_id == null && _dups.isNotEmpty) return;
     final title = _title.text, body = _body.text;
     if (body.trim().isEmpty) return;
     final repo = _repo;
@@ -99,6 +113,22 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
       return;
     }
     await _stopListening();
+    await _checkDuplicate();
+    if (_dups.isNotEmpty && _id == null && mounted) {
+      final ok = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(ctx.t('dup_save_anyway')),
+          content: Text(ctx.t('dup_save_anyway_body'), style: const TextStyle(fontSize: 17, height: 1.5)),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(ctx.t('cancel'), style: const TextStyle(fontSize: 17))),
+            FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(ctx.t('save_anyway'), style: const TextStyle(fontSize: 17))),
+          ],
+        ),
+      );
+      if (ok != true) return;
+      _dups = const [];
+    }
     await _save();
     if (!mounted) return;
     final messenger = ScaffoldMessenger.of(context);
@@ -234,6 +264,34 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
                               ]),
                             ),
                             const SizedBox(height: 12),
+                            if (_dups.isNotEmpty)
+                              Container(
+                                margin: const EdgeInsets.only(bottom: 12),
+                                padding: const EdgeInsets.fromLTRB(12, 10, 6, 10),
+                                decoration: BoxDecoration(
+                                  color: c.alertBg,
+                                  borderRadius: BorderRadius.circular(18),
+                                  border: Border.all(color: c.alertBorder, width: 1.5),
+                                ),
+                                child: Row(children: [
+                                  const Icon3D('collection', size: 44),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                      Text(context.t('dup_in_editor'), style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: c.ink)),
+                                      Text(poemTitle(_dups.first),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(fontFamily: poemFont(_dups.first.lang), fontSize: 15, color: c.mute)),
+                                    ]),
+                                  ),
+                                  TextButton(
+                                    style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
+                                    onPressed: () => openPoem(context, _dups, 0),
+                                    child: Text(context.t('dup_open'), style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: c.primary)),
+                                  ),
+                                ]),
+                              ),
                             Container(
                               constraints: const BoxConstraints(minHeight: 340),
                               padding: const EdgeInsets.fromLTRB(18, 6, 18, 6),

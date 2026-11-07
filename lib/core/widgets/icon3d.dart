@@ -54,6 +54,17 @@ const iconArt = <String, IconArt>{
   'undo': IconArt(_teal, _aqua, 'Undo', '', 'M9 14L4 9l5-5M4 9h10a6 6 0 0 1 0 12h-3', '', ''),
   'edit': IconArt(Color(0xFFB9520A), Color(0xFFFFE2C2), 'Edit', 'M4 20l1-4.5L16 4.5l3.5 3.5L8.5 19z', '', '', 'M14 7l3 3'),
   'check': IconArt(_teal, _peach, 'Save', '', 'M5 12.5l4.5 4.5L19.5 7', '', ''),
+  // Collection icons: two-tone (dominant tile colour + lighter highlight).
+  'samaj': IconArt(Color(0xFF9A3412), Color(0xFFFFD7B5), 'Society', 'M6 5.6a2.3 2.3 0 1 0 0 4.6a2.3 2.3 0 1 0 0-4.6zM18 5.6a2.3 2.3 0 1 0 0 4.6a2.3 2.3 0 1 0 0-4.6zM12 3.4a2.7 2.7 0 1 0 0 5.4a2.7 2.7 0 1 0 0-5.4zM1.8 20.5c0-3 1.9-5.2 4.2-5.2c1.2 0 2.2.5 3 1.4zM22.2 20.5c0-3-1.9-5.2-4.2-5.2c-1.2 0-2.2.5-3 1.4zM6.8 20.5c0-3.8 2.3-6.4 5.2-6.4s5.2 2.6 5.2 6.4z', '', '', ''),
+  'sunrise': IconArt(Color(0xFFC2410C), Color(0xFFFFE08A), 'Morning flowers', 'M5 16a7 7 0 0 1 14 0z', 'M12 3.5v2.5M4.6 7.6l1.7 1.7M19.4 7.6l-1.7 1.7M2.5 16H4M20 16h1.5M3 19.5h18', '', ''),
+  'mountain': IconArt(Color(0xFF475569), Color(0xFFE2E8F0), 'Struggle', 'M2 20.5L9 7.5l4 6 2.5-3.5L22 20.5z', 'M15.5 9.5V3.5l3.2 1.3-3.2 1.3', '', 'M7 11.2l2 1.3 2-1.6'),
+  'wave': IconArt(Color(0xFF1D4ED8), Color(0xFFBFDBFE), 'Ocean of devotion', '', 'M2 8.5c2.5-2 4.5-2 7 0s4.5 2 7 0 4.5-2 6 0M2 13.5c2.5-2 4.5-2 7 0s4.5 2 7 0 4.5-2 6 0M2 18.5c2.5-2 4.5-2 7 0s4.5 2 7 0 4.5-2 6 0', '', ''),
+  'flame': IconArt(Color(0xFFB91C1C), Color(0xFFFFD36E), 'Light of love', 'M12 2.5c3.5 4 6 6.6 6 10.5a6 6 0 0 1-12 0c0-2.6 1.4-4.4 3-6c.3 2 1.1 3 2.3 3.6C10.6 7.6 11 5 12 2.5z', '', 'M12 13.5c1.4 1.4 2.2 2.4 2.2 3.6a2.2 2.2 0 0 1-4.4 0c0-1.2.8-2.2 2.2-3.6z', ''),
+  'hourglass': IconArt(Color(0xFF7C3AED), Color(0xFFE9D5FF), 'Memories', 'M6 3h12v2.5c0 3-2.6 4.8-4.5 6.5c1.9 1.7 4.5 3.5 4.5 6.5V21H6v-2.5c0-3 2.6-4.8 4.5-6.5C8.6 10.3 6 8.5 6 5.5z', '', 'M9 19.5h6c-.6-1.6-1.8-2.6-3-3.4c-1.2.8-2.4 1.8-3 3.4zM9.5 7h5c-.6 1-1.5 1.8-2.5 2.5C11 8.8 10.1 8 9.5 7z', ''),
+  'gift': IconArt(Color(0xFFBE185D), Color(0xFFFFE4F1), 'Good wishes', 'M4 11h16v9.5H4zM3 7.5h18V11H3z', 'M12 7.5C10 4 6.5 4.5 7.5 6.5S12 7.5 12 7.5zM12 7.5c2-3.5 5.5-3 4.5-1S12 7.5 12 7.5z', '', 'M12 7.5v13'),
+  'tree': IconArt(Color(0xFF166534), Color(0xFFBBF7D0), 'With nature', 'M12 2.5a6 6 0 0 1 5.6 8.1A4.5 4.5 0 0 1 15 18.5H9a4.5 4.5 0 0 1-2.6-7.9A6 6 0 0 1 12 2.5z', '', '', 'M12 11v10.5M12 15.5l-2.5-2M12 14l2.5-2'),
+  'swirl': IconArt(Color(0xFF0E7490), Color(0xFFA5F3FC), 'Churning of life', '', 'M12 12a1.5 1.5 0 1 1 1.5 1.5a4 4 0 1 1-4-4a6.5 6.5 0 1 1-6.5 6.5', '', ''),
+  'spark': IconArt(Color(0xFFA16207), Color(0xFFFEF08A), 'Inspiration', 'M12 2.5l1.9 5.6 5.6 1.9-5.6 1.9L12 17.5l-1.9-5.6L4.5 10l5.6-1.9z', 'M18.5 16.5v4M16.5 18.5h4', '', ''),
   'restore': IconArt(Color(0xFF1F8A5B), Color(0xFFCFF7E3), 'Restore', '', 'M15 10l5-5-5-5M20 5H10a6 6 0 0 0 0 12h3', '', ''),
 };
 

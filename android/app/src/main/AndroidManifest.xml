@@ -1,4 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Checking GitHub for "Update Now", Drive/email backup later -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Installing a downloaded update -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>
     <!-- Voice typing into the poem editor -->
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <!-- Fingerprint unlock -->

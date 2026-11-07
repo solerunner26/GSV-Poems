@@ -10,6 +10,7 @@ import '../editor/editor_screen.dart';
 import '../home/home_screen.dart';
 import '../search/search_screen.dart';
 import '../settings/settings_screen.dart';
+import '../update/update_prompt.dart';
 
 enum Tab { settings, search, home, collection }
 
@@ -23,6 +24,15 @@ class Shell extends StatefulWidget {
 
 class _ShellState extends State<Shell> {
   Tab _tab = Tab.home;
+
+  @override
+  void initState() {
+    super.initState();
+    // Every time the app is opened (after the PIN), look for a newer version.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) checkForUpdate(context);
+    });
+  }
 
   void _go(Tab t) => setState(() => _tab = t);
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../app_providers.dart';
 import '../../core/l10n/strings.dart';
@@ -9,10 +10,11 @@ import '../../core/text/text_tools.dart';
 import '../../core/theme/app_themes.dart';
 import '../../core/widgets/common.dart';
 import '../../core/widgets/icon3d.dart';
+import '../duplicates/duplicates_screen.dart';
 import '../import/keep_import_screen.dart';
 import '../pin/pin_screen.dart';
+import '../update/update_prompt.dart';
 
-const appVersion = '1.0.0 (slice 1 + Keep import)';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -23,12 +25,16 @@ class SettingsScreen extends ConsumerStatefulWidget {
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool? _bio;
+  String _version = '';
 
   @override
   void initState() {
     super.initState();
     ref.read(pinServiceProvider).biometricEnabled().then((v) {
       if (mounted) setState(() => _bio = v);
+    });
+    PackageInfo.fromPlatform().then((i) {
+      if (mounted) setState(() => _version = '${i.version} (${i.buildNumber})');
     });
   }
 
@@ -175,6 +181,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               _Group(title: context.t('sec_backup'), rows: [
                 _Row(icon: 'shield', title: context.t('backup_soon'), sub: ''),
                 _Row(
+                  icon: 'collection',
+                  title: context.t('dup_title'),
+                  sub: context.t('dup_note'),
+                  onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const DuplicatesScreen())),
+                ),
+                _Row(
                   icon: 'download',
                   title: context.t('keep_import'),
                   sub: context.t('keep_import_sub'),
@@ -183,7 +195,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ]),
               _Group(title: context.t('sec_help'), rows: [
                 _Row(icon: 'help', title: context.t('help'), sub: '', onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const HelpGuideScreen()))),
-                _Row(icon: 'lotus', title: context.t('version'), sub: appVersion),
+                _Row(icon: 'download', title: context.t('check_update'), sub: '${context.t('version')} $_version', onTap: () => checkForUpdate(context, quiet: false)),
               ]),
               const SizedBox(height: 8),
               Center(child: Text('GSV Poems', style: TextStyle(fontSize: 13, color: c.mute))),

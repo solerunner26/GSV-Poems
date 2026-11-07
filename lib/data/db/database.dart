@@ -22,6 +22,9 @@ class Poems extends Table {
   TextColumn get source => text().withDefault(const Constant('app'))();
   TextColumn get sourceKey => text().nullable()();
 
+  /// Same text (ignoring spacing, punctuation and line breaks) → same key.
+  TextColumn get contentKey => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -67,22 +70,37 @@ const defaultCategories = <(String, String, String, String, String)>[
   ('ghazal', 'ગઝલ', 'ग़ज़ल', 'Ghazal', 'ghazal'),
   ('bhajan', 'ભજન', 'भजन', 'Bhajan', 'bhajan'),
   ('hasya', 'હાસ્ય', 'हास्य', 'Humour', 'hasya'),
-  ('other', 'બીજી', 'अन्य', 'Other', 'other'),
+  ('other', 'અન્ય', 'अन्य', 'Others', 'other'),
 ];
 
 @DriftDatabase(tables: [Poems, PoemCategories, PoemVersions, AppSettings])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? driftDatabase(name: 'gsv_poems'));
 
+  /// Filled in by the repository: recomputes derived columns after an upgrade.
+  static Future<void> Function(AppDatabase db)? backfill;
+
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
+        onUpgrade: (m, from, to) async {
+          if (from < 2) {
+            // v2: duplicate detection key, and "Others" as the home for uncategorised poems.
+            await m.addColumn(poems, poems.contentKey);
+            await customStatement('CREATE INDEX poems_content_key ON poems (content_key)');
+            await customStatement(
+                "UPDATE poem_categories SET name_gu = 'અન્ય', name_hi = 'अन्य', name_en = 'Others' WHERE id = 'other'");
+            await customStatement("UPDATE poems SET category_id = 'other' WHERE category_id IS NULL");
+            await backfill?.call(this);
+          }
+        },
         onCreate: (m) async {
           await m.createAll();
           await customStatement('CREATE INDEX poems_updated ON poems (updated_at)');
           await customStatement('CREATE UNIQUE INDEX poems_source_key ON poems (source_key)');
+          await customStatement('CREATE INDEX poems_content_key ON poems (content_key)');
           await batch((b) {
             for (var i = 0; i < defaultCategories.length; i++) {
               final c = defaultCategories[i];

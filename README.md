@@ -1,27 +1,37 @@
 # GSV Poems · કાવ્ય સંગ્રહ
 
-An Android app (phone and tablet) for writing, finding, reading and safely keeping Shri GSV's Gujarati and Hindi poems. It works fully offline and keeps everything on the device.
+An Android app (phone and tablet) for writing, finding, reading and safely keeping the Gujarati and Hindi poems of ગીગાભાઈ સનાભાઈ વાળા "ગૌરવ". It works fully offline and keeps everything on the device.
 
 - **Spec:** [BRIEF.md](BRIEF.md)
 - **Design:** [DESIGN.md](DESIGN.md)
 - **Code layout:** [ARCHITECTURE.md](ARCHITECTURE.md)
 - **Icon render prompts:** [ICON_PROMPTS.md](ICON_PROMPTS.md)
 
-## Status
-**Slice 1 (foundation) is done:**
-- Splash, 4-digit PIN (plus optional fingerprint), and the 5-button bottom bar with a raised Home
-- Write with auto-save, voice typing and edit history
-- Reading mode with text size, read-aloud, favourite and share
-- Search that finds any 3 letters across Gujarati, Hindi and English letters
-- Collection by category, and a recycle bin with restore
-- Six themes, a gu/hi/en interface and an in-app help guide
-- **Google Keep import** (Settings → Import from Google Keep). Each note's title becomes a collection, and the same title in Gujarati and Hindi is one collection. The importer reads the contents list at the top of each note, splits poems at their numbered titles and at separator lines (`****`, `++++`, `####`, `:::`), and keeps the date written under a poem. Importing twice never duplicates. Tested on the full export: 888 entries, which are 887 unique poems (one appears twice) in 17 collections. A short-named first volume ("પ્રકૃતિ" 1–19) joins the collection it continues ("પ્રકૃતિ સંગ" 20 onward).
+## Status — v1.1.0-beta.1 (build 2)
+- **Foundation:**
+  - Splash, 4-digit PIN (plus optional fingerprint), and the 5-button bottom bar with a raised Home
+  - Write with auto-save, voice typing and edit history
+  - Reading mode with text size, read-aloud, favourite and share
+  - Search for any 3 letters across Gujarati, Hindi and English letters
+  - Recycle bin with restore
+  - Six themes, a gu/hi/en interface and help
+- **All 890 poems come with the app** (`assets/poems/seed.json`): 801 Gujarati and 89 Hindi, in 20 collections. They fill the collections on first launch. A later version can add new poems the same way without touching existing ones.
+- **Clean poems:** each poem keeps only its title and stanzas. Contents lists, numbers, separator lines (`****`, `++++`, `####`, `:::`), "સમાપ્ત" and date/place lines are removed. The written date becomes the poem's date, and the app keeps each poem's number.
+- **Collections:**
+  - named after each note's title; notes with number ranges ("૧ થી ૧૮", "૧૯ થી ૩૬") join one collection
+  - the Collection tab has **ગુજરાતી / हिन्दी** sections, so each shows only its own poems, with names in that script
+  - uncategorised poems go to **અન્ય / अन्य / Others**
+- **Duplicates:**
+  - found by text, ignoring spacing, commas and line breaks
+  - shown on Home and in Settings → "એકસરખી કવિતા" (duplicate poems)
+  - removed only when asked, and the extras go to the recycle bin
+  - the editor warns when typed or pasted text is already in the collection
+- **Updates:** on every open, the app checks this repo's GitHub Releases and offers **Update Now**: download, then Android's installer, with all poems kept.
 
 **Coming next:**
 - Panchang and Choghadiya
 - Encrypted backup (WhatsApp, email, Drive) and restore
 - Two-device sync
-- "Update Now"
 
 ## Develop
 Requirements: Flutter 3.47+, Android SDK 36, and Android licences accepted (`flutter doctor --android-licenses`).
@@ -38,17 +48,30 @@ dart run build_runner build --delete-conflicting-outputs
 flutter test
 ```
 
+## Rebuilding the bundled poems from a Keep export
 ```bash
-flutter run
+dart run tool/build_seed.dart "path/to/folder/with/json"
 ```
 
-## Checking a Keep export without importing
+To check an export without changing anything:
+
 ```bash
 dart run tool/keep_dry_run.dart "path/to/folder/with/json"
 ```
 
+## Releasing an update
+1. Raise `version:` in `pubspec.yaml`. The number after `+` must go up, for example `1.1.0-beta.2+3`.
+2. Build the APK:
+   ```bash
+   flutter build apk --release
+   ```
+3. Create a GitHub release with the APK named `gsv-poems-v<version>-build<N>.apk`. Phones see it the next time the app opens.
+
+The release signing key is `%USERPROFILE%\.gsvpoems\gsv-poems-release.jks`, and its passwords are in `android/key.properties`. Neither is in git. **Back up both files.** Without them, future updates cannot install over the app.
+
 ## Privacy rules for this repo
-- **Never commit:** poems, backups (`*.gsvbak`), Google Takeout exports (`private/`, `takeout/`), keystores or passwords. `.gitignore` already blocks them.
+- **Never commit:** backups (`*.gsvbak`), keystores or passwords. `.gitignore` blocks them.
+- **Public by the owner's choice:** the poems in `assets/poems/seed.json`.
 - **On the phone:** the PIN is stored only as a salted PBKDF2 hash in Android's Keystore-backed storage.
 
 ## Fonts

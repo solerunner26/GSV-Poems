@@ -236,3 +236,14 @@ int? parseAnyDigits(String s) {
   }
   return int.tryParse(b.toString());
 }
+
+/// True when the text holds at least one real letter (not only digits or marks).
+bool hasLetter(String s) => s.runes.any(_isLetter);
+
+/// Letters only, lower-cased — spacing, punctuation and digits removed.
+/// Two copies of a poem with different line breaks or commas give the same key.
+String lettersOnly(String s) => String.fromCharCodes(s.toLowerCase().runes.where((c) {
+      if (_isLatin(c)) return true;
+      final off = _indicOffset(c);
+      return off != null && off >= 0x01 && off <= 0x63 && off != 0x3C;
+    }));

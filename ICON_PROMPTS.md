@@ -245,3 +245,63 @@ A high-resolution, high-fidelity app icon based on the context of feature. The d
 ```
 A high-resolution, high-fidelity app icon based on the context of feature. The design must be a 3D embossed icon with a distinct raised tactile depth, sitting on a clean, subtly recessed background. Style is modern, smooth matte plastic and polished glass claymorphism. Two-tone color palette: utilizing a dominant #8A2B6E plum and a supporting #FFC9EE orchid, dynamically contrasting against a Light theme background. The icon concept must visually represent a photo frame with mountains and sun. Studio lighting, soft ambient occlusion shadows to emphasize the embossed depth, isometric view, centered composition, isolated on a solid #F4F7F6 background, app store asset quality, 8k resolution, Unreal Engine 5 render style. --no outlines, photo, flat vector
 ```
+
+## Collection: Samaj Sang (society) · `samaj`
+
+```
+A high-resolution, high-fidelity app icon based on the context of feature. The design must be a 3D embossed icon with a distinct raised tactile depth, sitting on a clean, subtly recessed background. Style is modern, smooth matte plastic and polished glass claymorphism. Two-tone color palette: utilizing a dominant #9A3412 burnt orange and a supporting #FFD7B5 apricot, dynamically contrasting against a Light theme background. The icon concept must visually represent three people standing together, a community. Studio lighting, soft ambient occlusion shadows to emphasize the embossed depth, isometric view, centered composition, isolated on a solid #F4F7F6 background, app store asset quality, 8k resolution, Unreal Engine 5 render style. --no outlines, photo, flat vector
+```
+
+## Collection: Parivar na Prabhat Pushpo (family dawn flowers) · `sunrise`
+
+```
+A high-resolution, high-fidelity app icon based on the context of feature. The design must be a 3D embossed icon with a distinct raised tactile depth, sitting on a clean, subtly recessed background. Style is modern, smooth matte plastic and polished glass claymorphism. Two-tone color palette: utilizing a dominant #C2410C saffron red and a supporting #FFE08A morning gold, dynamically contrasting against a Light theme background. The icon concept must visually represent a rising half sun over the horizon with rays. Studio lighting, soft ambient occlusion shadows to emphasize the embossed depth, isometric view, centered composition, isolated on a solid #F4F7F6 background, app store asset quality, 8k resolution, Unreal Engine 5 render style. --no outlines, photo, flat vector
+```
+
+## Collection: Sangharshmay Jivan (life of struggle) · `mountain`
+
+```
+A high-resolution, high-fidelity app icon based on the context of feature. The design must be a 3D embossed icon with a distinct raised tactile depth, sitting on a clean, subtly recessed background. Style is modern, smooth matte plastic and polished glass claymorphism. Two-tone color palette: utilizing a dominant #475569 slate and a supporting #E2E8F0 snow white, dynamically contrasting against a Light theme background. The icon concept must visually represent a mountain peak with a small flag at the top. Studio lighting, soft ambient occlusion shadows to emphasize the embossed depth, isometric view, centered composition, isolated on a solid #F4F7F6 background, app store asset quality, 8k resolution, Unreal Engine 5 render style. --no outlines, photo, flat vector
+```
+
+## Collection: Bhakti Sagar Manch (ocean of devotion) · `wave`
+
+```
+A high-resolution, high-fidelity app icon based on the context of feature. The design must be a 3D embossed icon with a distinct raised tactile depth, sitting on a clean, subtly recessed background. Style is modern, smooth matte plastic and polished glass claymorphism. Two-tone color palette: utilizing a dominant #1D4ED8 royal blue and a supporting #BFDBFE sky blue, dynamically contrasting against a Light theme background. The icon concept must visually represent three gentle ocean waves. Studio lighting, soft ambient occlusion shadows to emphasize the embossed depth, isometric view, centered composition, isolated on a solid #F4F7F6 background, app store asset quality, 8k resolution, Unreal Engine 5 render style. --no outlines, photo, flat vector
+```
+
+## Collection: Prem Jyot (flame of love) · `flame`
+
+```
+A high-resolution, high-fidelity app icon based on the context of feature. The design must be a 3D embossed icon with a distinct raised tactile depth, sitting on a clean, subtly recessed background. Style is modern, smooth matte plastic and polished glass claymorphism. Two-tone color palette: utilizing a dominant #B91C1C crimson and a supporting #FFD36E warm gold, dynamically contrasting against a Light theme background. The icon concept must visually represent a single lamp flame with a bright inner core. Studio lighting, soft ambient occlusion shadows to emphasize the embossed depth, isometric view, centered composition, isolated on a solid #F4F7F6 background, app store asset quality, 8k resolution, Unreal Engine 5 render style. --no outlines, photo, flat vector
+```
+
+## Collection: Smruti (memories) · `hourglass`
+
+```
+A high-resolution, high-fidelity app icon based on the context of feature. The design must be a 3D embossed icon with a distinct raised tactile depth, sitting on a clean, subtly recessed background. Style is modern, smooth matte plastic and polished glass claymorphism. Two-tone color palette: utilizing a dominant #7C3AED violet and a supporting #E9D5FF lilac, dynamically contrasting against a Light theme background. The icon concept must visually represent an hourglass with flowing sand. Studio lighting, soft ambient occlusion shadows to emphasize the embossed depth, isometric view, centered composition, isolated on a solid #F4F7F6 background, app store asset quality, 8k resolution, Unreal Engine 5 render style. --no outlines, photo, flat vector
+```
+
+## Collection: Shubhechha Manch (good wishes) · `gift`
+
+```
+A high-resolution, high-fidelity app icon based on the context of feature. The design must be a 3D embossed icon with a distinct raised tactile depth, sitting on a clean, subtly recessed background. Style is modern, smooth matte plastic and polished glass claymorphism. Two-tone color palette: utilizing a dominant #BE185D magenta and a supporting #FFE4F1 pale pink, dynamically contrasting against a Light theme background. The icon concept must visually represent a gift box with a ribbon bow. Studio lighting, soft ambient occlusion shadows to emphasize the embossed depth, isometric view, centered composition, isolated on a solid #F4F7F6 background, app store asset quality, 8k resolution, Unreal Engine 5 render style. --no outlines, photo, flat vector
+```
+
+## Collection: Prakruti Sang (with nature) · `tree`
+
+```
+A high-resolution, high-fidelity app icon based on the context of feature. The design must be a 3D embossed icon with a distinct raised tactile depth, sitting on a clean, subtly recessed background. Style is modern, smooth matte plastic and polished glass claymorphism. Two-tone color palette: utilizing a dominant #166534 forest green and a supporting #BBF7D0 mint, dynamically contrasting against a Light theme background. The icon concept must visually represent a rounded leafy tree with a trunk. Studio lighting, soft ambient occlusion shadows to emphasize the embossed depth, isometric view, centered composition, isolated on a solid #F4F7F6 background, app store asset quality, 8k resolution, Unreal Engine 5 render style. --no outlines, photo, flat vector
+```
+
+## Collection: Jivan Manthan (churning of life) · `swirl`
+
+```
+A high-resolution, high-fidelity app icon based on the context of feature. The design must be a 3D embossed icon with a distinct raised tactile depth, sitting on a clean, subtly recessed background. Style is modern, smooth matte plastic and polished glass claymorphism. Two-tone color palette: utilizing a dominant #0E7490 deep cyan and a supporting #A5F3FC aqua, dynamically contrasting against a Light theme background. The icon concept must visually represent a swirling spiral, like churning. Studio lighting, soft ambient occlusion shadows to emphasize the embossed depth, isometric view, centered composition, isolated on a solid #F4F7F6 background, app store asset quality, 8k resolution, Unreal Engine 5 render style. --no outlines, photo, flat vector
+```
+
+## Collection: Preranatmak (inspiration) · `spark`
+
+```
+A high-resolution, high-fidelity app icon based on the context of feature. The design must be a 3D embossed icon with a distinct raised tactile depth, sitting on a clean, subtly recessed background. Style is modern, smooth matte plastic and polished glass claymorphism. Two-tone color palette: utilizing a dominant #A16207 dark gold and a supporting #FEF08A lemon, dynamically contrasting against a Light theme background. The icon concept must visually represent a four-point sparkle star with a small plus. Studio lighting, soft ambient occlusion shadows to emphasize the embossed depth, isometric view, centered composition, isolated on a solid #F4F7F6 background, app store asset quality, 8k resolution, Unreal Engine 5 render style. --no outlines, photo, flat vector
+```

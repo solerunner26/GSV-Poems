@@ -67,7 +67,8 @@ void main() {
       expect(r.poems.map((p) => p.number), [1, 2, 3]);
       expect(r.poems[0].title, 'પહેલું શીર્ષક');
       expect(r.poems[0].body, 'પહેલી પંક્તિ અહીં,\nબીજી પંક્તિ અહીં.\n૨. અંદરની ગણતરી પણ કવિતાનો ભાગ છે');
-      expect(r.poems[1].body, contains('ઓકલેન્ડ'));
+      expect(r.poems[1].body, 'એક પંક્તિ "ગૌરવ".', reason: 'the date/place line is not part of the poem');
+      expect(r.poems[1].written, DateTime(2020, 7, 26, 12));
       expect(r.poems[2].body, 'છેલ્લી કવિતા.', reason: 'separator, "સમાપ્ત" and the empty "૪:-" are dropped');
     });
 
@@ -96,6 +97,26 @@ void main() {
       final r = splitNote('1. One\nfirst text\n****\n2. Two\nsecond text');
       expect(r.listed, isEmpty);
       expect(r.poems.map((p) => p.title), ['One', 'Two']);
+    });
+  });
+
+  group('tidy', () {
+    test('titles keep only the name', () {
+      expect(tidyTitle('ગુરુ જ્ઞાન.. .(વિદ્યાપીઠ).  ૬'), 'ગુરુ જ્ઞાન (વિદ્યાપીઠ)');
+      expect(tidyTitle('औरत। :१::२::'), 'औरत');
+      expect(tidyTitle('યુવા શક્તિ.   ૨૮/૨/૨૫.'), 'યુવા શક્તિ');
+      expect(tidyTitle('ભવનું ભાથું. ૫/૮/'), 'ભવનું ભાથું');
+      expect(tidyTitle('૩૨:- નાની બાળ રીવા'), 'નાની બાળ રીવા');
+      expect(tidyTitle('સંતોષ ૧:- જીવન મંથન'), 'સંતોષ');
+      expect(tidyTitle('લઈને ક્યાં જશો?'), 'લઈને ક્યાં જશો?');
+    });
+    test('bodies keep only stanzas', () {
+      expect(tidyBody(['   પહેલી પંક્તિ,', '', '', '  બીજી પંક્તિ.', '(૫૨)', '૨૬/૭/૨૬..  ઓકલેન્ડ..', '૭૪:-', '']),
+          ['પહેલી પંક્તિ,', '', 'બીજી પંક્તિ.']);
+    });
+    test('a poem written after the contents list still starts its own poem', () {
+      final r = splitNote('1:- a\n2:- b\n****\n1:- a\ntext\n****\n2:- b\ntext\n****\n3:- c\nnew poem');
+      expect(r.poems.map((p) => p.title), ['a', 'b', 'c']);
     });
   });
 
@@ -149,8 +170,10 @@ void main() {
 
     test('the same poem always gets the same sourceKey (safe to import twice)', () {
       final a = parseKeepTakeout({'x.json': note(gujaratiNote, title: 'A')}).poems.first;
-      final b = parseKeepTakeout({'y.json': note(gujaratiNote, title: 'A')}).poems.first;
-      expect(a.sourceKey, b.sourceKey);
+      final b = parseKeepTakeout({'x.json': note(gujaratiNote.replaceAll('પહેલી પંક્તિ અહીં,', 'પહેલી   પંક્તિ અહીં'), title: 'A')}).poems.first;
+      expect(a.sourceKey, b.sourceKey, reason: 'same file, same words: spacing and commas do not matter');
+      final other = parseKeepTakeout({'y.json': note(gujaratiNote, title: 'A')}).poems.first;
+      expect(other.sourceKey, isNot(a.sourceKey), reason: 'a copy in another note is kept and shown as a duplicate');
     });
   });
 

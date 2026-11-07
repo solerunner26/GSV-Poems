@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
 import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
@@ -13,13 +16,34 @@ class PoemStats {
 }
 
 class ImportOutcome {
-  const ImportOutcome(this.added, this.alreadyThere);
+  const ImportOutcome(this.added, this.alreadyThere, {this.duplicates = 0});
   final int added, alreadyThere;
+
+  /// Poems whose text matches another poem — listed for review, never removed by themselves.
+  final int duplicates;
+}
+
+/// Key used to spot the same poem twice, whatever its spacing, commas or line breaks.
+/// Very short texts get no key, so two one-line drafts are not called duplicates.
+String? contentKeyOf(String body) {
+  final letters = lettersOnly(body);
+  if (letters.runes.length < 20) return null;
+  return sha1.convert(utf8.encode(letters)).toString();
 }
 
 /// All reads and writes of poems go through here.
 class PoemRepository {
-  PoemRepository(this.db, {DateTime Function()? clock}) : _now = clock ?? DateTime.now;
+  PoemRepository(this.db, {DateTime Function()? clock}) : _now = clock ?? DateTime.now {
+    AppDatabase.backfill = backfillKeys;
+  }
+
+  /// After a database upgrade: fill in duplicate keys for poems saved by older versions.
+  static Future<void> backfillKeys(AppDatabase db) async {
+    final rows = await db.select(db.poems).get();
+    for (final p in rows) {
+      await (db.update(db.poems)..where((x) => x.id.equals(p.id))).write(PoemsCompanion(contentKey: Value(contentKeyOf(p.body))));
+    }
+  }
 
   final AppDatabase db;
   final DateTime Function() _now;
@@ -147,8 +171,9 @@ class PoemRepository {
     // Keys are in folded Latin (sh→s, aa→a). Most specific first:
     // "sangharshmay jivan" is struggle, "desh prem" is the nation.
     const map = {
-      'sanghar': 'shield', 'des ': 'desh', 'tahevar': 'diya', 'prer': 'star', 'smrit': 'photo',
-      'prakrit': 'prakruti', 'prakrut': 'prakruti', 'samaj': 'parivar', 'parivar': 'parivar',
+      'sanghar': 'mountain', 'des ': 'desh', 'tahevar': 'diya', 'prer': 'spark', 'smrit': 'hourglass',
+      'subhech': 'gift', 'jyot': 'flame', 'sagar': 'wave', 'prabhat': 'sunrise', 'manthan': 'swirl',
+      'prakriti sang': 'tree', 'prakrit': 'prakruti', 'prakrut': 'prakruti', 'samaj': 'samaj', 'parivar': 'parivar',
       'bhakti': 'bhakti', 'bhajan': 'bhajan', 'gajal': 'ghazal', 'prem': 'prem', 'hasy': 'hasya', 'jivan': 'jivan',
     };
     for (final e in map.entries) {
@@ -161,6 +186,8 @@ class PoemRepository {
   /// "જીવન મંથન" and "जीवन मंथन" are the same collection.
   Future<String> ensureCategory(String name) async {
     final key = _nameKey(name);
+    // "અન્ય વિભાગ" / "अन्य" (other) belong in Others.
+    if (key == 'any' || key.startsWith('any ') || key == 'others' || key == 'other') return 'other';
     final cats = await db.select(db.poemCategories).get();
     for (final c in cats) {
       if (_nameKey(c.nameGu) == key || _nameKey(c.nameHi) == key || _nameKey(c.nameEn) == key) return c.id;
@@ -193,6 +220,7 @@ class PoemRepository {
   Future<String> createPoem({required String title, required String body, String? categoryId, String? lang}) async {
     final id = _uuid.v4();
     final now = _now();
+    categoryId ??= 'other';
     await db.into(db.poems).insert(PoemsCompanion.insert(
           id: id,
           number: Value(await _nextNumber(categoryId)),
@@ -202,6 +230,7 @@ class PoemRepository {
           categoryId: Value(categoryId),
           wordCount: Value(wordCount(body)),
           searchBlob: Value(buildSearchBlob(title, body)),
+          contentKey: Value(contentKeyOf(body)),
           createdAt: now,
           updatedAt: now,
         ));
@@ -224,9 +253,10 @@ class PoemRepository {
             title: Value(title.trim()),
             body: Value(body),
             lang: Value(detectLang('$title $body').name),
-            categoryId: Value(categoryId),
+            categoryId: Value(categoryId ?? 'other'),
             wordCount: Value(wordCount(body)),
             searchBlob: Value(buildSearchBlob(title, body)),
+            contentKey: Value(contentKeyOf(body)),
             updatedAt: changed || old.categoryId != categoryId ? Value(_now()) : const Value.absent(),
           ));
     });
@@ -284,6 +314,7 @@ class PoemRepository {
               categoryId: Value(cat),
               wordCount: Value(wordCount(p.body)),
               searchBlob: Value(buildSearchBlob(p.title, p.body)),
+              contentKey: Value(contentKeyOf(p.body)),
               createdAt: p.createdAt,
               updatedAt: p.updatedAt,
               source: const Value('keep'),
@@ -292,7 +323,49 @@ class PoemRepository {
         added++;
       }
     });
-    return ImportOutcome(added, skipped);
+    return ImportOutcome(added, skipped, duplicates: (await duplicateGroups()).fold(0, (n, g) => n + g.length - 1));
+  }
+
+  // ---------- duplicates ----------
+
+  /// Live poems whose text matches [body] (spacing and punctuation ignored).
+  Future<List<Poem>> findDuplicatesOf(String body, {String? excludeId}) async {
+    final key = contentKeyOf(body);
+    if (key == null) return const [];
+    final q = db.select(db.poems)..where((p) => p.deletedAt.isNull() & p.contentKey.equals(key));
+    if (excludeId != null) q.where((p) => p.id.equals(excludeId).not());
+    return q.get();
+  }
+
+  /// Groups of live poems with the same text, oldest first in each group.
+  Future<List<List<Poem>>> duplicateGroups() async {
+    final rows = await (db.select(db.poems)
+          ..where((p) => p.deletedAt.isNull() & p.contentKey.isNotNull())
+          ..orderBy([(p) => OrderingTerm.asc(p.createdAt)]))
+        .get();
+    final byKey = <String, List<Poem>>{};
+    for (final p in rows) {
+      (byKey[p.contentKey!] ??= []).add(p);
+    }
+    return byKey.values.where((g) => g.length > 1).toList();
+  }
+
+  Stream<int> watchDuplicateCount() => db.select(db.poems).watch().asyncMap((_) async {
+        final groups = await duplicateGroups();
+        return groups.fold<int>(0, (n, g) => n + g.length - 1);
+      });
+
+  /// Keeps the first copy of a group and moves the others to the recycle bin
+  /// (they can still be restored). Only runs when the poet asks.
+  Future<int> removeDuplicates(List<Poem> group, {String? keepId}) async {
+    final keep = keepId ?? group.first.id;
+    var moved = 0;
+    for (final p in group) {
+      if (p.id == keep) continue;
+      await moveToBin(p.id);
+      moved++;
+    }
+    return moved;
   }
 
   // ---------- settings ----------
