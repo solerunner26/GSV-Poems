@@ -298,6 +298,7 @@ const Map<String, List<String>> _t = {
   ],
   'drive_setup_title': ['Google Cloud સેટઅપ (એક વાર)', 'Google Cloud सेटअप (एक बार)', 'Google Cloud setup (once)'],
   'drive_client_id': ['Web client ID', 'Web client ID', 'Web client ID'],
+  'drive_reconnect': ['Google Drive ફરી જોડો — અહીં દબાવો', 'Google Drive फिर से जोड़ें — यहाँ दबाएँ', 'Connect Google Drive again — tap here'],
   'drive_saved': ['સાચવ્યું', 'सहेजा', 'Saved'],
   'drive_failed': ['Drive સાથે ન થયું', 'Drive के साथ नहीं हुआ', 'Drive did not work'],
   'help': ['કેવી રીતે વાપરવું', 'कैसे इस्तेमाल करें', 'How to use'],

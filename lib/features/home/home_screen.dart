@@ -15,6 +15,7 @@ import '../../core/panchang/panchang.dart';
 import '../calendar/calendar_screen.dart';
 import '../common/poem_tile.dart';
 import '../duplicates/duplicates_screen.dart';
+import '../sync/drive_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key, required this.onOpenCollection, required this.onWrite});
@@ -66,6 +67,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               const SizedBox(height: 18),
               const _FestivalAlert(),
               const DuplicateNotice(),
+              const DriveReconnectNotice(),
               const _UpcomingFestivals(),
               if (stats.total == 0)
                 EmptyState(

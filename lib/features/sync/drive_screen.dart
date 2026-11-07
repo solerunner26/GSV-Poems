@@ -37,11 +37,19 @@ class SyncCoordinator {
   Future<bool> connected() async => (await ref.read(repoProvider).getSetting('driveEmail'))?.isNotEmpty ?? false;
 
   Future<SyncResult> run({String? typedKey}) => _running ??= () async {
+        final repo = ref.read(repoProvider);
         try {
           final drive = await ref.read(driveServiceProvider.future);
-          final svc = SyncService(ref.read(repoProvider), ref.read(backupServiceProvider), drive);
-          return await svc.sync(typedKey: typedKey);
+          if (!await drive.signInQuietly()) {
+            await repo.setSetting('driveNeedsReconnect', '1');
+            throw StateError('Google Drive needs to be connected again');
+          }
+          final svc = SyncService(repo, ref.read(backupServiceProvider), drive);
+          final r = await svc.sync(typedKey: typedKey);
+          await repo.setSetting('driveNeedsReconnect', '');
+          return r;
         } finally {
+          ref.invalidate(driveReconnectProvider);
           _running = null;
           ref.invalidate(backupStatusProvider);
         }
@@ -63,6 +71,48 @@ class SyncCoordinator {
 
 final syncProvider = Provider<SyncCoordinator>((ref) => SyncCoordinator(ref));
 
+/// True when Google asked for permission again (e.g. after 7 days in Testing
+/// mode): Home then shows a "Reconnect Google Drive" card.
+final driveReconnectProvider = FutureProvider<bool>((ref) async {
+  final repo = ref.watch(repoProvider);
+  final connected = (await repo.getSetting('driveEmail'))?.isNotEmpty ?? false;
+  return connected && await repo.getSetting('driveNeedsReconnect') == '1';
+});
+
+/// Card on Home when Drive needs to be connected again.
+class DriveReconnectNotice extends ConsumerWidget {
+  const DriveReconnectNotice({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (!(ref.watch(driveReconnectProvider).asData?.value ?? false)) return const SizedBox.shrink();
+    final c = context.gc;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 18),
+      child: Material(
+        color: c.alertBg,
+        borderRadius: BorderRadius.circular(20),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const DriveScreen())),
+          child: Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), border: Border.all(color: c.alertBorder, width: 1.5)),
+            child: Row(children: [
+              const Icon3D('cloud', size: 48),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(context.t('drive_reconnect'), style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: c.ink)),
+              ),
+              Icon(Icons.chevron_right_rounded, color: c.accent),
+            ]),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class DriveScreen extends ConsumerStatefulWidget {
   const DriveScreen({super.key});
 
@@ -72,7 +122,7 @@ class DriveScreen extends ConsumerStatefulWidget {
 
 class _DriveScreenState extends ConsumerState<DriveScreen> {
   String? _email, _lastSync, _message;
-  bool _needsKey = false, _busy = false, _ok = true;
+  bool _needsKey = false, _busy = false, _ok = true, _reconnect = false;
   final _clientId = TextEditingController();
 
   @override
@@ -86,12 +136,14 @@ class _DriveScreenState extends ConsumerState<DriveScreen> {
     final email = await repo.getSetting('driveEmail');
     final last = await repo.getSetting('lastSyncAt');
     final needs = await repo.getSetting('syncNeedsKey');
+    final reconnect = await repo.getSetting('driveNeedsReconnect') == '1';
     final id = await ref.read(driveClientIdProvider.future);
     if (!mounted) return;
     setState(() {
       _email = email == null || email.isEmpty ? null : email;
       _lastSync = last;
       _needsKey = needs == '1';
+      _reconnect = reconnect;
       _clientId.text = id;
     });
   }
@@ -132,6 +184,7 @@ class _DriveScreenState extends ConsumerState<DriveScreen> {
         final drive = await ref.read(driveServiceProvider.future);
         final email = await drive.connect();
         await ref.read(repoProvider).setSetting('driveEmail', email);
+        await ref.read(repoProvider).setSetting('driveNeedsReconnect', '');
         final r = await ref.read(syncProvider).run();
         if (mounted) setState(() => _set(_describe(r), !r.needsKey));
       });
@@ -212,7 +265,7 @@ class _DriveScreenState extends ConsumerState<DriveScreen> {
                     ),
                   ],
                   const SizedBox(height: 16),
-                  if (_email == null)
+                  if (_email == null || _reconnect)
                     PrimaryButton(label: context.t('drive_connect'), icon: 'cloud', onPressed: _busy ? null : _connect)
                   else
                     PrimaryButton(label: _busy ? context.t('drive_syncing') : context.t('drive_sync_now'), icon: 'cloud', onPressed: _busy ? null : _syncNow),
