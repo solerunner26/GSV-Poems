@@ -48,8 +48,7 @@ class GsvColors extends ThemeExtension<GsvColors> {
 
   static const good = Color(0xFF2F8A55), neutral = Color(0xFF3A5BB0), bad = Color(0xFFC0392B);
 
-  LinearGradient get buttonGradient =>
-      LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [primary, primaryDeep]);
+  LinearGradient get buttonGradient => LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [primary, primaryDeep]);
 
   @override
   GsvColors copyWith() => this;
@@ -171,14 +170,16 @@ ThemeData buildTheme(GsvColors c) {
     scaffoldBackgroundColor: Colors.transparent,
     canvasColor: c.bg,
     extensions: [c, NeonTokens.standard],
-    pageTransitionsTheme: const PageTransitionsTheme(builders: {
-      TargetPlatform.android: transitions,
-      TargetPlatform.iOS: transitions,
-      TargetPlatform.windows: transitions,
-      TargetPlatform.linux: transitions,
-      TargetPlatform.macOS: transitions,
-      TargetPlatform.fuchsia: transitions,
-    }),
+    pageTransitionsTheme: const PageTransitionsTheme(
+      builders: {
+        TargetPlatform.android: transitions,
+        TargetPlatform.iOS: transitions,
+        TargetPlatform.windows: transitions,
+        TargetPlatform.linux: transitions,
+        TargetPlatform.macOS: transitions,
+        TargetPlatform.fuchsia: transitions,
+      },
+    ),
     textTheme: base.textTheme.copyWith(
       headlineMedium: s(28, FontWeight.w700),
       titleLarge: s(20, FontWeight.w700),
@@ -198,11 +199,23 @@ ThemeData buildTheme(GsvColors c) {
       filled: true,
       fillColor: c.surface,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: c.primary.withValues(alpha: 0.25))),
-      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: c.primary.withValues(alpha: 0.25), width: 1.5)),
-      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: c.primary, width: 2)),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(color: c.primary.withValues(alpha: 0.25)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(color: c.primary.withValues(alpha: 0.25), width: 1.5),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(color: c.primary, width: 2),
+      ),
     ),
-    dialogTheme: DialogThemeData(backgroundColor: c.surface, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24))),
+    dialogTheme: DialogThemeData(
+      backgroundColor: c.surface,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+    ),
     bottomSheetTheme: BottomSheetThemeData(backgroundColor: c.surface, showDragHandle: true),
     cardTheme: CardThemeData(color: c.surface),
   );

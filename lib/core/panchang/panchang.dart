@@ -107,30 +107,47 @@ class PanchangDay {
 // Day Choghadiya: the first of the day depends on the weekday, then it
 // follows Udveg → Char → Labh → Amrit → Kaal → Shubh → Rog.
 const _dayCycle = [
-  ChoghadiyaKind.udveg, ChoghadiyaKind.char, ChoghadiyaKind.labh, ChoghadiyaKind.amrit,
-  ChoghadiyaKind.kaal, ChoghadiyaKind.shubh, ChoghadiyaKind.rog,
+  ChoghadiyaKind.udveg,
+  ChoghadiyaKind.char,
+  ChoghadiyaKind.labh,
+  ChoghadiyaKind.amrit,
+  ChoghadiyaKind.kaal,
+  ChoghadiyaKind.shubh,
+  ChoghadiyaKind.rog,
 ];
 const _dayStart = [
-  ChoghadiyaKind.udveg, ChoghadiyaKind.amrit, ChoghadiyaKind.rog, ChoghadiyaKind.labh,
-  ChoghadiyaKind.shubh, ChoghadiyaKind.char, ChoghadiyaKind.kaal,
+  ChoghadiyaKind.udveg,
+  ChoghadiyaKind.amrit,
+  ChoghadiyaKind.rog,
+  ChoghadiyaKind.labh,
+  ChoghadiyaKind.shubh,
+  ChoghadiyaKind.char,
+  ChoghadiyaKind.kaal,
 ];
 // Night: Shubh → Amrit → Char → Rog → Kaal → Labh → Udveg.
 const _nightCycle = [
-  ChoghadiyaKind.shubh, ChoghadiyaKind.amrit, ChoghadiyaKind.char, ChoghadiyaKind.rog,
-  ChoghadiyaKind.kaal, ChoghadiyaKind.labh, ChoghadiyaKind.udveg,
+  ChoghadiyaKind.shubh,
+  ChoghadiyaKind.amrit,
+  ChoghadiyaKind.char,
+  ChoghadiyaKind.rog,
+  ChoghadiyaKind.kaal,
+  ChoghadiyaKind.labh,
+  ChoghadiyaKind.udveg,
 ];
 const _nightStart = [
-  ChoghadiyaKind.shubh, ChoghadiyaKind.char, ChoghadiyaKind.kaal, ChoghadiyaKind.udveg,
-  ChoghadiyaKind.amrit, ChoghadiyaKind.rog, ChoghadiyaKind.labh,
+  ChoghadiyaKind.shubh,
+  ChoghadiyaKind.char,
+  ChoghadiyaKind.kaal,
+  ChoghadiyaKind.udveg,
+  ChoghadiyaKind.amrit,
+  ChoghadiyaKind.rog,
+  ChoghadiyaKind.labh,
 ];
 
 List<Choghadiya> _segments(DateTime from, DateTime to, ChoghadiyaKind first, List<ChoghadiyaKind> cycle, {required bool night}) {
   final step = to.difference(from) ~/ 8;
   var i = cycle.indexOf(first);
-  return [
-    for (var k = 0; k < 8; k++)
-      Choghadiya(cycle[(i + k) % 7], from.add(step * k), k == 7 ? to : from.add(step * (k + 1)), night: night),
-  ];
+  return [for (var k = 0; k < 8; k++) Choghadiya(cycle[(i + k) % 7], from.add(step * k), k == 7 ? to : from.add(step * (k + 1)), night: night)];
 }
 
 double _wrap(double a) {
@@ -194,7 +211,8 @@ PanchangDay panchangFor(DateTime day, Place place) {
   if (hit != null) return hit;
 
   final offset = d.add(const Duration(hours: 12)).timeZoneOffset;
-  final st = sunTimes(d.year, d.month, d.day, place.lat, place.lon, offset) ??
+  final st =
+      sunTimes(d.year, d.month, d.day, place.lat, place.lon, offset) ??
       (rise: DateTime.utc(d.year, d.month, d.day, 6).subtract(offset), set: DateTime.utc(d.year, d.month, d.day, 18).subtract(offset));
   final n = d.add(const Duration(days: 1));
   final nOffset = n.add(const Duration(hours: 12)).timeZoneOffset;

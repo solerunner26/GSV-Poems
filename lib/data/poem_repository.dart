@@ -155,7 +155,55 @@ class PoemRepository {
       });
     if (lang != null) q.where((p) => p.lang.equals(lang));
     q.orderBy([(p) => OrderingTerm.desc(p.updatedAt)]);
-    return q.get();
+    return rankSearchResults(await q.get(), query);
+  }
+
+  /// Orders matches the way a reader expects: every poem whose title has the
+  /// word comes first, then poems that have it only in their verses. Inside
+  /// each group a whole word beats part of a longer word, and an earlier
+  /// position beats a later one (so "પ્રેમ મિલન" comes before "પ્રકૃતિનો પ્રેમ").
+  static List<Poem> rankSearchResults(List<Poem> poems, String query) {
+    final patterns = searchPatterns(query);
+    if (patterns.isEmpty) return poems;
+    final raw = patterns.first;
+    final folded = patterns.length > 1 ? patterns[1] : raw;
+
+    // (whole word?, position) of the first match in [text], or null.
+    (bool, int)? find(String text) {
+      final t = text.toLowerCase();
+      var i = t.indexOf(raw);
+      var len = raw.length;
+      var hay = t;
+      if (i < 0) {
+        hay = foldLatin(transliterate(t));
+        i = hay.indexOf(folded);
+        len = folded.length;
+      }
+      if (i < 0) return null;
+      bool edge(int at) => at < 0 || at >= hay.length || RegExp(r'[\s\p{P}]', unicode: true).hasMatch(hay[at]);
+      return (edge(i - 1) && edge(i + len), i);
+    }
+
+    final scored = <(int, int, int, int, Poem)>[];
+    for (var k = 0; k < poems.length; k++) {
+      final p = poems[k];
+      final inTitle = find(p.title);
+      final hit = inTitle ?? find(p.body);
+      scored.add((
+        inTitle != null ? 0 : 1,
+        hit == null || hit.$1 ? 0 : 1,
+        hit?.$2 ?? 1 << 30,
+        k, // keeps the newest-first order among equals
+        p,
+      ));
+    }
+    scored.sort((a, b) {
+      for (final c in [a.$1.compareTo(b.$1), a.$2.compareTo(b.$2), a.$3.compareTo(b.$3)]) {
+        if (c != 0) return c;
+      }
+      return a.$4.compareTo(b.$4);
+    });
+    return [for (final s in scored) s.$5];
   }
 
   // ---------- writing ----------

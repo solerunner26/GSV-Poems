@@ -25,12 +25,12 @@ class _Rule {
 }
 
 int _tithiAt(PanchangDay p, _At at) => switch (at) {
-      _At.sunrise => p.tithi,
-      _At.midday => p.middayTithi,
-      _At.afternoon => p.afternoonTithi,
-      _At.sunset => p.sunsetTithi,
-      _At.midnight => p.midnightTithi,
-    };
+  _At.sunrise => p.tithi,
+  _At.midday => p.middayTithi,
+  _At.afternoon => p.afternoonTithi,
+  _At.sunset => p.sunsetTithi,
+  _At.midnight => p.midnightTithi,
+};
 
 const _rules = <_Rule>[
   _Rule(0, 1, Festival(['ચૈત્રી નવરાત્રિ પ્રારંભ', 'चैत्र नवरात्रि प्रारंभ', 'Chaitra Navratri begins'], FestivalKind.festival)),
@@ -83,8 +83,7 @@ List<Festival> _named(PanchangDay p, PanchangDay n) {
   if (p.month.adhik) return const [];
   return [
     for (final r in _rules)
-      if ((p.month.index == r.month || (r.tithi == 1 && n.month.index == r.month)) &&
-          _onDay(_tithiAt(p, r.at), _tithiAt(n, r.at), r.tithi))
+      if ((p.month.index == r.month || (r.tithi == 1 && n.month.index == r.month)) && _onDay(_tithiAt(p, r.at), _tithiAt(n, r.at), r.tithi))
         r.festival,
   ];
 }

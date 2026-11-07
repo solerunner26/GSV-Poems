@@ -31,9 +31,17 @@ const Map<String, List<String>> _t = {
   'panchang_soon': ['પંચાંગ અને ચોઘડિયાં આવતા અપડેટમાં', 'पंचांग और चौघड़िया अगले अपडेट में', 'Panchang & Choghadiya arrive in the next update'],
   'recent7': ['છેલ્લા ૭ દિવસની કવિતા', 'पिछले 7 दिनों की कविताएँ', 'Poems from the last 7 days'],
   'clear_list': ['યાદી સાફ કરો', 'सूची साफ़ करें', 'Clear list'],
-  'list_cleared': ['યાદી સાફ થઈ. કવિતા સંગ્રહમાં સલામત છે.', 'सूची साफ़ हुई। कविताएँ संग्रह में सुरक्षित हैं।', 'List cleared. The poems are safe in the collection.'],
+  'list_cleared': [
+    'યાદી સાફ થઈ. કવિતા સંગ્રહમાં સલામત છે.',
+    'सूची साफ़ हुई। कविताएँ संग्रह में सुरक्षित हैं।',
+    'List cleared. The poems are safe in the collection.',
+  ],
   'favorites': ['મનગમતી કવિતા', 'पसंदीदा कविताएँ', 'Favourite poems'],
-  'no_favorites': ['કવિતા વાંચતી વખતે ★ દબાવો, તે અહીં દેખાશે', 'कविता पढ़ते समय ★ दबाएँ, वह यहाँ दिखेगी', 'Tap ★ while reading a poem to see it here'],
+  'no_favorites': [
+    'કવિતા વાંચતી વખતે ★ દબાવો, તે અહીં દેખાશે',
+    'कविता पढ़ते समय ★ दबाएँ, वह यहाँ दिखेगी',
+    'Tap ★ while reading a poem to see it here',
+  ],
   'total_poems': ['કુલ કવિતા', 'कुल कविताएँ', 'Total poems'],
   'total_words': ['કુલ શબ્દો', 'कुल शब्द', 'Total words'],
   'lang_gu': ['ગુજરાતી', 'गुजराती', 'Gujarati'],
@@ -49,12 +57,20 @@ const Map<String, List<String>> _t = {
   'title_hint': ['શીર્ષક (ન લખો તો પહેલી પંક્તિ)', 'शीर्षक (न लिखें तो पहली पंक्ति)', 'Title (first line if left empty)'],
   'body_label': ['કવિતા', 'कविता', 'Poem'],
   'body_hint': ['અહીં કવિતા લખો…', 'यहाँ कविता लिखें…', 'Write your poem here…'],
-  'keyboard_tip': ['ગુજરાતી Gboard, Alaya કે માઈક — ગમે તે વાપરો', 'हिंदी Gboard, Alaya या माइक — कुछ भी चुनें', 'Gujarati Gboard, Alaya or the mic — any works'],
+  'keyboard_tip': [
+    'ગુજરાતી Gboard, Alaya કે માઈક — ગમે તે વાપરો',
+    'हिंदी Gboard, Alaya या माइक — कुछ भी चुनें',
+    'Gujarati Gboard, Alaya or the mic — any works',
+  ],
   'autosaved': ['આપમેળે સચવાયું', 'अपने-आप सहेजा गया', 'Saved automatically'],
   'words': ['શબ્દો', 'शब्द', 'words'],
   'voice': ['બોલીને લખો', 'बोलकर लिखें', 'Speak to write'],
   'listening': ['સાંભળે છે…', 'सुन रहा है…', 'Listening…'],
-  'voice_unavailable': ['આ ફોનમાં અવાજથી લખવાનું ચાલુ નથી. Gboard નું માઈક વાપરો.', 'इस फ़ोन में आवाज़ से लिखना उपलब्ध नहीं। Gboard का माइक इस्तेमाल करें।', 'Voice typing is not available here. Use the mic on Gboard.'],
+  'voice_unavailable': [
+    'આ ફોનમાં અવાજથી લખવાનું ચાલુ નથી. Gboard નું માઈક વાપરો.',
+    'इस फ़ोन में आवाज़ से लिखना उपलब्ध नहीं। Gboard का माइक इस्तेमाल करें।',
+    'Voice typing is not available here. Use the mic on Gboard.',
+  ],
   'save': ['સાચવો', 'सहेजें', 'Save'],
   'saved': ['કવિતા સચવાઈ ગઈ', 'कविता सहेज ली गई', 'Poem saved'],
   'empty_poem': ['પહેલાં કવિતા લખો', 'पहले कविता लिखें', 'Write the poem first'],
@@ -68,6 +84,9 @@ const Map<String, List<String>> _t = {
   'stop': ['બંધ', 'रोकें', 'Stop'],
   'favorite': ['મનગમતી', 'पसंदीदा', 'Favourite'],
   'share': ['મોકલો', 'भेजें', 'Share'],
+  'moon': ['ચંદ્ર', 'चंद्र', 'Moon'],
+  'moon_waxing': ['વધતો ચંદ્ર', 'बढ़ता चंद्र', 'waxing'],
+  'moon_waning': ['ઘટતો ચંદ્ર', 'घटता चंद्र', 'waning'],
   'share_how': ['કવિતા કેવી રીતે મોકલવી છે?', 'कविता कैसे भेजनी है?', 'How should the poem be sent?'],
   'share_image': ['ફોટો તરીકે (JPG)', 'फ़ोटो के रूप में (JPG)', 'As a picture (JPG)'],
   'share_image_sub': ['સુંદર કાર્ડ, લોગો સાથે', 'सुंदर कार्ड, लोगो के साथ', 'A card with the logo'],
@@ -81,7 +100,11 @@ const Map<String, List<String>> _t = {
   'restore': ['પાછી લાવો', 'वापस लाएँ', 'Restore'],
   'restored': ['કવિતા પાછી આવી', 'कविता वापस आ गई', 'Poem restored'],
   'delete_forever': ['કાયમ માટે ભૂંસો', 'हमेशा के लिए मिटाएँ', 'Delete forever'],
-  'confirm_forever': ['આ કવિતા કાયમ માટે ભૂંસાઈ જશે. પાછી નહીં આવે.', 'यह कविता हमेशा के लिए मिट जाएगी। वापस नहीं आएगी।', 'This poem will be erased for good. It cannot come back.'],
+  'confirm_forever': [
+    'આ કવિતા કાયમ માટે ભૂંસાઈ જશે. પાછી નહીં આવે.',
+    'यह कविता हमेशा के लिए मिट जाएगी। वापस नहीं आएगी।',
+    'This poem will be erased for good. It cannot come back.',
+  ],
   'confirm_forever2': ['ખરેખર? છેલ્લી વાર પૂછીએ છીએ.', 'सच में? आखिरी बार पूछ रहे हैं।', 'Are you sure? Asking one last time.'],
   'cancel': ['રહેવા દો', 'रहने दें', 'Cancel'],
   'yes_delete': ['હા, ભૂંસો', 'हाँ, मिटाएँ', 'Yes, delete'],
@@ -117,14 +140,18 @@ const Map<String, List<String>> _t = {
   'change_pin': ['PIN બદલો', 'PIN बदलें', 'Change PIN'],
   'fingerprint': ['આંગળીની છાપથી ખોલો', 'उंगली की छाप से खोलें', 'Unlock with fingerprint'],
   'fingerprint_none': ['આ ફોનમાં આંગળીની છાપ સેટ નથી', 'इस फ़ोन में फ़िंगरप्रिंट सेट नहीं है', 'No fingerprint is set up on this phone'],
-  'backup_soon': ['એન્ક્રિપ્ટેડ બેકઅપ, WhatsApp, ઈમેલ, Drive — આવતા અપડેટમાં', 'एन्क्रिप्टेड बैकअप, WhatsApp, ईमेल, Drive — अगले अपडेट में', 'Encrypted backup, WhatsApp, email, Drive — next update'],
+  'backup_soon': [
+    'એન્ક્રિપ્ટેડ બેકઅપ, WhatsApp, ઈમેલ, Drive — આવતા અપડેટમાં',
+    'एन्क्रिप्टेड बैकअप, WhatsApp, ईमेल, Drive — अगले अपडेट में',
+    'Encrypted backup, WhatsApp, email, Drive — next update',
+  ],
   'keep_soon': ['Google Keep થી કવિતા લાવો — આવતા અપડેટમાં', 'Google Keep से कविताएँ लाएँ — अगले अपडेट में', 'Import from Google Keep — next update'],
   'keep_import': ['Google Keep થી કવિતા લાવો', 'Google Keep से कविताएँ लाएँ', 'Import from Google Keep'],
   'keep_import_sub': ['Takeout ની .json ફાઈલો', 'Takeout की .json फ़ाइलें', 'Takeout .json files'],
   'keep_how': [
     'Google Takeout માંથી Keep ની .json ફાઈલો આ ફોનમાં રાખો. પછી નીચેનું બટન દબાવી બધી ફાઈલો પસંદ કરો. દરેક ફાઈલનું નામ સંગ્રહનું નામ બનશે. એક જ ફાઈલ બે વાર લાવશો તો પણ કવિતા બે વાર નહીં ઉમેરાય.',
     'Google Takeout से Keep की .json फ़ाइलें इस फ़ोन में रखें। फिर नीचे का बटन दबाकर सभी फ़ाइलें चुनें। हर फ़ाइल का नाम संग्रह का नाम बनेगा। एक ही फ़ाइल दो बार लाने पर भी कविता दो बार नहीं जुड़ेगी।',
-    'Put the Keep .json files from Google Takeout on this phone, then tap the button below and select them all. Each file\'s title becomes a collection. Importing the same file twice never adds a poem twice.'
+    'Put the Keep .json files from Google Takeout on this phone, then tap the button below and select them all. Each file\'s title becomes a collection. Importing the same file twice never adds a poem twice.',
   ],
   'keep_pick': ['ફાઈલો પસંદ કરો', 'फ़ाइलें चुनें', 'Choose files'],
   'keep_reading': ['ફાઈલો વાંચે છે…', 'फ़ाइलें पढ़ रहा है…', 'Reading files…'],
@@ -146,22 +173,34 @@ const Map<String, List<String>> _t = {
   'dup_remove_all_body': [
     'વધારાની નકલ કચરાપેટીમાં જશે. દરેકની પહેલી (સૌથી જૂની) નકલ રહેશે. જરૂર પડે તો કચરાપેટીમાંથી પાછી લાવી શકાય.',
     'अतिरिक्त प्रतियाँ कूड़ेदान में जाएँगी। हर कविता की पहली (सबसे पुरानी) प्रति रहेगी। ज़रूरत हो तो कूड़ेदान से वापस ला सकते हैं।',
-    'extra copies will go to the recycle bin. The first (oldest) copy of each poem stays. You can bring them back from the recycle bin.'
+    'extra copies will go to the recycle bin. The first (oldest) copy of each poem stays. You can bring them back from the recycle bin.',
   ],
   'dup_yes': ['હા, કાઢો', 'हाँ, हटाएँ', 'Yes, remove'],
   'dup_moved': ['નકલ કચરાપેટીમાં મૂકી', 'प्रतियाँ कूड़ेदान में डालीं', 'copies moved to the recycle bin'],
   'dup_in_editor': ['આ કવિતા પહેલેથી સંગ્રહમાં છે', 'यह कविता पहले से संग्रह में है', 'This poem is already in the collection'],
   'dup_open': ['જુઓ', 'देखें', 'Open'],
   'dup_save_anyway': ['છતાં સાચવવી છે?', 'फिर भी सहेजें?', 'Save it anyway?'],
-  'dup_save_anyway_body': ['આ જ કવિતા પહેલેથી છે. બીજી નકલ સાચવશો તો "એકસરખી કવિતા" માં દેખાશે.', 'यही कविता पहले से है। दूसरी प्रति सहेजेंगे तो "एक जैसी कविताएँ" में दिखेगी।', 'The same poem already exists. A second copy will be listed under "Duplicate poems".'],
+  'dup_save_anyway_body': [
+    'આ જ કવિતા પહેલેથી છે. બીજી નકલ સાચવશો તો "એકસરખી કવિતા" માં દેખાશે.',
+    'यही कविता पहले से है। दूसरी प्रति सहेजेंगे तो "एक जैसी कविताएँ" में दिखेगी।',
+    'The same poem already exists. A second copy will be listed under "Duplicate poems".',
+  ],
   'save_anyway': ['હા, સાચવો', 'हाँ, सहेजें', 'Yes, save'],
   'update_title': ['નવું અપડેટ આવ્યું', 'नया अपडेट आया', 'A new update is ready'],
   'update_current': ['હાલની આવૃત્તિ', 'वर्तमान संस्करण', 'Current version'],
-  'update_safe': ['બધી કવિતા સલામત રહેશે. "હમણાં અપડેટ કરો" દબાવો, પછી "Install" દબાવો.', 'सभी कविताएँ सुरक्षित रहेंगी। "अभी अपडेट करें" दबाएँ, फिर "Install" दबाएँ।', 'All poems stay safe. Tap "Update Now", then tap "Install".'],
+  'update_safe': [
+    'બધી કવિતા સલામત રહેશે. "હમણાં અપડેટ કરો" દબાવો, પછી "Install" દબાવો.',
+    'सभी कविताएँ सुरक्षित रहेंगी। "अभी अपडेट करें" दबाएँ, फिर "Install" दबाएँ।',
+    'All poems stay safe. Tap "Update Now", then tap "Install".',
+  ],
   'update_now': ['હમણાં અપડેટ કરો', 'अभी अपडेट करें', 'Update Now'],
   'update_later': ['પછી', 'बाद में', 'Later'],
   'update_downloading': ['ડાઉનલોડ થાય છે…', 'डाउनलोड हो रहा है…', 'Downloading…'],
-  'update_failed': ['અપડેટ ન થયું. ઇન્ટરનેટ ચાલુ છે તે જુઓ.', 'अपडेट नहीं हुआ। इंटरनेट चालू है देखें।', 'The update did not finish. Check the internet connection.'],
+  'update_failed': [
+    'અપડેટ ન થયું. ઇન્ટરનેટ ચાલુ છે તે જુઓ.',
+    'अपडेट नहीं हुआ। इंटरनेट चालू है देखें।',
+    'The update did not finish. Check the internet connection.',
+  ],
   'up_to_date': ['એપ નવીનતમ છે', 'ऐप नवीनतम है', 'The app is up to date'],
   'check_update': ['અપડેટ તપાસો', 'अपडेट जाँचें', 'Check for update'],
   'panchang': ['પંચાંગ', 'पंचांग', 'Panchang'],
@@ -200,9 +239,17 @@ const Map<String, List<String>> _t = {
   'show_less': ['ઓછું બતાવો', 'कम दिखाएँ', 'Show less'],
   'all': ['બધા', 'सभी', 'All'],
   'place': ['સ્થળ', 'स्थान', 'Place'],
-  'place_note': ['સૂર્યોદય, તિથિ અને ચોઘડિયાં આ સ્થળ પ્રમાણે', 'सूर्योदय, तिथि और चौघड़िया इस स्थान के अनुसार', 'Sunrise, tithi and Choghadiya are worked out for this place'],
+  'place_note': [
+    'સૂર્યોદય, તિથિ અને ચોઘડિયાં આ સ્થળ પ્રમાણે',
+    'सूर्योदय, तिथि और चौघड़िया इस स्थान के अनुसार',
+    'Sunrise, tithi and Choghadiya are worked out for this place',
+  ],
   'use_gps': ['મારું સ્થળ (GPS) વાપરો', 'मेरा स्थान (GPS) लें', 'Use my location (GPS)'],
-  'gps_failed': ['સ્થળ ન મળ્યું. Location ચાલુ કરો અથવા શહેર પસંદ કરો.', 'स्थान नहीं मिला। Location चालू करें या शहर चुनें।', 'Could not get the location. Turn on Location or pick a city.'],
+  'gps_failed': [
+    'સ્થળ ન મળ્યું. Location ચાલુ કરો અથવા શહેર પસંદ કરો.',
+    'स्थान नहीं मिला। Location चालू करें या शहर चुनें।',
+    'Could not get the location. Turn on Location or pick a city.',
+  ],
   'place_set': ['સ્થળ નક્કી થયું', 'स्थान तय हुआ', 'Place set'],
   'change': ['બદલો', 'बदलें', 'Change'],
   'no_fest_day': ['આ દિવસે કોઈ તહેવાર નથી', 'इस दिन कोई त्योहार नहीं', 'No festival on this day'],
@@ -211,17 +258,21 @@ const Map<String, List<String>> _t = {
   'recovery_intro': [
     'આ ચાવી કાગળ પર લખી સલામત રાખો. નવા ફોનમાં બેકઅપ ખોલવા અને PIN ભૂલી જાઓ ત્યારે આ જ ચાવી જોઈશે. ચાવી વગર બેકઅપ કોઈ ખોલી શકતું નથી.',
     'यह चाबी काग़ज़ पर लिखकर सुरक्षित रखें। नए फ़ोन में बैकअप खोलने और PIN भूलने पर यही चाबी चाहिए। चाबी के बिना बैकअप कोई नहीं खोल सकता।',
-    'Write this key on paper and keep it safe. You need it to open a backup on a new phone and to reset a forgotten PIN. Without it nobody can open the backups.'
+    'Write this key on paper and keep it safe. You need it to open a backup on a new phone and to reset a forgotten PIN. Without it nobody can open the backups.',
   ],
   'recovery_written': ['મેં લખી લીધી', 'मैंने लिख ली', 'I have written it down'],
   'recovery_share': ['છાપો / મોકલો', 'छापें / भेजें', 'Print / share'],
   'recovery_email': ['ઈમેલ પર મોકલો', 'ईमेल पर भेजें', 'Email it to me'],
   'recovery_emailed': ['Recovery key ઈમેલ પર મોકલી', 'Recovery key ईमेल पर भेजी', 'Recovery key emailed'],
-  'recovery_mail_subject': ['GSV Poems — Recovery key (સાચવીને રાખો)', 'GSV Poems — Recovery key (सँभालकर रखें)', 'GSV Poems — recovery key (keep safe)'],
+  'recovery_mail_subject': [
+    'GSV Poems — Recovery key (સાચવીને રાખો)',
+    'GSV Poems — Recovery key (सँभालकर रखें)',
+    'GSV Poems — recovery key (keep safe)',
+  ],
   'recovery_mail_body': [
     'આ તમારી કાવ્ય સંગ્રહ એપની Recovery key છે. બેકઅપ ખોલવા અને PIN બદલવા જોઈશે. આ ઈમેલ કોઈને મોકલશો નહીં.',
     'यह आपके काव्य संग्रह ऐप की Recovery key है। बैकअप खोलने और PIN बदलने के लिए चाहिए। यह ईमेल किसी को न भेजें।',
-    'This is the recovery key for your poem collection app. You need it to open backups and to reset the PIN. Do not forward this email.'
+    'This is the recovery key for your poem collection app. You need it to open backups and to reset the PIN. Do not forward this email.',
   ],
   'recovery_view': ['Recovery key જુઓ', 'Recovery key देखें', 'View recovery key'],
   'backup_title': ['બેકઅપ', 'बैकअप', 'Backup'],
@@ -235,14 +286,18 @@ const Map<String, List<String>> _t = {
   'backup_safe': ['બધી કવિતા સુરક્ષિત છે', 'सभी कविताएँ सुरक्षित हैं', 'All poems are safe'],
   'backup_locked': ['તાળાબંધ (encrypted)', 'ताला-बंद (encrypted)', 'Encrypted'],
   'backup_whatsapp': ['WhatsApp પર મોકલો', 'WhatsApp पर भेजें', 'Send to WhatsApp'],
-  'backup_share_text': ['GSV Poems બેકઅપ. ખોલવા Recovery key જોઈશે.', 'GSV Poems बैकअप। खोलने के लिए Recovery key चाहिए।', 'GSV Poems backup. The recovery key is needed to open it.'],
+  'backup_share_text': [
+    'GSV Poems બેકઅપ. ખોલવા Recovery key જોઈશે.',
+    'GSV Poems बैकअप। खोलने के लिए Recovery key चाहिए।',
+    'GSV Poems backup. The recovery key is needed to open it.',
+  ],
   'backup_restore': ['બેકઅપમાંથી પાછું લાવો', 'बैकअप से वापस लाएँ', 'Restore from a backup'],
   'backup_failed': ['બેકઅપ ન થયો', 'बैकअप नहीं हुआ', 'Backup did not finish'],
   'backup_mail_subject': ['GSV Poems — આજનો બેકઅપ', 'GSV Poems — आज का बैकअप', 'GSV Poems — today\'s backup'],
   'backup_mail_body': [
     'કાવ્ય સંગ્રહનો આજનો બેકઅપ સાથે છે. તે તાળાબંધ છે; ખોલવા Recovery key જોઈશે. નવા ફોનમાં: એપ → સેટિંગ → બેકઅપમાંથી પાછું લાવો.',
     'काव्य संग्रह का आज का बैकअप साथ में है। यह ताला-बंद है; खोलने के लिए Recovery key चाहिए। नए फ़ोन में: ऐप → सेटिंग → बैकअप से वापस लाएँ।',
-    "Today's backup of the poem collection is attached. It is encrypted; the recovery key opens it. On a new phone: app → Settings → Restore from a backup."
+    "Today's backup of the poem collection is attached. It is encrypted; the recovery key opens it. On a new phone: app → Settings → Restore from a backup.",
   ],
   'email_backup': ['ઈમેલ બેકઅપ', 'ईमेल बैकअप', 'Email backup'],
   'email_on': ['ચાલુ', 'चालू', 'On'],
@@ -254,36 +309,60 @@ const Map<String, List<String>> _t = {
   'email_how': [
     'App password બનાવવા: Google Account → Security → 2-Step Verification ચાલુ કરો → App passwords → "GSV Poems" નામ આપો → મળેલા 16 અક્ષર અહીં લખો. તમારો સામાન્ય Gmail પાસવર્ડ ન લખો.',
     'App password बनाने के लिए: Google Account → Security → 2-Step Verification चालू करें → App passwords → "GSV Poems" नाम दें → मिले 16 अक्षर यहाँ लिखें। अपना सामान्य Gmail पासवर्ड न लिखें।',
-    'To make an app password: Google Account → Security → turn on 2-Step Verification → App passwords → name it "GSV Poems" → type the 16 letters here. Do not type your normal Gmail password.'
+    'To make an app password: Google Account → Security → turn on 2-Step Verification → App passwords → name it "GSV Poems" → type the 16 letters here. Do not type your normal Gmail password.',
   ],
   'email_save_test': ['સાચવો અને ટેસ્ટ ઈમેલ મોકલો', 'सहेजें और टेस्ट ईमेल भेजें', 'Save and send a test email'],
-  'email_ok': ['ઈમેલ પહોંચી ગયો. દરરોજ રાત્રે બેકઅપ આ ઈમેલ પર આવશે.', 'ईमेल पहुँच गया। हर रात बैकअप इसी ईमेल पर आएगा।', 'Email sent. Every night the backup will arrive at this address.'],
+  'email_ok': [
+    'ઈમેલ પહોંચી ગયો. દરરોજ રાત્રે બેકઅપ આ ઈમેલ પર આવશે.',
+    'ईमेल पहुँच गया। हर रात बैकअप इसी ईमेल पर आएगा।',
+    'Email sent. Every night the backup will arrive at this address.',
+  ],
   'email_fail': ['ઈમેલ ન ગયો', 'ईमेल नहीं गया', 'The email was not sent'],
   'email_remove': ['ઈમેલ બેકઅપ બંધ કરો', 'ईमेल बैकअप बंद करें', 'Turn off email backup'],
-  'email_bad_input': ['ઈમેલ સરનામાં અને 16 અક્ષરનો App password તપાસો', 'ईमेल पते और 16 अक्षर का App password जाँचें', 'Check the email addresses and the 16-letter app password'],
+  'email_bad_input': [
+    'ઈમેલ સરનામાં અને 16 અક્ષરનો App password તપાસો',
+    'ईमेल पते और 16 अक्षर का App password जाँचें',
+    'Check the email addresses and the 16-letter app password',
+  ],
   'restore_title': ['બેકઅપમાંથી પાછું લાવો', 'बैकअप से वापस लाएँ', 'Restore from a backup'],
   'restore_how': [
     'WhatsApp, ઈમેલ કે ફોનમાં સાચવેલી .gsvbak ફાઈલ પસંદ કરો. કોઈ કવિતા બે વાર નહીં ઉમેરાય અને ફોનની કોઈ કવિતા ભૂંસાશે નહીં.',
     'WhatsApp, ईमेल या फ़ोन में रखी .gsvbak फ़ाइल चुनें। कोई कविता दो बार नहीं जुड़ेगी और फ़ोन की कोई कविता नहीं मिटेगी।',
-    'Pick the .gsvbak file saved from WhatsApp, email or the phone. No poem is added twice and no poem on the phone is erased.'
+    'Pick the .gsvbak file saved from WhatsApp, email or the phone. No poem is added twice and no poem on the phone is erased.',
   ],
   'restore_pick': ['બેકઅપ ફાઈલ પસંદ કરો', 'बैकअप फ़ाइल चुनें', 'Choose the backup file'],
   'restore_phone_copies': ['આ ફોનમાંના બેકઅપ', 'इस फ़ोन के बैकअप', 'Backups on this phone'],
   'restore_of': ['નો બેકઅપ', 'का बैकअप', 'backup of'],
   'restore_key_hint': ['Recovery key લખો (ઉ.દા. 7K2QM-…)', 'Recovery key लिखें (जैसे 7K2QM-…)', 'Type the recovery key (e.g. 7K2QM-…)'],
   'restore_open': ['ખોલો', 'खोलें', 'Open'],
-  'restore_wrong_key': ['આ ચાવીથી બેકઅપ ન ખૂલ્યો. ચાવી ફરી તપાસો.', 'इस चाबी से बैकअप नहीं खुला। चाबी फिर जाँचें।', 'This key does not open the backup. Check it again.'],
+  'restore_wrong_key': [
+    'આ ચાવીથી બેકઅપ ન ખૂલ્યો. ચાવી ફરી તપાસો.',
+    'इस चाबी से बैकअप नहीं खुला। चाबी फिर जाँचें।',
+    'This key does not open the backup. Check it again.',
+  ],
   'restore_not_backup': ['આ GSV Poems ની બેકઅપ ફાઈલ નથી', 'यह GSV Poems की बैकअप फ़ाइल नहीं है', 'This is not a GSV Poems backup file'],
   'restore_merge': ['પાછું લાવો (ભેગું કરો)', 'वापस लाएँ (जोड़ें)', 'Restore (combine)'],
-  'restore_merge_note': ['નવી કવિતા ઉમેરાશે, જે બદલાઈ છે તેની નવી આવૃત્તિ રહેશે અને જૂની ઇતિહાસમાં સચવાશે.', 'नई कविताएँ जुड़ेंगी, बदली हुई का नया रूप रहेगा और पुराना इतिहास में सहेजा जाएगा।', 'New poems are added; for changed ones the newer text stays and the older one is kept in history.'],
+  'restore_merge_note': [
+    'નવી કવિતા ઉમેરાશે, જે બદલાઈ છે તેની નવી આવૃત્તિ રહેશે અને જૂની ઇતિહાસમાં સચવાશે.',
+    'नई कविताएँ जुड़ेंगी, बदली हुई का नया रूप रहेगा और पुराना इतिहास में सहेजा जाएगा।',
+    'New poems are added; for changed ones the newer text stays and the older one is kept in history.',
+  ],
   'restore_replace': ['બધું બદલી નાખો', 'सब बदल दें', 'Replace everything'],
-  'restore_replace_confirm': ['ફોનની બધી કવિતા કાઢીને ફક્ત બેકઅપની કવિતા રાખશે.', 'फ़ोन की सभी कविताएँ हटाकर केवल बैकअप की कविताएँ रखेगा।', 'This removes every poem on the phone and keeps only the backup\'s poems.'],
+  'restore_replace_confirm': [
+    'ફોનની બધી કવિતા કાઢીને ફક્ત બેકઅપની કવિતા રાખશે.',
+    'फ़ोन की सभी कविताएँ हटाकर केवल बैकअप की कविताएँ रखेगा।',
+    'This removes every poem on the phone and keeps only the backup\'s poems.',
+  ],
   'restore_done': ['પાછું આવી ગયું', 'वापस आ गया', 'Restored'],
   'restore_added': ['નવી', 'नई', 'new'],
   'restore_updated': ['સુધરી', 'अपडेट', 'updated'],
   'restore_same': ['એ જ હતી', 'वैसी ही थीं', 'unchanged'],
   'restore_key_adopted': ['હવેથી આ જ Recovery key વપરાશે', 'अब से यही Recovery key चलेगी', 'This recovery key is used from now on'],
-  'forgot_body': ['Recovery key લખો. સાચી હશે તો નવો PIN બનાવી શકશો.', 'Recovery key लिखें। सही होगी तो नया PIN बना सकेंगे।', 'Type the recovery key. If it is right you can make a new PIN.'],
+  'forgot_body': [
+    'Recovery key લખો. સાચી હશે તો નવો PIN બનાવી શકશો.',
+    'Recovery key लिखें। सही होगी तो नया PIN बना सकेंगे।',
+    'Type the recovery key. If it is right you can make a new PIN.',
+  ],
   'forgot_wrong': ['આ Recovery key આ ફોનની નથી', 'यह Recovery key इस फ़ोन की नहीं है', 'This is not this phone\'s recovery key'],
   'forgot_ok': ['સાચી ચાવી. હવે નવો PIN બનાવો.', 'सही चाबी। अब नया PIN बनाएँ।', 'Correct key. Now make a new PIN.'],
   'next': ['આગળ', 'आगे', 'Next'],
@@ -292,7 +371,7 @@ const Map<String, List<String>> _t = {
   'drive_intro': [
     'ફોન અને ટેબ્લેટ બંનેમાં એ જ Google એકાઉન્ટ જોડો. પછી દરેક ઉપકરણ પોતાનો તાળાબંધ બેકઅપ Drive ના "GSV Poems Backups" ફોલ્ડરમાં મૂકશે અને બીજા ઉપકરણની નવી કવિતા લઈ આવશે. કોઈ કવિતા બે વાર નહીં થાય અને ભૂંસાશે નહીં.',
     'फ़ोन और टैबलेट दोनों में वही Google खाता जोड़ें। फिर हर डिवाइस अपना ताला-बंद बैकअप Drive के "GSV Poems Backups" फ़ोल्डर में रखेगा और दूसरे डिवाइस की नई कविताएँ ले आएगा। कोई कविता दो बार नहीं होगी और मिटेगी नहीं।',
-    'Connect the same Google account on the phone and the tablet. Each device then keeps its encrypted backup in the Drive folder "GSV Poems Backups" and brings in the other device\'s new poems. Nothing is doubled or erased.'
+    'Connect the same Google account on the phone and the tablet. Each device then keeps its encrypted backup in the Drive folder "GSV Poems Backups" and brings in the other device\'s new poems. Nothing is doubled or erased.',
   ],
   'drive_connect': ['Google Drive જોડો', 'Google Drive जोड़ें', 'Connect Google Drive'],
   'drive_connected_as': ['જોડાયેલું', 'जुड़ा है', 'Connected'],
@@ -306,14 +385,14 @@ const Map<String, List<String>> _t = {
   'drive_needs_key_body': [
     'બીજા ઉપકરણનો બેકઅપ જુદી Recovery key થી તાળાબંધ છે. એ ઉપકરણની (પહેલા ફોનની) Recovery key અહીં એક વાર લખો. પછી બંને ઉપકરણ એક જ ચાવી વાપરશે.',
     'दूसरे डिवाइस का बैकअप अलग Recovery key से बंद है। उस डिवाइस (पहले फ़ोन) की Recovery key यहाँ एक बार लिखें। फिर दोनों एक ही चाबी इस्तेमाल करेंगे।',
-    "The other device's backup is locked with a different recovery key. Type that device's (the first phone's) recovery key here once; then both use the same key."
+    "The other device's backup is locked with a different recovery key. Type that device's (the first phone's) recovery key here once; then both use the same key.",
   ],
   'drive_enter_key': ['Recovery key લખો', 'Recovery key लिखें', 'Type the recovery key'],
   'drive_disconnect': ['Drive છોડી દો', 'Drive से हटें', 'Disconnect Drive'],
   'drive_not_setup': [
     'Google Drive હજી ગોઠવાયું નથી. નીચે "Google Cloud સેટઅપ" માં Web client ID લખવાનું બાકી છે.',
     'Google Drive अभी सेट नहीं है। नीचे "Google Cloud सेटअप" में Web client ID लिखना बाकी है।',
-    'Google Drive is not set up yet: the Web client ID still needs to be entered under "Google Cloud setup" below.'
+    'Google Drive is not set up yet: the Web client ID still needs to be entered under "Google Cloud setup" below.',
   ],
   'drive_setup_title': ['Google Cloud સેટઅપ (એક વાર)', 'Google Cloud सेटअप (एक बार)', 'Google Cloud setup (once)'],
   'drive_client_id': ['Web client ID', 'Web client ID', 'Web client ID'],
@@ -335,39 +414,38 @@ const Map<String, List<String>> helpText = {
   'home': [
     'હોમ પર આજની તારીખ, તાજી લખેલી કવિતા, મનગમતી કવિતા અને કુલ કવિતા દેખાય છે. નીચેના પટ્ટામાં વચ્ચેનું બટન હંમેશાં અહીં પાછું લાવે છે. "લખો" દબાવી નવી કવિતા લખો.',
     'होम पर आज की तारीख, हाल की कविताएँ, पसंदीदा और कुल कविताएँ दिखती हैं। नीचे बीच का बटन हमेशा यहाँ लाता है। "लिखें" दबाकर नई कविता लिखें।',
-    'Home shows today\'s date, recent poems, favourites and totals. The middle button at the bottom always brings you here. Tap "Write" to write a new poem.'
+    'Home shows today\'s date, recent poems, favourites and totals. The middle button at the bottom always brings you here. Tap "Write" to write a new poem.',
   ],
   'editor': [
     'ઉપર શીર્ષક, નીચે કવિતા લખો. ગુજરાતી Gboard, Alaya કે "બોલીને લખો" બટન વાપરો. કવિતા આપમેળે સચવાય છે. અંતે "સાચવો" દબાવો.',
     'ऊपर शीर्षक, नीचे कविता लिखें। Gboard, Alaya या "बोलकर लिखें" बटन इस्तेमाल करें। कविता अपने-आप सहेजी जाती है। अंत में "सहेजें" दबाएँ।',
-    'Write the title at the top and the poem below. Use Gboard, Alaya or "Speak to write". The poem saves automatically; tap "Save" at the end.'
+    'Write the title at the top and the poem below. Use Gboard, Alaya or "Speak to write". The poem saves automatically; tap "Save" at the end.',
   ],
   'reader': [
     'A− / A+ થી અક્ષર નાના-મોટા કરો. "સાંભળો" દબાવી કવિતા સાંભળો. ★ દબાવી મનગમતી બનાવો. "મોકલો" થી WhatsApp પર મોકલો. આંગળી ડાબે-જમણે ખસેડી બીજી કવિતા જુઓ.',
     'A− / A+ से अक्षर छोटे-बड़े करें। "सुनें" से कविता सुनें। ★ से पसंदीदा बनाएँ। "भेजें" से WhatsApp पर भेजें। उंगली दाएँ-बाएँ सरकाकर दूसरी कविता देखें।',
-    'A− / A+ change the text size. "Listen" reads the poem aloud. ★ marks it as a favourite. "Share" sends it on WhatsApp. Swipe left or right for other poems.'
+    'A− / A+ change the text size. "Listen" reads the poem aloud. ★ marks it as a favourite. "Share" sends it on WhatsApp. Swipe left or right for other poems.',
   ],
   'search': [
     'કોઈ પણ ૩ અક્ષર લખતાં જ એ શબ્દવાળી બધી કવિતા દેખાય છે — ગુજરાતી, હિન્દી કે અંગ્રેજી અક્ષરમાં. કવિતા પર દબાવી વાંચો.',
     'कोई भी 3 अक्षर लिखते ही वह शब्द वाली सभी कविताएँ दिखती हैं — गुजराती, हिंदी या अंग्रेज़ी में। कविता पर दबाकर पढ़ें।',
-    'Type any 3 letters and every poem containing them appears — Gujarati, Hindi or English letters. Tap a poem to read it.'
+    'Type any 3 letters and every poem containing them appears — Gujarati, Hindi or English letters. Tap a poem to read it.',
   ],
   'collection': [
     'અહીં વિભાગ પ્રમાણે બધી કવિતા છે. "⋯" દબાવી સુધારો, મોકલો કે કચરાપેટીમાં મૂકો. કચરાપેટીમાંથી "પાછી લાવો" દબાવી કવિતા પાછી લાવી શકાય.',
     'यहाँ विभाग के अनुसार सभी कविताएँ हैं। "⋯" दबाकर बदलें, भेजें या कूड़ेदान में डालें। कूड़ेदान से "वापस लाएँ" दबाकर कविता लौटाई जा सकती है।',
-    'All poems by category. Tap "⋯" to edit, share or move to the recycle bin. In the recycle bin, "Restore" brings a poem back.'
+    'All poems by category. Tap "⋯" to edit, share or move to the recycle bin. In the recycle bin, "Restore" brings a poem back.',
   ],
   'calendar': [
     'ઉપર મહિનો, નીચે પસંદ કરેલા દિવસનું પંચાંગ અને ચોઘડિયાં. રંગીન ટપકું તહેવાર કે વ્રત બતાવે છે. "આજે" દબાવી આજના દિવસે પાછા આવો. સ્થળ બદલવા "બદલો" દબાવો.',
     'ऊपर महीना, नीचे चुने दिन का पंचांग और चौघड़िया। रंगीन बिंदु त्योहार या व्रत दिखाता है। "आज" दबाकर आज पर लौटें। स्थान बदलने के लिए "बदलें" दबाएँ।',
-    'The month is at the top; below are the chosen day\'s Panchang and Choghadiya. A coloured dot marks a festival or vrat day. "Today" jumps back to today; "Change" sets the place.'
+    'The month is at the top; below are the chosen day\'s Panchang and Choghadiya. A coloured dot marks a festival or vrat day. "Today" jumps back to today; "Change" sets the place.',
   ],
   'settings': [
     'થીમ, ભાષા, અક્ષરનું કદ, PIN અને સ્થળ અહીં બદલો. લીલા ખાનામાં બેકઅપ છે: દરરોજ રાત્રે 11:59 વાગ્યે આપમેળે થાય છે. "હમણાં બેકઅપ લો" દબાવી ગમે ત્યારે લઈ શકાય. "WhatsApp પર મોકલો" થી બેકઅપ ફાઈલ કોઈ પણ ચેટમાં મોકલો. નવા ફોનમાં "બેકઅપમાંથી પાછું લાવો" દબાવી એ ફાઈલ પસંદ કરો અને Recovery key લખો.',
     'थीम, भाषा, अक्षर का आकार, PIN और स्थान यहाँ बदलें। हरे खाने में बैकअप है: हर रात 11:59 बजे अपने-आप होता है। "अभी बैकअप लें" से कभी भी ले सकते हैं। "WhatsApp पर भेजें" से बैकअप फ़ाइल किसी भी चैट में भेजें। नए फ़ोन में "बैकअप से वापस लाएँ" दबाकर वह फ़ाइल चुनें और Recovery key लिखें।',
-    'Change theme, language, text size, PIN and place here. The green box is the backup: it runs every night at 11:59 PM by itself. "Back up now" takes one any time. "Send to WhatsApp" sends the backup file to any chat. On a new phone, tap "Restore from a backup", pick that file and type the recovery key.'
+    'Change theme, language, text size, PIN and place here. The green box is the backup: it runs every night at 11:59 PM by itself. "Back up now" takes one any time. "Send to WhatsApp" sends the backup file to any chat. On a new phone, tap "Restore from a backup", pick that file and type the recovery key.',
   ],
-
 };
 
 /// Supplies the active interface language. Wrapping a subtree in a
@@ -376,8 +454,7 @@ class LangScope extends InheritedWidget {
   const LangScope({super.key, required this.lang, required super.child});
   final PoemLang lang;
 
-  static PoemLang of(BuildContext context) =>
-      context.dependOnInheritedWidgetOfExactType<LangScope>()?.lang ?? PoemLang.gu;
+  static PoemLang of(BuildContext context) => context.dependOnInheritedWidgetOfExactType<LangScope>()?.lang ?? PoemLang.gu;
 
   @override
   bool updateShouldNotify(LangScope old) => old.lang != lang;

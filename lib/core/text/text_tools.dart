@@ -6,8 +6,7 @@ library;
 
 enum PoemLang { gu, hi, en }
 
-PoemLang langFromCode(String code) =>
-    PoemLang.values.firstWhere((l) => l.name == code, orElse: () => PoemLang.gu);
+PoemLang langFromCode(String code) => PoemLang.values.firstWhere((l) => l.name == code, orElse: () => PoemLang.gu);
 
 bool _isGujarati(int c) => c >= 0x0A80 && c <= 0x0AFF;
 bool _isDevanagari(int c) => c >= 0x0900 && c <= 0x097F;
@@ -52,21 +51,69 @@ bool _isLetter(int c) {
 
 // Offsets inside the Indic block (code point minus block start).
 const _independentVowels = <int, String>{
-  0x05: 'a', 0x06: 'aa', 0x07: 'i', 0x08: 'ii', 0x09: 'u', 0x0A: 'uu',
-  0x0B: 'ri', 0x0D: 'e', 0x0F: 'e', 0x10: 'ai', 0x11: 'o', 0x13: 'o', 0x14: 'au',
+  0x05: 'a',
+  0x06: 'aa',
+  0x07: 'i',
+  0x08: 'ii',
+  0x09: 'u',
+  0x0A: 'uu',
+  0x0B: 'ri',
+  0x0D: 'e',
+  0x0F: 'e',
+  0x10: 'ai',
+  0x11: 'o',
+  0x13: 'o',
+  0x14: 'au',
 };
 const _consonants = <int, String>{
-  0x15: 'k', 0x16: 'kh', 0x17: 'g', 0x18: 'gh', 0x19: 'n',
-  0x1A: 'ch', 0x1B: 'chh', 0x1C: 'j', 0x1D: 'jh', 0x1E: 'n',
-  0x1F: 't', 0x20: 'th', 0x21: 'd', 0x22: 'dh', 0x23: 'n',
-  0x24: 't', 0x25: 'th', 0x26: 'd', 0x27: 'dh', 0x28: 'n',
-  0x2A: 'p', 0x2B: 'ph', 0x2C: 'b', 0x2D: 'bh', 0x2E: 'm',
-  0x2F: 'y', 0x30: 'r', 0x32: 'l', 0x33: 'l', 0x35: 'v',
-  0x36: 'sh', 0x37: 'sh', 0x38: 's', 0x39: 'h',
+  0x15: 'k',
+  0x16: 'kh',
+  0x17: 'g',
+  0x18: 'gh',
+  0x19: 'n',
+  0x1A: 'ch',
+  0x1B: 'chh',
+  0x1C: 'j',
+  0x1D: 'jh',
+  0x1E: 'n',
+  0x1F: 't',
+  0x20: 'th',
+  0x21: 'd',
+  0x22: 'dh',
+  0x23: 'n',
+  0x24: 't',
+  0x25: 'th',
+  0x26: 'd',
+  0x27: 'dh',
+  0x28: 'n',
+  0x2A: 'p',
+  0x2B: 'ph',
+  0x2C: 'b',
+  0x2D: 'bh',
+  0x2E: 'm',
+  0x2F: 'y',
+  0x30: 'r',
+  0x32: 'l',
+  0x33: 'l',
+  0x35: 'v',
+  0x36: 'sh',
+  0x37: 'sh',
+  0x38: 's',
+  0x39: 'h',
 };
 const _matras = <int, String>{
-  0x3E: 'aa', 0x3F: 'i', 0x40: 'ii', 0x41: 'u', 0x42: 'uu', 0x43: 'ri',
-  0x45: 'e', 0x47: 'e', 0x48: 'ai', 0x49: 'o', 0x4B: 'o', 0x4C: 'au',
+  0x3E: 'aa',
+  0x3F: 'i',
+  0x40: 'ii',
+  0x41: 'u',
+  0x42: 'uu',
+  0x43: 'ri',
+  0x45: 'e',
+  0x47: 'e',
+  0x48: 'ai',
+  0x49: 'o',
+  0x4B: 'o',
+  0x4C: 'au',
 };
 const _virama = 0x4D;
 const _nukta = 0x3C;
@@ -156,8 +203,18 @@ String transliterate(String text) {
 String foldLatin(String s) {
   var t = s.toLowerCase();
   const pairs = [
-    ['chh', 'ch'], ['aa', 'a'], ['ee', 'i'], ['ii', 'i'], ['oo', 'u'], ['uu', 'u'],
-    ['ph', 'f'], ['sh', 's'], ['w', 'v'], ['z', 'j'], ['ae', 'e'], ['q', 'k'],
+    ['chh', 'ch'],
+    ['aa', 'a'],
+    ['ee', 'i'],
+    ['ii', 'i'],
+    ['oo', 'u'],
+    ['uu', 'u'],
+    ['ph', 'f'],
+    ['sh', 's'],
+    ['w', 'v'],
+    ['z', 'j'],
+    ['ae', 'e'],
+    ['q', 'k'],
   ];
   for (final p in pairs) {
     t = t.replaceAll(p[0], p[1]);
@@ -242,8 +299,10 @@ bool hasLetter(String s) => s.runes.any(_isLetter);
 
 /// Letters only, lower-cased — spacing, punctuation and digits removed.
 /// Two copies of a poem with different line breaks or commas give the same key.
-String lettersOnly(String s) => String.fromCharCodes(s.toLowerCase().runes.where((c) {
-      if (_isLatin(c)) return true;
-      final off = _indicOffset(c);
-      return off != null && off >= 0x01 && off <= 0x63 && off != 0x3C;
-    }));
+String lettersOnly(String s) => String.fromCharCodes(
+  s.toLowerCase().runes.where((c) {
+    if (_isLatin(c)) return true;
+    final off = _indicOffset(c);
+    return off != null && off >= 0x01 && off <= 0x63 && off != 0x3C;
+  }),
+);

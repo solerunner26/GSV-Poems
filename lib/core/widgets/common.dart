@@ -8,7 +8,7 @@ import '../theme/neon_tokens.dart';
 import 'icon3d.dart';
 import 'neon_surface.dart';
 
-/// White card with the soft shadow used across the app.
+/// The raised card used across the app: neon edge, outer glow, translucent face.
 class GsvCard extends StatelessWidget {
   const GsvCard({super.key, required this.child, this.padding = const EdgeInsets.all(16), this.onTap, this.radius = 20});
   final Widget child;
@@ -19,22 +19,28 @@ class GsvCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.gc;
-    final card = DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(radius),
-        boxShadow: neonGlow(c, context.neon.glowIntensity, strength: onTap == null ? 0.6 : 1),
-      ),
-      child: Material(
-        color: c.surface,
-        borderRadius: BorderRadius.circular(radius),
-        child: InkWell(
+    // Slightly translucent, so the moving wash glows through; the glow and
+    // shadow are drawn only outside the card so its face stays clean.
+    final face = c.surface.withValues(alpha: c.isDark ? NeonTokens.cardOpacityDark : NeonTokens.cardOpacityLight);
+    return NeonPressSurface(
+      radius: radius,
+      interactive: onTap != null,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(radius),
-          onTap: onTap,
-          child: Padding(padding: padding, child: child),
+          boxShadow: neonGlow(c, context.neon.glowIntensity, strength: onTap == null ? 0.7 : 1),
+        ),
+        child: Material(
+          color: face,
+          borderRadius: BorderRadius.circular(radius),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(radius),
+            onTap: onTap,
+            child: Padding(padding: padding, child: child),
+          ),
         ),
       ),
     );
-    return onTap == null ? card : NeonPressSurface(radius: radius, child: card);
   }
 }
 

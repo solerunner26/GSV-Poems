@@ -92,14 +92,13 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
     final every = ref.watch(poemsProvider((lang: null, categoryId: null, sort: PoemSort.number))).asData?.value ?? const <Poem>[];
     final mine = every.where((p) => _inSection(p, section)).toList();
     final stats = ref.watch(statsProvider).asData?.value ?? const PoemStats();
-    final counts = <String, int>{}, anyCounts = <String, int>{};
+    final counts = <String, int>{};
     for (final p in every) {
       final k = p.categoryId ?? 'other';
-      anyCounts[k] = (anyCounts[k] ?? 0) + 1;
       if (_inSection(p, section)) counts[k] = (counts[k] ?? 0) + 1;
     }
-    // Topics with poems in this section, new empty topics, and Others.
-    final cats = allCats.where((t) => (counts[t.id] ?? 0) > 0 || (anyCounts[t.id] ?? 0) == 0 || t.id == 'other').toList();
+    // Only topics that hold poems in this section get a tile.
+    final cats = allCats.where((t) => (counts[t.id] ?? 0) > 0).toList();
     // Names follow the section's script (जीवन मंथन in Hindi, જીવન મંથન in Gujarati).
     final nameLang = lang == PoemLang.en ? PoemLang.en : section;
     final cols = MediaQuery.sizeOf(context).width >= 600 ? 3 : 2;

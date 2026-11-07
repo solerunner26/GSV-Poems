@@ -9,6 +9,8 @@ import '../../core/text/text_tools.dart';
 import '../../core/theme/app_themes.dart';
 import '../../core/widgets/common.dart';
 import '../../core/widgets/icon3d.dart';
+import '../../core/widgets/neon_surface.dart';
+import '../../core/theme/neon_tokens.dart';
 import '../../data/db/database.dart';
 import '../common/poem_share.dart';
 import '../common/poem_tile.dart';
@@ -290,63 +292,72 @@ class _PoemPage extends ConsumerWidget {
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 760),
-        child: Container(
-          margin: const EdgeInsets.fromLTRB(16, 6, 16, 8),
-          decoration: BoxDecoration(
-            color: c.surface,
-            borderRadius: BorderRadius.circular(26),
-            boxShadow: [BoxShadow(color: c.ink.withValues(alpha: 0.10), blurRadius: 30, offset: const Offset(0, 10))],
-          ),
-          child: CustomPaint(
-            painter: _Corners(c.accent.withValues(alpha: 0.7)),
-            child: Stack(
-              children: [
-                // The poet's logo, faint, behind every poem.
-                Positioned.fill(
-                  child: IgnorePointer(
-                    child: Padding(
-                      padding: const EdgeInsets.all(28),
-                      child: Image.asset(
-                        logoMarkAsset,
-                        fit: BoxFit.contain,
-                        excludeFromSemantics: true,
-                        color: c.ink.withValues(alpha: c.isDark ? 0.07 : 0.06),
-                        colorBlendMode: BlendMode.srcIn,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 6, 16, 8),
+          child: NeonPressSurface(
+            radius: 26,
+            featured: true,
+            interactive: false,
+            focal: (s) => Offset(s.width / 2, 54),
+            focalRadius: 34,
+            child: Container(
+              decoration: BoxDecoration(
+                color: c.surface,
+                borderRadius: BorderRadius.circular(26),
+                boxShadow: neonGlow(c, context.neon.glowIntensity, strength: 1.2),
+              ),
+              child: CustomPaint(
+                painter: _Corners(c.accent.withValues(alpha: 0.7)),
+                child: Stack(
+                  children: [
+                    // The poet's logo, faint, behind every poem.
+                    Positioned.fill(
+                      child: IgnorePointer(
+                        child: Padding(
+                          padding: const EdgeInsets.all(28),
+                          child: Image.asset(
+                            logoMarkAsset,
+                            fit: BoxFit.contain,
+                            excludeFromSemantics: true,
+                            color: c.ink.withValues(alpha: c.isDark ? 0.07 : 0.06),
+                            colorBlendMode: BlendMode.srcIn,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                    SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(26, 26, 26, 26),
+                      child: Column(
+                        children: [
+                          const Icon3D('lotus', size: 56),
+                          const SizedBox(height: 8),
+                          if (p.number != null)
+                            Text(
+                              '#${localDigits(p.number!, lang)}',
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: c.accentText),
+                            ),
+                          Text(
+                            poemTitle(p),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontFamily: font, fontSize: size + 4, height: 1.25, fontWeight: FontWeight.w700, color: c.ink),
+                          ),
+                          const SizedBox(height: 14),
+                          SelectableText(
+                            p.body.trim(),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontFamily: font, fontSize: size, height: 1.85, color: c.ink),
+                          ),
+                          const SizedBox(height: 22),
+                          Text(
+                            '— ${tr('poet_name', lang)} · ${friendlyDate(context, p.createdAt)}',
+                            style: TextStyle(fontSize: 15, fontStyle: FontStyle.italic, color: c.mute),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(26, 26, 26, 26),
-                  child: Column(
-                    children: [
-                      const Icon3D('lotus', size: 56),
-                      const SizedBox(height: 8),
-                      if (p.number != null)
-                        Text(
-                          '#${localDigits(p.number!, lang)}',
-                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: c.accentText),
-                        ),
-                      Text(
-                        poemTitle(p),
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontFamily: font, fontSize: size + 4, height: 1.25, fontWeight: FontWeight.w700, color: c.ink),
-                      ),
-                      const SizedBox(height: 14),
-                      SelectableText(
-                        p.body.trim(),
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontFamily: font, fontSize: size, height: 1.85, color: c.ink),
-                      ),
-                      const SizedBox(height: 22),
-                      Text(
-                        '— ${tr('poet_name', lang)} · ${friendlyDate(context, p.createdAt)}',
-                        style: TextStyle(fontSize: 15, fontStyle: FontStyle.italic, color: c.mute),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ),
