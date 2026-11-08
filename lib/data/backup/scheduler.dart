@@ -14,6 +14,8 @@ import '../security/pin_service.dart';
 import 'backup_service.dart';
 import '../sync/drive_service.dart';
 import '../sync/sync_service.dart';
+import '../../app_providers.dart' show AppPrefs;
+import '../../features/widget/home_screen_widget.dart';
 
 const _nightlyId = 1159, _reminderId = 1900;
 
@@ -81,6 +83,13 @@ Future<(AppDatabase, PoemRepository, PoemLang)> _open() async {
 @pragma('vm:entry-point')
 Future<void> nightlyBackupAlarm() async {
   final (db, repo, lang) = await _open();
+  try {
+    // Tomorrow's date and Choghadiya for the home-screen widget, a week ahead.
+    final place = AppPrefs.fromMap(await repo.allSettings()).place;
+    await updateHomeScreenWidget(place, lang);
+  } on Object {
+    // The widget also refreshes when the app is opened.
+  }
   try {
     final backups = BackupService(repo, const SecureSecretStore());
     await backups.nightly(subject: tr('backup_mail_subject', lang), body: tr('backup_mail_body', lang));

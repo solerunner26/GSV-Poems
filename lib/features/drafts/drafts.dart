@@ -59,7 +59,7 @@ Future<void> _delete(BuildContext context, WidgetRef ref, Poem p) async {
         FilledButton(
           style: FilledButton.styleFrom(backgroundColor: GsvColors.bad),
           onPressed: () => Navigator.pop(ctx, true),
-          child: Text(ctx.t('delete'), style: const TextStyle(fontSize: 17)),
+          child: Text(ctx.t('draft_delete'), style: const TextStyle(fontSize: 17)),
         ),
       ],
     ),
@@ -105,63 +105,124 @@ class DraftsSection extends ConsumerWidget {
         for (final p in drafts)
           Padding(
             padding: const EdgeInsets.only(bottom: 10),
-            child: GsvCard(
-              padding: const EdgeInsets.fromLTRB(12, 10, 8, 8),
-              onTap: () => _edit(context, ref, p),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Icon3D('write', size: 40),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              poemTitle(p),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(fontFamily: poemFont(p.lang), fontSize: 17, fontWeight: FontWeight.w700, color: c.ink),
-                            ),
-                            Text(
-                              '${context.t('kind_${p.kind}')} · ${friendlyDate(context, p.updatedAt)} · ${localDigits(p.wordCount, lang)} ${context.t('words')}',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(fontSize: 13.5, color: c.mute),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const AttentionDot(),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Wrap(
-                    spacing: 6,
-                    runSpacing: 4,
-                    alignment: WrapAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: () => _delete(context, ref, p),
-                        child: Text(context.t('delete'), style: const TextStyle(fontSize: 15, color: GsvColors.bad)),
-                      ),
-                      OutlinedButton(
-                        onPressed: () => _edit(context, ref, p),
-                        child: Text(context.t('edit'), style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
-                      ),
-                      FilledButton(
-                        onPressed: () => _publish(context, ref, p),
-                        child: Text(context.t('draft_publish'), style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+            child: _DraftCard(
+              poem: p,
+              onEdit: () => _edit(context, ref, p),
+              onDelete: () => _delete(context, ref, p),
+              onPublish: () => _publish(context, ref, p),
             ),
           ),
       ],
+    );
+  }
+}
+
+/// One draft: title and details, then Delete · Edit · Publish in one row of
+/// equal, 44 dp buttons (destructive outlined in red, primary filled).
+class _DraftCard extends StatelessWidget {
+  const _DraftCard({required this.poem, required this.onEdit, required this.onDelete, required this.onPublish});
+  final Poem poem;
+  final VoidCallback onEdit, onDelete, onPublish;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.gc;
+    final lang = context.lang;
+    const radius = 12.0;
+    const height = 44.0;
+    final shape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius));
+    const pad = EdgeInsets.symmetric(horizontal: 8);
+    Widget label(IconData icon, String text) => FittedBox(
+      fit: BoxFit.scaleDown,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 18),
+          const SizedBox(width: 6),
+          Text(text, maxLines: 1, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+        ],
+      ),
+    );
+    return GsvCard(
+      radius: 18,
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+      onTap: onEdit,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const Icon3D('write', size: 36),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      poemTitle(poem),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontFamily: poemFont(poem.lang), fontSize: 16.5, fontWeight: FontWeight.w700, color: c.ink),
+                    ),
+                    Text(
+                      '${context.t('kind_${poem.kind}')} · ${friendlyDate(context, poem.updatedAt)} · ${localDigits(poem.wordCount, lang)} ${context.t('words')}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 13, color: c.mute),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: onDelete,
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(0, height),
+                    padding: pad,
+                    shape: shape,
+                    foregroundColor: GsvColors.bad,
+                    side: BorderSide(color: GsvColors.bad.withValues(alpha: 0.7)),
+                  ),
+                  child: label(Icons.delete_outline_rounded, context.t('draft_delete')),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: onEdit,
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(0, height),
+                    padding: pad,
+                    shape: shape,
+                    foregroundColor: c.primary,
+                    side: BorderSide(color: c.primary.withValues(alpha: 0.7)),
+                  ),
+                  child: label(Icons.edit_outlined, context.t('edit')),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: FilledButton(
+                  onPressed: onPublish,
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size(0, height),
+                    padding: pad,
+                    shape: shape,
+                    backgroundColor: c.primary,
+                    foregroundColor: c.onPrimary,
+                  ),
+                  child: label(Icons.cloud_upload_outlined, context.t('draft_publish_short')),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
@@ -212,15 +273,9 @@ class DraftsNotice extends ConsumerWidget {
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '✱ ${localDigits(n, context.lang)} ${context.t('drafts_waiting')}',
-                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: c.ink),
-                  ),
-                  Text(context.t('drafts_waiting_sub'), style: TextStyle(fontSize: 14, color: c.mute)),
-                ],
+              child: Text(
+                '${context.t('drafts_title')} ${localDigits(n, context.lang)}',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: c.ink),
               ),
             ),
             Icon(Icons.chevron_right_rounded, color: c.accent),

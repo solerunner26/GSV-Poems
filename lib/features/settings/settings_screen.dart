@@ -15,6 +15,7 @@ import '../import/keep_import_screen.dart';
 import '../profile/profile_screen.dart';
 import '../sync/drive_screen.dart';
 import '../sync/writer_gate.dart';
+import '../widget/home_screen_widget.dart';
 import '../sync/library_screen.dart';
 import '../update/update_prompt.dart';
 
@@ -208,6 +209,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   SettingsRow(icon: 'theme', title: context.t('theme'), sub: context.t('theme_${prefs.themeId}'), onTap: _pickTheme),
                   SettingsRow(icon: 'language', title: context.t('language'), sub: tr('lang_${prefs.lang.name}', prefs.lang), onTap: _pickLang),
                   SettingsRow(icon: 'fontsize', title: context.t('text_size'), sub: context.t(sizeKey), onTap: _pickTextSize),
+                ],
+              ),
+              SettingsGroup(
+                title: context.t('panchang'),
+                rows: [
+                  SettingsRow(
+                    icon: 'calendar',
+                    title: context.t('widget_add'),
+                    sub: context.t('widget_add_sub'),
+                    onTap: () async {
+                      final prefs = ref.read(prefsProvider);
+                      await updateHomeScreenWidget(prefs.place, prefs.lang);
+                      final asked = await requestHomeScreenWidget();
+                      if (!asked && context.mounted) {
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(SnackBar(content: Text(context.t('widget_how')), duration: const Duration(seconds: 8)));
+                      }
+                    },
+                  ),
                 ],
               ),
               const Padding(padding: EdgeInsets.only(bottom: 18), child: BackupCard()),

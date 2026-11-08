@@ -136,10 +136,10 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
     expect(tester.takeException(), isNull);
     expect(find.text('નવી કવિતા'), findsOneWidget);
-    expect(find.textContaining(tr('drafts_waiting', PoemLang.gu)), findsOneWidget);
-    expect(find.text(tr('draft_publish', PoemLang.gu)), findsOneWidget);
+    expect(find.text('${tr('drafts_title', PoemLang.gu)} ૧'), findsOneWidget);
+    expect(find.text(tr('draft_publish_short', PoemLang.gu)), findsOneWidget);
     expect(find.text(tr('edit', PoemLang.gu)), findsOneWidget);
-    expect(find.text(tr('delete', PoemLang.gu)), findsOneWidget);
+    expect(find.text(tr('draft_delete', PoemLang.gu)), findsOneWidget);
     expect(find.byType(AttentionDot), findsWidgets);
   });
 }

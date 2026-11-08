@@ -18,6 +18,7 @@ import '../editor/editor_screen.dart';
 import '../home/home_screen.dart';
 import '../drafts/drafts.dart';
 import '../search/search_screen.dart';
+import '../widget/home_screen_widget.dart';
 import '../settings/settings_screen.dart';
 import '../update/update_prompt.dart';
 
@@ -41,7 +42,11 @@ class _ShellState extends ConsumerState<Shell> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) checkForUpdate(context);
       unawaited(_startupJobs());
+      final prefs = ref.read(prefsProvider);
+      unawaited(updateHomeScreenWidget(prefs.place, prefs.lang));
     });
+    // The home-screen widget follows the chosen place and language.
+    ref.listenManual(prefsProvider.select((p) => (p.place, p.lang)), (_, next) => unawaited(updateHomeScreenWidget(next.$1, next.$2)));
   }
 
   /// Once per open: ask for notification permission the first time, and take
