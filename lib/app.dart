@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,6 +13,8 @@ import 'features/backup/backup_screens.dart';
 import 'features/pin/pin_screen.dart';
 import 'features/shell/shell.dart';
 import 'features/splash/splash_screen.dart';
+import 'features/sync/drive_screen.dart';
+import 'features/sync/library_screen.dart';
 
 class GsvApp extends ConsumerWidget {
   const GsvApp({super.key});
@@ -35,7 +39,7 @@ class GsvApp extends ConsumerWidget {
         return LangScope(
           lang: prefs.lang,
           child: MediaQuery(
-            data: mq.copyWith(textScaler: TextScaler.linear(mq.textScaler.scale(1) * prefs.textScale)),
+            data: mq.copyWith(textScaler: TextScaler.linear(appTextScale(mq.textScaler.scale(1), prefs.textScale))),
             child: child!,
           ),
         );
@@ -60,6 +64,18 @@ class _StartFlowState extends State<StartFlow> with WidgetsBindingObserver {
   DateTime? _pausedAt;
   static const _relockAfter = Duration(minutes: 2);
 
+  /// Sends new poems up (and brings others' in) without disturbing anyone.
+  Future<void> _quietSync() async {
+    final container = ProviderScope.containerOf(context, listen: false);
+    unawaited(container.read(libraryProvider).quiet(daily: true));
+    final sync = container.read(syncProvider);
+    try {
+      if (await sync.connected()) await sync.run();
+    } on Object {
+      // Offline or signed out: tried again on the next open or edit.
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -76,8 +92,10 @@ class _StartFlowState extends State<StartFlow> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused) {
       _pausedAt = DateTime.now();
+      if (_stage == _Stage.app) unawaited(_quietSync());
     } else if (state == AppLifecycleState.resumed && _stage == _Stage.app) {
       final p = _pausedAt;
+      if (p != null && DateTime.now().difference(p) > const Duration(minutes: 2)) unawaited(_quietSync());
       if (p != null && DateTime.now().difference(p) > _relockAfter) {
         Navigator.of(context).popUntil((r) => r.isFirst);
         setState(() => _stage = _Stage.pin);

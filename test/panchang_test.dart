@@ -57,8 +57,14 @@ void main() {
   test('Choghadiya: 8 by day and 8 by night, first one by weekday', () {
     final sat = panchangFor(DateTime(2026, 11, 7), Place.ahmedabad); // Saturday
     expect(sat.dayChoghadiya.map((c) => c.kind), [
-      ChoghadiyaKind.kaal, ChoghadiyaKind.shubh, ChoghadiyaKind.rog, ChoghadiyaKind.udveg,
-      ChoghadiyaKind.char, ChoghadiyaKind.labh, ChoghadiyaKind.amrit, ChoghadiyaKind.kaal,
+      ChoghadiyaKind.kaal,
+      ChoghadiyaKind.shubh,
+      ChoghadiyaKind.rog,
+      ChoghadiyaKind.udveg,
+      ChoghadiyaKind.char,
+      ChoghadiyaKind.labh,
+      ChoghadiyaKind.amrit,
+      ChoghadiyaKind.kaal,
     ]);
     expect(sat.nightChoghadiya.first.kind, ChoghadiyaKind.labh);
     expect(sat.dayChoghadiya.first.start, sat.sunrise);

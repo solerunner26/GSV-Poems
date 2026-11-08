@@ -11,6 +11,8 @@ import '../../app_providers.dart';
 import '../../data/backup/scheduler.dart';
 import '../backup/backup_screens.dart';
 import '../sync/drive_screen.dart';
+import '../sync/writer_gate.dart';
+import '../sync/library_screen.dart';
 import '../collection/collection_screen.dart';
 import '../editor/editor_screen.dart';
 import '../home/home_screen.dart';
@@ -53,6 +55,8 @@ class _ShellState extends ConsumerState<Shell> {
         // Older Android: nothing to ask.
       }
     }
+    // The online library: readers look once a day, the poet's devices publish.
+    unawaited(ref.read(libraryProvider).quiet(daily: true));
     final sync = ref.read(syncProvider);
     if (await sync.connected()) {
       try {
@@ -75,7 +79,10 @@ class _ShellState extends ConsumerState<Shell> {
 
   void _go(Tab t) => setState(() => _tab = t);
 
-  void _write() => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const EditorScreen()));
+  Future<void> _write() async {
+    if (!await ensureCanWrite(context, ref) || !mounted) return;
+    await Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const EditorScreen()));
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:intl/intl.dart';
@@ -27,10 +28,26 @@ class SyncResult {
 /// edit wins, the other text goes to history, nothing is duplicated or erased),
 /// then uploads this device's backup.
 class SyncService {
-  SyncService(this.repo, this.backups, this.remote);
+  SyncService(this.repo, this.backups, this.remote, {this.ownerVerifier});
   final PoemRepository repo;
   final BackupService backups;
   final RemoteStore remote;
+
+  /// On the poet's own phone: its PIN verifier, published so that his PIN
+  /// can unlock writing on another device.
+  final Future<Map<String, String>?> Function()? ownerVerifier;
+
+  static const ownerFile = 'gsv-owner.json';
+
+  /// The poet's PIN verifier, as published by his phone, or null.
+  Future<Map<String, dynamic>?> fetchOwnerVerifier() async {
+    for (final f in await remote.list()) {
+      if (f.name != ownerFile) continue;
+      final m = jsonDecode(utf8.decode(await remote.download(f.id)));
+      return m is Map<String, dynamic> ? m : null;
+    }
+    return null;
+  }
 
   static const keepDailyDays = 14;
   static final _latest = RegExp(r'^gsv-poems-latest-([A-Za-z0-9]+)\.gsvbak$');
@@ -104,6 +121,8 @@ class SyncService {
         if (day != null && day.isBefore(cutoff)) await remote.delete(f.id);
       }
     }
+    final owner = await ownerVerifier?.call();
+    if (owner != null) await remote.upload(ownerFile, Uint8List.fromList(utf8.encode(jsonEncode(owner))));
     await repo.setSetting('lastSyncAt', DateTime.now().toIso8601String());
     await repo.setSetting('syncNeedsKey', needsKey ? '1' : '');
     return SyncResult(devices: devices, added: added, updated: updated, uploaded: uploaded, needsKey: needsKey);

@@ -111,6 +111,27 @@ class PinService {
     return PinCheck.wrong;
   }
 
+  /// The salted hash of this device's PIN, to let the poet's own PIN unlock
+  /// writing on another device. Never the PIN itself.
+  Future<Map<String, String>?> verifier() async {
+    final salt = await store.read(_kSalt), hash = await store.read(_kHash);
+    if (salt == null || hash == null) return null;
+    return {'salt': salt, 'hash': hash, 'iter': await store.read(_kIter) ?? '$iterations'};
+  }
+
+  /// Whether [pin] matches a [verifier] from another device.
+  static Future<bool> matches(Map<String, dynamic> verifier, String pin) async {
+    final salt = base64Decode('${verifier['salt']}');
+    final want = base64Decode('${verifier['hash']}');
+    final iter = int.tryParse('${verifier['iter']}') ?? 60000;
+    final calc = await Isolate.run(() => pbkdf2(utf8.encode(pin), salt, iter, 32));
+    var diff = calc.length ^ want.length;
+    for (var i = 0; i < calc.length && i < want.length; i++) {
+      diff |= calc[i] ^ want[i];
+    }
+    return diff == 0;
+  }
+
   Future<bool> biometricEnabled() async => (await store.read(_kBio)) == '1';
   Future<void> setBiometric(bool on) => on ? store.write(_kBio, '1') : store.delete(_kBio);
 }

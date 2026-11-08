@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app_providers.dart';
@@ -26,6 +27,30 @@ class _KeepImportScreenState extends ConsumerState<KeepImportScreen> {
   KeepParseResult? _result;
   ImportOutcome? _outcome;
   bool _busy = false;
+  final _paste = TextEditingController();
+
+  @override
+  void dispose() {
+    _paste.dispose();
+    super.dispose();
+  }
+
+  Future<void> _fromClipboard() async {
+    final data = await Clipboard.getData(Clipboard.kTextPlain);
+    final text = data?.text ?? '';
+    if (text.trim().isEmpty) return;
+    _paste.text = text;
+    _split();
+  }
+
+  /// Splits the pasted Keep text into single poems for the preview.
+  void _split() {
+    if (_paste.text.trim().isEmpty) return;
+    setState(() {
+      _outcome = null;
+      _result = parseKeepText(_paste.text);
+    });
+  }
 
   Future<void> _pick() async {
     final picked = await FilePicker.pickFiles(type: FileType.any);
@@ -96,6 +121,44 @@ class _KeepImportScreenState extends ConsumerState<KeepImportScreen> {
                       ),
                       const SizedBox(height: 16),
                       PrimaryButton(label: context.t('keep_pick'), icon: 'collection', onPressed: _busy ? null : _pick),
+                      const SizedBox(height: 18),
+                      // Or: text copied straight out of Google Keep.
+                      Text(
+                        context.t('keep_or_paste'),
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: c.ink),
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: _paste,
+                        minLines: 4,
+                        maxLines: 10,
+                        style: const TextStyle(fontSize: 16, height: 1.5),
+                        decoration: InputDecoration(
+                          hintText: context.t('keep_paste_hint'),
+                          filled: true,
+                          fillColor: c.surface,
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: _busy ? null : _fromClipboard,
+                              style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(52)),
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(context.t('keep_paste_btn'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: PrimaryButton(label: context.t('keep_split_btn'), height: 52, onPressed: _busy ? null : _split),
+                          ),
+                        ],
+                      ),
                       if (_busy) ...[
                         const SizedBox(height: 18),
                         Center(
@@ -139,6 +202,18 @@ class _KeepImportScreenState extends ConsumerState<KeepImportScreen> {
                                 ),
                               ),
                             ),
+                          // Each poem found, so the split can be checked before adding.
+                          if (r.poems.length <= 40)
+                            for (final p in r.poems)
+                              Padding(
+                                padding: const EdgeInsets.only(left: 6, bottom: 4),
+                                child: Text(
+                                  '${p.number == null ? '•' : '#${localDigits(p.number!, lang)}'}  ${p.title}  ·  ${localDigits(p.body.split('\n').length, lang)} ${context.t('keep_lines')}',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(fontFamily: poemFont(p.lang.name), fontSize: 15, color: c.mute),
+                                ),
+                              ),
                           if (missing.isNotEmpty) ...[
                             const SizedBox(height: 8),
                             Text(

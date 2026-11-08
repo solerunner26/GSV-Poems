@@ -12,9 +12,11 @@ import '../../core/widgets/icon3d.dart';
 import '../../core/widgets/neon_surface.dart';
 import '../../core/theme/neon_tokens.dart';
 import '../../data/db/database.dart';
+import '../../data/poem_repository.dart';
 import '../common/poem_share.dart';
 import '../common/poem_tile.dart';
 import '../editor/editor_screen.dart';
+import '../sync/writer_gate.dart';
 
 /// Reading mode: one poem per page, swipe for the next. The interface follows
 /// the poem's language. The screen stays awake while reading.
@@ -101,6 +103,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
     );
     if (!mounted || choice == null) return;
     if (choice == 'bin') {
+      if (!await ensureCanWrite(context, ref) || !mounted) return;
       await repo.moveToBin(p.id);
       if (!mounted) return;
       final messenger = ScaffoldMessenger.of(context);
@@ -207,7 +210,11 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                             label: context.t('edit'),
                             size: 44,
                             onPressed: () {
-                              Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => EditorScreen(poemId: current.id)));
+                              ensureCanWrite(context, ref).then((ok) {
+                                if (ok && context.mounted) {
+                                  Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => EditorScreen(poemId: current.id)));
+                                }
+                              });
                             },
                           ),
                           IconButton(
@@ -342,10 +349,16 @@ class _PoemPage extends ConsumerWidget {
                             style: TextStyle(fontFamily: font, fontSize: size + 4, height: 1.25, fontWeight: FontWeight.w700, color: c.ink),
                           ),
                           const SizedBox(height: 14),
+                          // Poems are centred line by line; prose reads as justified paragraphs.
                           SelectableText(
                             p.body.trim(),
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontFamily: font, fontSize: size, height: 1.85, color: c.ink),
+                            textAlign: p.kind == Kind.prose ? TextAlign.justify : TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: font,
+                              fontSize: p.kind == Kind.prose ? size - 2 : size,
+                              height: p.kind == Kind.prose ? 1.7 : 1.85,
+                              color: c.ink,
+                            ),
                           ),
                           const SizedBox(height: 22),
                           Text(

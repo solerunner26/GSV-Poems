@@ -42,14 +42,19 @@ void main() {
       tester.view.physicalSize = const Size(390, 844) * 3;
       tester.view.devicePixelRatio = 3;
       addTearDown(tester.view.reset);
-      await tester.pumpWidget(ProviderScope(
-        overrides: [
-          prefsProvider.overrideWith(() => PrefsNotifier(AppPrefs(lang: lang))),
-          statsProvider.overrideWith((ref) => Stream.value(const PoemStats(total: 890, words: 121105, gu: 801, hi: 89))),
-          profileProvider.overrideWith((ref) async => const Profile(name: 'ગીગાભાઈ', penName: 'ગૌરવ', place: 'ભાવનગર')),
-        ],
-        child: MaterialApp(theme: buildTheme(themeById('night')), home: LangScope(lang: lang, child: const ProfileScreen())),
-      ));
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            prefsProvider.overrideWith(() => PrefsNotifier(AppPrefs(lang: lang))),
+            statsProvider.overrideWith((ref) => Stream.value(const PoemStats(total: 890, words: 121105, gu: 801, hi: 89))),
+            profileProvider.overrideWith((ref) async => const Profile(name: 'ગીગાભાઈ', penName: 'ગૌરવ', place: 'ભાવનગર')),
+          ],
+          child: MaterialApp(
+            theme: buildTheme(themeById('night')),
+            home: LangScope(lang: lang, child: const ProfileScreen()),
+          ),
+        ),
+      );
       await tester.pump(const Duration(milliseconds: 300));
       expect(tester.takeException(), isNull);
       expect(find.text('ગીગાભાઈ'), findsOneWidget);
@@ -64,10 +69,15 @@ void main() {
   }
 
   testWidgets('home shows the profile photo button in place of help', (tester) async {
-    await tester.pumpWidget(MaterialApp(
-      theme: buildTheme(themeById('mor')),
-      home: const LangScope(lang: PoemLang.gu, child: Scaffold(body: Center(child: ProfileButton()))),
-    ));
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: buildTheme(themeById('mor')),
+        home: const LangScope(
+          lang: PoemLang.gu,
+          child: Scaffold(body: Center(child: ProfileButton())),
+        ),
+      ),
+    );
     await tester.pump();
     expect(find.bySemanticsLabel(tr('profile', PoemLang.gu)), findsOneWidget);
   });

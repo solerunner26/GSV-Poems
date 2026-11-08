@@ -25,6 +25,9 @@ class Poems extends Table {
   /// Same text (ignoring spacing, punctuation and line breaks) → same key.
   TextColumn get contentKey => text().nullable()();
 
+  /// What the writing is: 'poem' (કવિતા) or 'prose' (ગદ્ય: articles, essays).
+  TextColumn get kind => text().withDefault(const Constant('poem'))();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -81,7 +84,7 @@ class AppDatabase extends _$AppDatabase {
   static Future<void> Function(AppDatabase db)? backfill;
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -93,6 +96,10 @@ class AppDatabase extends _$AppDatabase {
         await customStatement("UPDATE poem_categories SET name_gu = 'અન્ય', name_hi = 'अन्य', name_en = 'Others' WHERE id = 'other'");
         await customStatement("UPDATE poems SET category_id = 'other' WHERE category_id IS NULL");
         await backfill?.call(this);
+      }
+      if (from < 3) {
+        // v3: prose (articles, essays) next to poems. Everything so far is a poem.
+        await m.addColumn(poems, poems.kind);
       }
     },
     onCreate: (m) async {

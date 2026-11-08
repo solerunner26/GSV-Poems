@@ -94,10 +94,18 @@ class PrefsNotifier extends Notifier<AppPrefs> {
 
 final prefsProvider = NotifierProvider<PrefsNotifier, AppPrefs>(PrefsNotifier.new);
 
-typedef PoemQuery = ({String? lang, String? categoryId, PoemSort sort});
+/// The text size the app uses: the phone's own setting, kept within a range
+/// the layouts are built for (very large system sizes no longer cut labels
+/// off), times the size chosen in Settings.
+double appTextScale(double system, double chosen) => system.clamp(0.85, 1.1) * chosen;
+
+/// Text sizes offered in Settings, smallest first, with their label keys.
+const textSizes = [(0.8, 'size_xs'), (0.9, 'size_s'), (1.0, 'size_m'), (1.15, 'size_l'), (1.3, 'size_xl')];
+
+typedef PoemQuery = ({String? lang, String? categoryId, String? kind, PoemSort sort});
 
 final poemsProvider = StreamProvider.family<List<Poem>, PoemQuery>(
-  (ref, q) => ref.watch(repoProvider).watchPoems(lang: q.lang, categoryId: q.categoryId, sort: q.sort),
+  (ref, q) => ref.watch(repoProvider).watchPoems(lang: q.lang, categoryId: q.categoryId, kind: q.kind, sort: q.sort),
 );
 final statsProvider = StreamProvider<PoemStats>((ref) => ref.watch(repoProvider).watchStats());
 final favoritesProvider = StreamProvider<List<Poem>>((ref) => ref.watch(repoProvider).watchFavorites());

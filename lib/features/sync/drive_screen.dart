@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'writer_gate.dart';
+import 'library_screen.dart';
+
 import '../../app_providers.dart';
 import '../../core/l10n/strings.dart';
 import '../../core/text/text_tools.dart';
@@ -44,21 +47,29 @@ class SyncCoordinator {
         await repo.setSetting('driveNeedsReconnect', '1');
         throw StateError('Google Drive needs to be connected again');
       }
-      final svc = SyncService(repo, ref.read(backupServiceProvider), drive);
+      final model = await ref.read(deviceModelProvider.future);
+      final svc = SyncService(
+        repo,
+        ref.read(backupServiceProvider),
+        drive,
+        ownerVerifier: publishesOwnerPin(model) ? () => ref.read(pinServiceProvider).verifier() : null,
+      );
       final r = await svc.sync(typedKey: typedKey);
       await repo.setSetting('driveNeedsReconnect', '');
       return r;
     } finally {
       ref.invalidate(driveReconnectProvider);
+      ref.invalidate(syncNeedsKeyProvider);
       _running = null;
       ref.invalidate(backupStatusProvider);
     }
   }();
 
-  /// A quiet sync a little after an edit, when Drive is connected.
+  /// A quiet sync a few seconds after an edit, when Drive is connected.
   void soon() {
     _soon?.cancel();
-    _soon = Timer(const Duration(seconds: 20), () async {
+    _soon = Timer(const Duration(seconds: 4), () async {
+      unawaited(ref.read(libraryProvider).quiet());
       if (!await connected()) return;
       try {
         await run();
@@ -70,6 +81,55 @@ class SyncCoordinator {
 }
 
 final syncProvider = Provider<SyncCoordinator>((ref) => SyncCoordinator(ref));
+
+/// True when another device's backup is locked with a different recovery key,
+/// so its poems cannot come in until that key is typed here once.
+final syncNeedsKeyProvider = FutureProvider<bool>((ref) async {
+  final repo = ref.watch(repoProvider);
+  if (await repo.getSetting('libNeedsKey') == '1') return true;
+  final connected = (await repo.getSetting('driveEmail'))?.isNotEmpty ?? false;
+  return connected && await repo.getSetting('syncNeedsKey') == '1';
+});
+
+/// Card on Home: the other device's poems are waiting for its recovery key.
+class SyncKeyNotice extends ConsumerWidget {
+  const SyncKeyNotice({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (!(ref.watch(syncNeedsKeyProvider).asData?.value ?? false)) return const SizedBox.shrink();
+    final c = context.gc;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 18),
+      child: GsvCard(
+        onTap: () async {
+          final lib = await ref.read(repoProvider).getSetting('libNeedsKey') == '1';
+          if (!context.mounted) return;
+          await Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => lib ? const LibraryScreen() : const DriveScreen()));
+        },
+        child: Row(
+          children: [
+            const Icon3D('key', size: 48),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    context.t('sync_key_title'),
+                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: c.ink),
+                  ),
+                  Text(context.t('sync_key_body'), style: TextStyle(fontSize: 14.5, height: 1.4, color: c.mute)),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right_rounded, color: c.accent),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 /// True when Google asked for permission again (e.g. after 7 days in Testing
 /// mode): Home then shows a "Reconnect Google Drive" card.

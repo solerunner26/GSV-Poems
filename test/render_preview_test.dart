@@ -38,9 +38,22 @@ void main() {
   });
 
   final poem = Poem(
-    id: 'p1', number: 12, title: 'વરસાદની પહેલી સાંજ', body: 'ભીની માટીની સુગંધમાં\nયાદો ફરી ખીલી ઊઠી', lang: 'gu',
-    categoryId: 'prakruti', isFavorite: true, wordCount: 7, searchBlob: '', createdAt: DateTime(2024, 11, 7),
-    updatedAt: DateTime(2026, 11, 6), source: 'app', sourceKey: null, contentKey: null, deletedAt: null,
+    id: 'p1',
+    number: 12,
+    title: 'વરસાદની પહેલી સાંજ',
+    body: 'ભીની માટીની સુગંધમાં\nયાદો ફરી ખીલી ઊઠી',
+    lang: 'gu',
+    categoryId: 'prakruti',
+    isFavorite: true,
+    wordCount: 7,
+    searchBlob: '',
+    createdAt: DateTime(2024, 11, 7),
+    updatedAt: DateTime(2026, 11, 6),
+    source: 'app',
+    sourceKey: null,
+    contentKey: null,
+    deletedAt: null,
+    kind: 'poem',
   );
 
   final themes = const String.fromEnvironment('THEMES', defaultValue: 'mor,night,light,neel,van,kamal').split(',');
@@ -51,27 +64,34 @@ void main() {
       tester.view.devicePixelRatio = 2;
       addTearDown(tester.view.reset);
       final key = GlobalKey();
-      await tester.pumpWidget(RepaintBoundary(
-        key: key,
-        child: ProviderScope(
-          overrides: [
-            minuteProvider.overrideWith((ref) => Stream.value(DateTime(2026, 11, 7, 15, 40))),
-            prefsProvider.overrideWith(() => PrefsNotifier(const AppPrefs(lang: PoemLang.gu))),
-            statsProvider.overrideWith((ref) => Stream.value(const PoemStats(total: 890, words: 121105, gu: 801, hi: 89))),
-            recentProvider.overrideWith((ref) => Stream.value([poem, poem])),
-            favoritesProvider.overrideWith((ref) => Stream.value([poem])),
-            poemsProvider.overrideWith((ref, q) => Stream.value([poem])),
-            onThisDayProvider.overrideWith((ref) async => [poem]),
-            duplicateCountProvider.overrideWith((ref) => Stream.value(0)),
-            categoriesProvider.overrideWith((ref) => Stream.value(const <PoemCategory>[])),
-          ],
-          child: MaterialApp(
-            debugShowCheckedModeBanner: false,
-            theme: buildTheme(themeById(id)),
-            home: LangScope(lang: PoemLang.gu, child: Scaffold(body: HomeScreen(onOpenCollection: () {}, onWrite: () {}))),
+      await tester.pumpWidget(
+        RepaintBoundary(
+          key: key,
+          child: ProviderScope(
+            overrides: [
+              minuteProvider.overrideWith((ref) => Stream.value(DateTime(2026, 11, 7, 15, 40))),
+              prefsProvider.overrideWith(() => PrefsNotifier(const AppPrefs(lang: PoemLang.gu))),
+              statsProvider.overrideWith((ref) => Stream.value(const PoemStats(total: 890, words: 121105, gu: 801, hi: 89))),
+              recentProvider.overrideWith((ref) => Stream.value([poem, poem])),
+              favoritesProvider.overrideWith((ref) => Stream.value([poem])),
+              poemsProvider.overrideWith((ref, q) => Stream.value([poem])),
+              onThisDayProvider.overrideWith((ref) async => [poem]),
+              duplicateCountProvider.overrideWith((ref) => Stream.value(0)),
+              categoriesProvider.overrideWith((ref) => Stream.value(const <PoemCategory>[])),
+            ],
+            child: MaterialApp(
+              debugShowCheckedModeBanner: false,
+              theme: buildTheme(themeById(id)),
+              home: LangScope(
+                lang: PoemLang.gu,
+                child: Scaffold(
+                  body: HomeScreen(onOpenCollection: () {}, onWrite: () {}),
+                ),
+              ),
+            ),
           ),
         ),
-      ));
+      );
       var elapsed = 0;
       for (final t in times) {
         await tester.pump(Duration(milliseconds: t - elapsed));

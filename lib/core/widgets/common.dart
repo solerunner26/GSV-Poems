@@ -267,8 +267,16 @@ class SectionTitle extends StatelessWidget {
     padding: const EdgeInsets.only(bottom: 8, top: 4),
     child: Row(
       children: [
-        Expanded(child: Text(text, style: Theme.of(context).textTheme.titleLarge)),
-        ?action,
+        // The title may wrap; the action shrinks to fit rather than pushing anything off screen.
+        Expanded(flex: 3, child: Text(text, maxLines: 2, style: Theme.of(context).textTheme.titleLarge)),
+        if (action != null)
+          Flexible(
+            flex: 2,
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: FittedBox(fit: BoxFit.scaleDown, child: action),
+            ),
+          ),
       ],
     ),
   );

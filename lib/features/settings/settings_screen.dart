@@ -14,6 +14,8 @@ import '../duplicates/duplicates_screen.dart';
 import '../import/keep_import_screen.dart';
 import '../profile/profile_screen.dart';
 import '../sync/drive_screen.dart';
+import '../sync/writer_gate.dart';
+import '../sync/library_screen.dart';
 import '../update/update_prompt.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -32,6 +34,49 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     PackageInfo.fromPlatform().then((i) {
       if (mounted) setState(() => _version = '${i.version} (${i.buildNumber})');
     });
+  }
+
+  /// Five sizes with a live sample; the whole app follows at once.
+  void _pickTextSize() {
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (ctx) => Consumer(
+        builder: (ctx, ref, _) {
+          final current = ref.watch(prefsProvider).textScale;
+          final system = MediaQuery.of(context).textScaler.scale(1);
+          return SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
+                  child: Text(ctx.t('text_size'), style: Theme.of(ctx).textTheme.titleLarge),
+                ),
+                RadioGroup<double>(
+                  groupValue: current,
+                  onChanged: (v) => ref.read(prefsProvider.notifier).setTextScale(v!),
+                  child: Column(
+                    children: [
+                      for (final (scale, key) in textSizes)
+                        RadioListTile<double>(
+                          value: scale,
+                          title: Text(
+                            ctx.t(key),
+                            // A true preview: shown at the size it gives, not the current one.
+                            textScaler: TextScaler.linear(appTextScale(system, scale)),
+                            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+              ],
+            ),
+          );
+        },
+      ),
+    );
   }
 
   void _pickTheme() {
@@ -118,11 +163,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget build(BuildContext context) {
     final c = context.gc;
     final prefs = ref.watch(prefsProvider);
-    final sizeKey = prefs.textScale >= 1.3
-        ? 'size_xl'
-        : prefs.textScale >= 1.15
-        ? 'size_l'
-        : 'size_m';
+    // The closest offered size names the current one.
+    var sizeKey = textSizes.first.$2;
+    for (final s in textSizes) {
+      if ((s.$1 - prefs.textScale).abs() < (textSizes.firstWhere((x) => x.$2 == sizeKey).$1 - prefs.textScale).abs()) sizeKey = s.$2;
+    }
     return SafeArea(
       bottom: false,
       child: Center(
@@ -162,19 +207,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 rows: [
                   SettingsRow(icon: 'theme', title: context.t('theme'), sub: context.t('theme_${prefs.themeId}'), onTap: _pickTheme),
                   SettingsRow(icon: 'language', title: context.t('language'), sub: tr('lang_${prefs.lang.name}', prefs.lang), onTap: _pickLang),
-                  SettingsRow(
-                    icon: 'fontsize',
-                    title: context.t('text_size'),
-                    sub: context.t(sizeKey),
-                    onTap: () {
-                      final next = prefs.textScale >= 1.3
-                          ? 1.0
-                          : prefs.textScale >= 1.15
-                          ? 1.3
-                          : 1.15;
-                      ref.read(prefsProvider.notifier).setTextScale(next);
-                    },
-                  ),
+                  SettingsRow(icon: 'fontsize', title: context.t('text_size'), sub: context.t(sizeKey), onTap: _pickTextSize),
                 ],
               ),
               const Padding(padding: EdgeInsets.only(bottom: 18), child: BackupCard()),
@@ -186,6 +219,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     title: context.t('drive_title'),
                     sub: context.t('drive_row_sub'),
                     onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const DriveScreen())),
+                  ),
+                  SettingsRow(
+                    icon: 'download',
+                    title: context.t('lib_title'),
+                    sub: context.t('lib_row_sub'),
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const LibraryScreen())),
                   ),
                   SettingsRow(
                     icon: 'mail',
@@ -203,7 +242,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     icon: 'download',
                     title: context.t('keep_import'),
                     sub: context.t('keep_import_sub'),
-                    onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const KeepImportScreen())),
+                    onTap: () async {
+                      if (await ensureCanWrite(context, ref) && context.mounted) {
+                        await Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const KeepImportScreen()));
+                      }
+                    },
                   ),
                 ],
               ),

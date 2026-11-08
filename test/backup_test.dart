@@ -14,8 +14,16 @@ const textA = 'ભીની માટીની સુગંધમાં યા�
 const textB = 'मन का आँगन रोशन है, शब्दों के दीप जलाकर हर साँस में तेरा नाम।';
 
 ImportedPoem seedPoem(String key, String body) => ImportedPoem(
-      number: 1, title: 'T', body: body, lang: detectLang(body), createdAt: DateTime(2024), updatedAt: DateTime(2024),
-      collection: 'જીવન મંથન', sourceKey: key, fileName: 'seed');
+  number: 1,
+  title: 'T',
+  body: body,
+  lang: detectLang(body),
+  createdAt: DateTime(2024),
+  updatedAt: DateTime(2024),
+  collection: 'જીવન મંથન',
+  sourceKey: key,
+  fileName: 'seed',
+);
 
 void main() {
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
@@ -32,7 +40,15 @@ void main() {
 
   group('encrypted file', () {
     const key = '7K2QM-ABCDE-FGHJK-MNPQR-STVWX';
-    final contents = {'format': 1, 'poems': [{'body': textA}], 'categories': [], 'versions': [], 'settings': {}};
+    final contents = {
+      'format': 1,
+      'poems': [
+        {'body': textA},
+      ],
+      'categories': [],
+      'versions': [],
+      'settings': {},
+    };
 
     test('opens with the key, typed loosely; poems are not readable without it', () async {
       final bytes = await encodeBackup(contents, key, iterations: 1000);

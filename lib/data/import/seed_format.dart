@@ -20,6 +20,7 @@ String encodeSeed(List<ImportedPoem> poems) => const JsonEncoder.withIndent(' ')
         'lang': p.lang.name,
         'created': p.createdAt.toIso8601String(),
         'updated': p.updatedAt.toIso8601String(),
+        if (p.kind != 'poem') 'kind': p.kind,
       },
   ],
 });
@@ -38,6 +39,7 @@ List<ImportedPoem> decodeSeed(String json) {
         collection: e['collection'] as String,
         sourceKey: e['key'] as String,
         fileName: seedAsset,
+        kind: e['kind'] as String? ?? 'poem',
       ),
   ];
 }

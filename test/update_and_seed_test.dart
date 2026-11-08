@@ -9,16 +9,16 @@ import 'package:gsv_poems/data/poem_repository.dart';
 import 'package:gsv_poems/data/update/update_service.dart';
 
 ImportedPoem poem(String body, {String collection = 'જીવન મંથન', int number = 1, String key = 'k1'}) => ImportedPoem(
-      number: number,
-      title: 'શીર્ષક $number',
-      body: body,
-      lang: detectLang(body),
-      createdAt: DateTime(2024, 7, 25, 12),
-      updatedAt: DateTime(2024, 7, 26),
-      collection: collection,
-      sourceKey: key,
-      fileName: 'f.json',
-    );
+  number: number,
+  title: 'શીર્ષક $number',
+  body: body,
+  lang: detectLang(body),
+  createdAt: DateTime(2024, 7, 25, 12),
+  updatedAt: DateTime(2024, 7, 26),
+  collection: collection,
+  sourceKey: key,
+  fileName: 'f.json',
+);
 
 const text = 'ભીની માટીની સુગંધમાં યાદો ફરી ખીલી ઊઠી,\nઆંગણે ઊભી લીમડી ટીપે ટીપે ગીત ગાતી.';
 
@@ -34,15 +34,39 @@ void main() {
 
     test('newest non-draft release with an APK wins; betas count', () {
       final r = pickLatest([
-        {'tag_name': 'v1.2.0', 'draft': true, 'assets': [{'name': 'gsv-poems-build9.apk', 'browser_download_url': 'x'}]},
-        {'tag_name': 'v1.1.0-beta.1', 'prerelease': true, 'name': 'Beta 1', 'body': 'notes',
-          'assets': [{'name': 'gsv-poems-v1.1.0-beta.1-build3.apk', 'browser_download_url': 'https://x/3.apk', 'size': 2048}]},
-        {'tag_name': 'v1.0.0', 'assets': [{'name': 'gsv-poems-build1.apk', 'browser_download_url': 'https://x/1.apk'}, {'name': 'notes.txt'}]},
+        {
+          'tag_name': 'v1.2.0',
+          'draft': true,
+          'assets': [
+            {'name': 'gsv-poems-build9.apk', 'browser_download_url': 'x'},
+          ],
+        },
+        {
+          'tag_name': 'v1.1.0-beta.1',
+          'prerelease': true,
+          'name': 'Beta 1',
+          'body': 'notes',
+          'assets': [
+            {'name': 'gsv-poems-v1.1.0-beta.1-build3.apk', 'browser_download_url': 'https://x/3.apk', 'size': 2048},
+          ],
+        },
+        {
+          'tag_name': 'v1.0.0',
+          'assets': [
+            {'name': 'gsv-poems-build1.apk', 'browser_download_url': 'https://x/1.apk'},
+            {'name': 'notes.txt'},
+          ],
+        },
       ])!;
       expect(r.build, 3);
       expect(r.apkUrl, 'https://x/3.apk');
       expect(r.notes, 'notes');
-      expect(pickLatest([{'tag_name': 'v1', 'assets': []}]), isNull);
+      expect(
+        pickLatest([
+          {'tag_name': 'v1', 'assets': []},
+        ]),
+        isNull,
+      );
     });
   });
 

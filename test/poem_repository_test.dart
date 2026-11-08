@@ -103,8 +103,7 @@ void main() {
   });
 
   test('import: collections from note titles, same name in two scripts is one collection, twice adds nothing', () async {
-    String n(String title, String text) =>
-        '{"title":${_q(title)},"textContent":${_q(text)},"createdTimestampUsec":1700000000000000}';
+    String n(String title, String text) => '{"title":${_q(title)},"textContent":${_q(text)},"createdTimestampUsec":1700000000000000}';
     final parsed = parseKeepTakeout({
       'g.json': n('૧): જીવન મંથન : ૧ થી ૨:', '૧:- એક\n૨:- બે\n****\n૧:- એક\nપંક્તિ\n****\n૨:- બે\nપંક્તિ'),
       'h.json': n('जीवन मंथन।:-१।', '१:- एक\n२:- दो\n****\n१:- एक\nपंक्ति\n****\n२:- दो\nपंक्ति'),

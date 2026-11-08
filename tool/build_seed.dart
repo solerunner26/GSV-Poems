@@ -19,9 +19,7 @@ void main(List<String> args) {
   };
   final r = parseKeepTakeout(files);
   final poems = r.poems.where((p) => p.body.trim().isNotEmpty).toList()
-    ..sort((a, b) => a.collection != b.collection
-        ? a.collection.compareTo(b.collection)
-        : (a.number ?? 0).compareTo(b.number ?? 0));
+    ..sort((a, b) => a.collection != b.collection ? a.collection.compareTo(b.collection) : (a.number ?? 0).compareTo(b.number ?? 0));
   out.parent.createSync(recursive: true);
   out.writeAsStringSync(encodeSeed(poems));
   final byLang = <String, int>{};

@@ -16,6 +16,7 @@ import '../../core/panchang/astro.dart';
 import '../../core/panchang/names.dart';
 import '../../core/panchang/panchang.dart';
 import '../calendar/calendar_screen.dart';
+import '../collection/collection_screen.dart';
 import '../common/poem_tile.dart';
 import '../duplicates/duplicates_screen.dart';
 import '../profile/profile_screen.dart';
@@ -31,7 +32,6 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  String _lang = 'gu';
   bool _recentAll = false;
 
   @override
@@ -40,7 +40,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final stats = ref.watch(statsProvider).asData?.value ?? const PoemStats();
     final recent = ref.watch(recentProvider).asData?.value ?? const <Poem>[];
     final favs = ref.watch(favoritesProvider).asData?.value ?? const <Poem>[];
-    final langPoems = ref.watch(poemsProvider((lang: _lang, categoryId: null, sort: PoemSort.newest))).asData?.value ?? const <Poem>[];
+    final allPoems = ref.watch(poemsProvider((lang: null, categoryId: null, kind: Kind.poem, sort: PoemSort.newest))).asData?.value ?? const <Poem>[];
     final onThisDay = ref.watch(onThisDayProvider).asData?.value ?? const <Poem>[];
     final lang = context.lang;
 
@@ -79,6 +79,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               const _FestivalAlert(),
               const DuplicateNotice(),
               const DriveReconnectNotice(),
+              const SyncKeyNotice(),
               const _UpcomingFestivals(),
               if (stats.total == 0)
                 EmptyState(
@@ -86,6 +87,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   text: context.t('no_poems'),
                   action: PrimaryButton(label: context.t('write_first'), onPressed: widget.onWrite),
                 ),
+              if (stats.total > 0) ...[
+                // Counters: poems and prose; each number opens its list.
+                const _Counters(),
+                const SizedBox(height: 18),
+              ],
               if (recent.isNotEmpty) ...[
                 SectionTitle(
                   context.t('recent7'),
@@ -101,105 +107,42 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
                         child: Text(
                           context.t('clear_list'),
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: c.primary),
+                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: c.primary),
                         ),
                       ),
-                      if (recent.length > 5) ExpandArrow(expanded: _recentAll, onPressed: () => setState(() => _recentAll = !_recentAll)),
+                      if (recent.length > 2) ExpandArrow(expanded: _recentAll, onPressed: () => setState(() => _recentAll = !_recentAll)),
                     ],
                   ),
                 ),
-                // Five at first; the arrow shows up to seven.
-                for (var i = 0; i < recent.length && i < (_recentAll ? 7 : 5); i++)
+                // Two at first; the arrow shows up to seven.
+                for (var i = 0; i < recent.length && i < (_recentAll ? 7 : 2); i++)
                   PoemTile(poem: recent[i], onTap: () => openPoem(context, recent, i)),
-                const SizedBox(height: 14),
+                const SizedBox(height: 12),
               ],
               if (stats.total > 0) ...[
-                SectionTitle(context.t('favorites')),
-                if (favs.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 18),
-                    child: Text(context.t('no_favorites'), style: TextStyle(fontSize: 16, color: c.mute)),
-                  )
-                else
-                  SizedBox(
-                    height: 176,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: favs.length,
-                      separatorBuilder: (_, _) => const SizedBox(width: 12),
-                      itemBuilder: (_, i) => _FavCard(poem: favs[i], onTap: () => openPoem(context, favs, i)),
-                    ),
-                  ),
-                const SizedBox(height: 22),
-                GsvCard(
-                  radius: 22,
-                  padding: const EdgeInsets.all(18),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _Stat(
-                              value: localDigits(NumberFormat.decimalPattern('en_IN').format(stats.total), lang),
-                              label: context.t('total_poems'),
-                            ),
-                          ),
-                          Expanded(
-                            child: _Stat(
-                              value: localDigits(NumberFormat.decimalPattern('en_IN').format(stats.words), lang),
-                              label: context.t('total_words'),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 14),
-                      SegmentedButton<String>(
-                        showSelectedIcon: false,
-                        style: SegmentedButton.styleFrom(
-                          minimumSize: const Size(48, 52),
-                          textStyle: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
-                        ),
-                        segments: [
-                          ButtonSegment(value: 'gu', label: Text('${tr('lang_gu', PoemLang.gu)} · ${localDigits(stats.gu, lang)}')),
-                          ButtonSegment(value: 'hi', label: Text('${tr('lang_hi', PoemLang.hi)} · ${localDigits(stats.hi, lang)}')),
-                        ],
-                        selected: {_lang},
-                        onSelectionChanged: (s) => setState(() => _lang = s.first),
-                      ),
-                      const SizedBox(height: 10),
-                      for (var i = 0; i < langPoems.length && i < 5; i++)
-                        ListTile(
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 6),
-                          minTileHeight: 52,
-                          title: Text(
-                            poemTitle(langPoems[i]),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(fontFamily: poemFont(langPoems[i].lang), fontSize: 18, color: c.ink),
-                          ),
-                          trailing: Icon(Icons.chevron_right_rounded, color: c.accent),
-                          onTap: () => openPoem(context, langPoems, i),
-                        ),
-                      if (langPoems.length > 5)
-                        TextButton(
-                          onPressed: widget.onOpenCollection,
-                          style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
-                          child: Text(
-                            '${context.t('all_poems')} →',
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: c.primary),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 22),
                 _FeatureCard(
                   label: onThisDay.isNotEmpty
                       ? '${context.t('on_this_day')} · ${localDigits(onThisDay.first.createdAt.year, lang)}'
                       : context.t('poem_of_day'),
-                  poems: onThisDay.isNotEmpty ? onThisDay : _poemOfDay(langPoems),
+                  poems: onThisDay.isNotEmpty ? onThisDay : _poemOfDay(allPoems),
                 ),
+                const SizedBox(height: 18),
+                SectionTitle(context.t('favorites')),
+                if (favs.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 18),
+                    child: Text(context.t('no_favorites'), style: TextStyle(fontSize: 15, color: c.mute)),
+                  )
+                else
+                  SizedBox(
+                    height: 60,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: favs.length,
+                      separatorBuilder: (_, _) => const SizedBox(width: 10),
+                      itemBuilder: (_, i) => _FavChip(poem: favs[i], onTap: () => openPoem(context, favs, i)),
+                    ),
+                  ),
               ],
             ],
           ),
@@ -349,7 +292,7 @@ class _TodayCard extends ConsumerWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    '${context.t('now_running')}: ${choghadiyaNames[ch.kind]![l]} ${context.t('choghadiya_one')}',
+                                    '${context.t('now_running')}: ${choghadiyaNames[ch.kind]![l]} ${context.t('choghadiya_one')} (${placeLabel(ref.watch(prefsProvider).place, lang)})',
                                     style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Colors.white),
                                   ),
                                   Text(
@@ -445,17 +388,17 @@ class _UpcomingFestivalsState extends ConsumerState<_UpcomingFestivals> {
     final l = lang.index;
     final today = ref.watch(todayPanchangProvider).date;
     final every = ref.watch(upcomingFestivalsProvider).where((f) => !f.date.isBefore(today)).toList();
-    // The next three; the arrow beside the title shows the rest.
-    final items = _all ? every : every.take(3).toList();
+    // The next one; the arrow beside the title shows the rest.
+    final items = _all ? every : every.take(1).toList();
     if (items.isEmpty) return const SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.only(bottom: 22),
+      padding: const EdgeInsets.only(bottom: 18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           SectionTitle(
             context.t('upcoming_fest'),
-            action: every.length > 3 ? ExpandArrow(expanded: _all, onPressed: () => setState(() => _all = !_all)) : null,
+            action: every.length > 1 ? ExpandArrow(expanded: _all, onPressed: () => setState(() => _all = !_all)) : null,
           ),
           GsvCard(
             padding: EdgeInsets.zero,
@@ -472,8 +415,9 @@ class _UpcomingFestivalsState extends ConsumerState<_UpcomingFestivals> {
                       child: Row(
                         children: [
                           Container(
-                            width: 54,
-                            height: 54,
+                            // Grows with the text size, never cuts the date.
+                            constraints: const BoxConstraints(minWidth: 54, minHeight: 54),
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                             decoration: BoxDecoration(color: c.tint, borderRadius: BorderRadius.circular(14)),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -522,54 +466,107 @@ class _UpcomingFestivalsState extends ConsumerState<_UpcomingFestivals> {
   }
 }
 
-class _Stat extends StatelessWidget {
-  const _Stat({required this.value, required this.label});
-  final String value, label;
+/// Poems and prose at a glance. Each big number opens that whole list; the
+/// small language counts open that language only.
+class _Counters extends ConsumerWidget {
+  const _Counters();
 
   @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(
-        value,
-        style: TextStyle(fontSize: 30, fontWeight: FontWeight.w700, height: 1.1, color: context.gc.ink),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final c = context.gc;
+    final lang = context.lang;
+    final stats = ref.watch(statsProvider).asData?.value ?? const PoemStats();
+    String n(int v) => localDigits(NumberFormat.decimalPattern('en_IN').format(v), lang);
+    void open(String kind, [PoemLang? l]) => Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => TopicPoemsScreen(kind: kind, lang: l),
       ),
-      Text(label, style: TextStyle(fontSize: 15, color: context.gc.mute)),
-    ],
-  );
+    );
+
+    Widget counter(String kind) => Expanded(
+      child: GsvCard(
+        radius: 20,
+        padding: const EdgeInsets.fromLTRB(14, 12, 10, 8),
+        onTap: () => open(kind),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                n(stats.of(kind)),
+                style: TextStyle(fontSize: 30, fontWeight: FontWeight.w700, height: 1.1, color: c.ink),
+              ),
+            ),
+            Text(
+              context.t(kind == Kind.prose ? 'total_prose' : 'total_poems'),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w600, color: c.mute),
+            ),
+            const SizedBox(height: 4),
+            Wrap(
+              spacing: 2,
+              children: [
+                for (final l in const [PoemLang.gu, PoemLang.hi])
+                  InkWell(
+                    borderRadius: BorderRadius.circular(10),
+                    onTap: () => open(kind, l),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+                      child: Text(
+                        '${tr('lang_${l.name}', l)} ${n(stats.of(kind, lang: l.name))}',
+                        style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: c.accentText),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(crossAxisAlignment: CrossAxisAlignment.start, children: [counter(Kind.poem), const SizedBox(width: 10), counter(Kind.prose)]),
+        Padding(
+          padding: const EdgeInsets.only(top: 6, left: 4),
+          child: Text('${n(stats.words)} ${context.t('total_words')}', style: TextStyle(fontSize: 13.5, color: c.mute)),
+        ),
+      ],
+    );
+  }
 }
 
-class _FavCard extends StatelessWidget {
-  const _FavCard({required this.poem, required this.onTap});
+/// A favourite in one compact line.
+class _FavChip extends StatelessWidget {
+  const _FavChip({required this.poem, required this.onTap});
   final Poem poem;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final c = context.gc;
-    final lines = poem.body.split('\n').where((l) => l.trim().isNotEmpty).take(2).join('\n');
-    return SizedBox(
-      width: 210,
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 230),
       child: GsvCard(
         onTap: onTap,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        radius: 16,
+        padding: const EdgeInsets.fromLTRB(8, 6, 14, 6),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon3D('star', size: 36),
-            const SizedBox(height: 4),
-            Text(
-              poemTitle(poem),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontFamily: poemFont(poem.lang), fontSize: 17, fontWeight: FontWeight.w700, color: c.ink),
-            ),
-            const SizedBox(height: 2),
-            Expanded(
+            const Icon3D('star', size: 32),
+            const SizedBox(width: 8),
+            Flexible(
               child: Text(
-                lines,
-                maxLines: 3,
-                overflow: TextOverflow.fade,
-                style: TextStyle(fontFamily: poemFont(poem.lang), fontSize: 15, height: 1.55, color: c.mute),
+                poemTitle(poem),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontFamily: poemFont(poem.lang), fontSize: 15.5, fontWeight: FontWeight.w700, color: c.ink),
               ),
             ),
           ],
@@ -579,6 +576,7 @@ class _FavCard extends StatelessWidget {
   }
 }
 
+/// Today's poem in one compact card: label, title and the first line.
 class _FeatureCard extends StatelessWidget {
   const _FeatureCard({required this.label, required this.poems});
   final String label;
@@ -589,39 +587,42 @@ class _FeatureCard extends StatelessWidget {
     if (poems.isEmpty) return const SizedBox.shrink();
     final c = context.gc;
     final p = poems.first;
-    final lines = p.body.split('\n').where((l) => l.trim().isNotEmpty).take(3).join('\n');
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(22),
-        color: c.tint,
-        border: Border.all(color: c.accent.withValues(alpha: 0.35)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    final first = p.body.split('\n').firstWhere((l) => l.trim().isNotEmpty, orElse: () => '');
+    return GsvCard(
+      radius: 20,
+      padding: const EdgeInsets.fromLTRB(12, 10, 6, 10),
+      onTap: () => openPoem(context, poems, 0),
+      child: Row(
         children: [
-          Text(
-            label.toUpperCase(),
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 0.6, color: c.mute),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            poemTitle(p),
-            style: TextStyle(fontFamily: poemFont(p.lang), fontSize: 20, fontWeight: FontWeight.w700, color: c.ink),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            lines,
-            style: TextStyle(fontFamily: poemFont(p.lang), fontSize: 17, height: 1.8, color: c.ink),
-          ),
-          TextButton(
-            onPressed: () => openPoem(context, poems, 0),
-            style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: const Size(48, 48)),
-            child: Text(
-              '${context.t('read_full')} →',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: c.primary),
+          const Icon3D('lotus', size: 44),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: c.accentText),
+                ),
+                Text(
+                  poemTitle(p),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontFamily: poemFont(p.lang), fontSize: 17, fontWeight: FontWeight.w700, color: c.ink),
+                ),
+                if (first.trim().isNotEmpty && first.trim() != poemTitle(p))
+                  Text(
+                    first.trim(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontFamily: poemFont(p.lang), fontSize: 14.5, color: c.mute),
+                  ),
+              ],
             ),
           ),
+          Icon(Icons.chevron_right_rounded, color: c.accentText),
         ],
       ),
     );

@@ -64,26 +64,34 @@ void main() {
   });
 
   Widget host(GsvColors t, Widget child, {bool reduce = false}) => MaterialApp(
-        theme: buildTheme(t),
-        home: MediaQuery(
-          data: MediaQueryData(disableAnimations: reduce),
-          child: LangScope(lang: PoemLang.gu, child: Scaffold(body: Center(child: child))),
-        ),
-      );
+    theme: buildTheme(t),
+    home: MediaQuery(
+      data: MediaQueryData(disableAnimations: reduce),
+      child: LangScope(
+        lang: PoemLang.gu,
+        child: Scaffold(body: Center(child: child)),
+      ),
+    ),
+  );
 
   for (final t in allThemes) {
     for (final reduce in [false, true]) {
       testWidgets('presses fire once with accents · ${t.id} · reduce=$reduce', (tester) async {
         var card = 0, button = 0, icon = 0;
-        await tester.pumpWidget(host(
-          t,
-          Column(mainAxisSize: MainAxisSize.min, children: [
-            GsvCard(onTap: () => card++, child: const Text('card')),
-            PrimaryButton(label: 'go', icon: 'write', onPressed: () => button++),
-            Icon3DButton('star', label: 'star', onPressed: () => icon++),
-          ]),
-          reduce: reduce,
-        ));
+        await tester.pumpWidget(
+          host(
+            t,
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                GsvCard(onTap: () => card++, child: const Text('card')),
+                PrimaryButton(label: 'go', icon: 'write', onPressed: () => button++),
+                Icon3DButton('star', label: 'star', onPressed: () => icon++),
+              ],
+            ),
+            reduce: reduce,
+          ),
+        );
         await tester.pump(const Duration(milliseconds: 100));
         await tester.tap(find.text('card'));
         await tester.pump(const Duration(milliseconds: 200));
@@ -100,9 +108,22 @@ void main() {
 
   testWidgets('poem picture is a JPEG', (tester) async {
     final poem = Poem(
-      id: 'p1', number: 12, title: 'વરસાદ', body: 'ભીની માટીની સુગંધમાં\nયાદો ફરી ખીલી ઊઠી', lang: 'gu', categoryId: 'prakruti',
-      isFavorite: false, wordCount: 7, searchBlob: '', createdAt: DateTime(2024), updatedAt: DateTime(2024),
-      source: 'app', sourceKey: null, contentKey: null, deletedAt: null,
+      id: 'p1',
+      number: 12,
+      title: 'વરસાદ',
+      body: 'ભીની માટીની સુગંધમાં\nયાદો ફરી ખીલી ઊઠી',
+      lang: 'gu',
+      categoryId: 'prakruti',
+      isFavorite: false,
+      wordCount: 7,
+      searchBlob: '',
+      createdAt: DateTime(2024),
+      updatedAt: DateTime(2024),
+      source: 'app',
+      sourceKey: null,
+      contentKey: null,
+      deletedAt: null,
+      kind: 'poem',
     );
     for (final t in [allThemes.first, allThemes[1]]) {
       final bytes = await tester.runAsync(() => poemJpeg(poem, t));
@@ -114,10 +135,23 @@ void main() {
 
   test('search lists title matches first, then poems with the word only in verses', () {
     Poem poem(String id, String title, String body, int age) => Poem(
-          id: id, number: null, title: title, body: body, lang: 'gu', categoryId: null, isFavorite: false, wordCount: 0,
-          searchBlob: '', createdAt: DateTime(2024), updatedAt: DateTime(2026, 1, 30 - age), source: 'app',
-          sourceKey: null, contentKey: null, deletedAt: null,
-        );
+      id: id,
+      number: null,
+      title: title,
+      body: body,
+      lang: 'gu',
+      categoryId: null,
+      isFavorite: false,
+      wordCount: 0,
+      searchBlob: '',
+      createdAt: DateTime(2024),
+      updatedAt: DateTime(2026, 1, 30 - age),
+      source: 'app',
+      sourceKey: null,
+      contentKey: null,
+      deletedAt: null,
+      kind: 'poem',
+    );
     // Newest first, as the database returns them.
     final found = [
       poem('v1', 'સાંજ', 'મનમાં પ્રેમ જાગ્યો', 0),
@@ -136,8 +170,11 @@ void main() {
       expect((box.center.dx - 32).abs(), lessThan(0.01), reason: '$key horizontal');
       expect((box.center.dy - 30.4).abs(), lessThan(0.01), reason: '$key vertical');
       expect(box.longestSide, inInclusiveRange(20, 30.01), reason: '$key size');
-      expect(Rect.fromLTWH(7, 6, 50, 50).contains(box.topLeft) && Rect.fromLTWH(7, 6, 50, 50).contains(box.bottomRight), isTrue,
-          reason: '$key stays inside the tile');
+      expect(
+        Rect.fromLTWH(7, 6, 50, 50).contains(box.topLeft) && Rect.fromLTWH(7, 6, 50, 50).contains(box.bottomRight),
+        isTrue,
+        reason: '$key stays inside the tile',
+      );
     }
   });
 }

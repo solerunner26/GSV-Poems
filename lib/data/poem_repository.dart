@@ -10,9 +10,41 @@ import 'import/keep_parser.dart';
 
 enum PoemSort { newest, oldest, number, title }
 
+/// The two kinds of writing the app keeps.
+abstract final class Kind {
+  static const poem = 'poem';
+  static const prose = 'prose';
+  static const all = [poem, prose];
+}
+
 class PoemStats {
-  const PoemStats({this.total = 0, this.words = 0, this.gu = 0, this.hi = 0, this.en = 0, this.inBin = 0});
+  const PoemStats({
+    this.total = 0,
+    this.words = 0,
+    this.gu = 0,
+    this.hi = 0,
+    this.en = 0,
+    this.inBin = 0,
+    this.poems = 0,
+    this.prose = 0,
+    this.poemsGu = 0,
+    this.poemsHi = 0,
+    this.proseGu = 0,
+    this.proseHi = 0,
+  });
+
+  /// Everything (poems and prose) outside the recycle bin.
   final int total, words, gu, hi, en, inBin;
+  final int poems, prose, poemsGu, poemsHi, proseGu, proseHi;
+
+  int of(String kind, {String? lang}) => switch ((kind, lang)) {
+    (Kind.prose, 'gu') => proseGu,
+    (Kind.prose, 'hi') => proseHi,
+    (Kind.prose, _) => prose,
+    (_, 'gu') => poemsGu,
+    (_, 'hi') => poemsHi,
+    _ => poems,
+  };
 }
 
 class RestoreOutcome {
@@ -56,8 +88,9 @@ class PoemRepository {
 
   // ---------- reading ----------
 
-  Stream<List<Poem>> watchPoems({String? lang, String? categoryId, PoemSort sort = PoemSort.newest}) {
+  Stream<List<Poem>> watchPoems({String? lang, String? categoryId, String? kind, PoemSort sort = PoemSort.newest}) {
     final q = db.select(db.poems)..where((p) => p.deletedAt.isNull());
+    if (kind != null) q.where((p) => p.kind.equals(kind));
     if (lang != null) q.where((p) => p.lang.equals(lang));
     if (categoryId != null) q.where((p) => p.categoryId.equals(categoryId));
     q.orderBy([
@@ -108,6 +141,7 @@ class PoemRepository {
     final all = db.select(db.poems).watch();
     return all.map((rows) {
       var total = 0, words = 0, gu = 0, hi = 0, en = 0, bin = 0;
+      var poems = 0, prose = 0, poemsGu = 0, poemsHi = 0, proseGu = 0, proseHi = 0;
       for (final p in rows) {
         if (p.deletedAt != null) {
           bin++;
@@ -115,16 +149,34 @@ class PoemRepository {
         }
         total++;
         words += p.wordCount;
+        final isProse = p.kind == Kind.prose;
+        isProse ? prose++ : poems++;
         switch (p.lang) {
           case 'hi':
             hi++;
+            isProse ? proseHi++ : poemsHi++;
           case 'en':
             en++;
+            isProse ? proseGu++ : poemsGu++;
           default:
             gu++;
+            isProse ? proseGu++ : poemsGu++;
         }
       }
-      return PoemStats(total: total, words: words, gu: gu, hi: hi, en: en, inBin: bin);
+      return PoemStats(
+        total: total,
+        words: words,
+        gu: gu,
+        hi: hi,
+        en: en,
+        inBin: bin,
+        poems: poems,
+        prose: prose,
+        poemsGu: poemsGu,
+        poemsHi: poemsHi,
+        proseGu: proseGu,
+        proseHi: proseHi,
+      );
     });
   }
 
@@ -283,7 +335,7 @@ class PoemRepository {
   }
 
   /// Creates a poem and returns its id.
-  Future<String> createPoem({required String title, required String body, String? categoryId, String? lang}) async {
+  Future<String> createPoem({required String title, required String body, String? categoryId, String? lang, String kind = Kind.poem}) async {
     final id = _uuid.v4();
     final now = _now();
     categoryId ??= 'other';
@@ -300,6 +352,7 @@ class PoemRepository {
             wordCount: Value(wordCount(body)),
             searchBlob: Value(buildSearchBlob(title, body)),
             contentKey: Value(contentKeyOf(body)),
+            kind: Value(kind),
             createdAt: now,
             updatedAt: now,
           ),
@@ -309,7 +362,14 @@ class PoemRepository {
 
   /// Updates text and category. When [keepVersion] is set, the text as it was
   /// before is saved to the edit history first.
-  Future<void> updatePoem(String id, {required String title, required String body, String? categoryId, bool keepVersion = false}) async {
+  Future<void> updatePoem(
+    String id, {
+    required String title,
+    required String body,
+    String? categoryId,
+    String? kind,
+    bool keepVersion = false,
+  }) async {
     await db.transaction(() async {
       final old = await getPoem(id);
       if (old == null) return;
@@ -326,7 +386,8 @@ class PoemRepository {
           wordCount: Value(wordCount(body)),
           searchBlob: Value(buildSearchBlob(title, body)),
           contentKey: Value(contentKeyOf(body)),
-          updatedAt: changed || old.categoryId != categoryId ? Value(_now()) : const Value.absent(),
+          kind: kind == null ? const Value.absent() : Value(kind),
+          updatedAt: changed || old.categoryId != categoryId || (kind != null && kind != old.kind) ? Value(_now()) : const Value.absent(),
         ),
       );
     });
@@ -393,6 +454,7 @@ class PoemRepository {
                 updatedAt: p.updatedAt,
                 source: const Value('keep'),
                 sourceKey: Value(p.sourceKey),
+                kind: Value(p.kind),
               ),
             );
         added++;
@@ -497,7 +559,8 @@ class PoemRepository {
       };
       final idMap = <String, String>{};
       for (final m in (data['poems'] as List? ?? const []).cast<Map<String, dynamic>>()) {
-        var b = Poem.fromJson(m);
+        // Backups from before prose existed hold only poems.
+        var b = Poem.fromJson({...m, 'kind': m['kind'] ?? Kind.poem});
         b = b.copyWith(contentKey: Value(b.contentKey ?? contentKeyOf(b.body)));
         final mine = byId[b.id] ?? (b.sourceKey == null ? null : bySource[b.sourceKey]) ?? (b.contentKey == null ? null : byContent[b.contentKey]);
         if (mine == null) {
@@ -543,6 +606,7 @@ class PoemRepository {
             number: Value(b.number),
             title: Value(b.title),
             body: Value(b.body),
+            kind: Value(b.kind),
             lang: Value(b.lang),
             categoryId: Value(b.categoryId),
             isFavorite: Value(b.isFavorite || mine.isFavorite),

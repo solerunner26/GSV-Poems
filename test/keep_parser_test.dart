@@ -52,12 +52,12 @@ const hindiNote = '''परिवार। ३:-
 ''';
 
 String note(String text, {String title = '', bool trashed = false, int created = 1700000000000000}) => jsonEncode({
-      'title': title,
-      'textContent': text,
-      'isTrashed': trashed,
-      'createdTimestampUsec': created,
-      'userEditedTimestampUsec': created + 1000000,
-    });
+  'title': title,
+  'textContent': text,
+  'isTrashed': trashed,
+  'createdTimestampUsec': created,
+  'userEditedTimestampUsec': created + 1000000,
+});
 
 void main() {
   group('splitNote', () {
@@ -111,8 +111,11 @@ void main() {
       expect(tidyTitle('લઈને ક્યાં જશો?'), 'લઈને ક્યાં જશો?');
     });
     test('bodies keep only stanzas', () {
-      expect(tidyBody(['   પહેલી પંક્તિ,', '', '', '  બીજી પંક્તિ.', '(૫૨)', '૨૬/૭/૨૬..  ઓકલેન્ડ..', '૭૪:-', '']),
-          ['પહેલી પંક્તિ,', '', 'બીજી પંક્તિ.']);
+      expect(tidyBody(['   પહેલી પંક્તિ,', '', '', '  બીજી પંક્તિ.', '(૫૨)', '૨૬/૭/૨૬..  ઓકલેન્ડ..', '૭૪:-', '']), [
+        'પહેલી પંક્તિ,',
+        '',
+        'બીજી પંક્તિ.',
+      ]);
     });
     test('a poem written after the contents list still starts its own poem', () {
       final r = splitNote('1:- a\n2:- b\n****\n1:- a\ntext\n****\n2:- b\ntext\n****\n3:- c\nnew poem');

@@ -17,6 +17,7 @@ class ImportedPoem {
     required this.sourceKey,
     required this.fileName,
     this.problem,
+    this.kind = 'poem',
   });
 
   final int? number;
@@ -33,6 +34,9 @@ class ImportedPoem {
   final String sourceKey;
   final String fileName;
   final String? problem;
+
+  /// 'poem' or 'prose'.
+  final String kind;
 }
 
 /// What one note (file) produced, for the preview screen.
@@ -365,4 +369,230 @@ void _mergeContinuations(List<ImportedPoem> poems, List<NoteSummary> notes) {
   for (final n in notes) {
     n.collection = rename[n.collection] ?? n.collection;
   }
+}
+
+// ---------- text copied straight out of Google Keep ----------
+
+/// Lines Keep or the copy adds that are not part of any poem: "Edited 7 Nov",
+/// "છેલ્લે ફેરફાર…", labels, the poet's own name or pen name on its own line,
+/// and stray dates or times.
+final _keepNoise = RegExp(
+  r'^\s*(edited|last edited|modified|created|reminder|labels?|સંપાદિત|છેલ્લ[ેા] ફેરફાર|ફેરફાર કર્યો|संपादित|अंतिम बदलाव)\b.*$',
+  caseSensitive: false,
+);
+final _timeOnly = RegExp(r'^\s*\d{1,2}[:.]\d{2}\s*(am|pm)?\s*$', caseSensitive: false);
+final _monthDate = RegExp(
+  r'^\s*([0-9૦-૯०-९]{1,2}\s+)?(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?(\s+[0-9૦-૯०-९]{1,4})?(,?\s+[0-9૦-૯०-९]{2,4})?\s*$',
+  caseSensitive: false,
+);
+
+/// The poet's name or pen name alone on a line ("— ગૌરવ", "ગીગાભાઈ સનાભાઈ વાળા", "Gaurav").
+bool _isSignature(String line) {
+  final l = lettersOnly(line).toLowerCase();
+  if (l.isEmpty) return false;
+  const names = ['ગૌરવ', 'गौरव', 'gaurav', 'ગીગાભાઈ', 'गीगाभाई', 'gigabhai', 'વાળા', 'वाला', 'vala'];
+  var rest = l;
+  for (final n in names) {
+    rest = rest.replaceAll(lettersOnly(n).toLowerCase(), '');
+  }
+  // Only name words (and at most a few letters of connecting words) remain.
+  return rest.runes.length <= 6 && rest.runes.length < l.runes.length;
+}
+
+String _stripKeepNoise(String text) => text
+    .replaceAll('\r\n', '\n')
+    .split('\n')
+    .where((l) => !_keepNoise.hasMatch(l) && !_timeOnly.hasMatch(l) && !_monthDate.hasMatch(l) && !_isSignature(l))
+    .join('\n');
+
+/// Splits text pasted from one or more Google Keep notes into single poems.
+///
+/// Numbered notes ("૧:- title" … "****") are split exactly like a Takeout
+/// note; a first line that is not a numbered title becomes the collection
+/// name. Text without numbers is split at lines of marks (****, ++++, ####…)
+/// or, failing those, at two or more blank lines; each piece's first line is
+/// its title. Dates, places, the poet's name and Keep's own "Edited…" lines
+/// are dropped. Pasting the same text again adds nothing.
+KeepParseResult parseKeepText(String text, {String? collection, DateTime? now}) {
+  final today = now ?? DateTime.now();
+  final clean = _stripKeepNoise(text);
+  final lines = clean.split('\n');
+  final poems = <ImportedPoem>[];
+
+  // A note title line on top (not itself a numbered poem title) names the collection.
+  var coll = collection ?? '';
+  final firstIdx = lines.indexWhere((l) => l.trim().isNotEmpty);
+  final numbered = splitNote(clean, now: today);
+
+  ImportedPoem make(int? number, String title, String body, String? problem, DateTime? written) {
+    final key = sha1.convert(utf8.encode('paste|${number ?? ''}|${lettersOnly(title)}|${lettersOnly(body)}')).toString();
+    return ImportedPoem(
+      number: number,
+      title: title,
+      body: body,
+      lang: detectLang('$title\n$body'),
+      createdAt: written ?? today,
+      updatedAt: today,
+      collection: coll,
+      sourceKey: 'paste:$key',
+      fileName: 'paste',
+      problem: problem,
+    );
+  }
+
+  if (numbered.poems.isNotEmpty) {
+    if (coll.isEmpty && firstIdx >= 0 && _heading.firstMatch(lines[firstIdx]) == null) {
+      final name = collectionName(lines[firstIdx]);
+      if (name.runes.length <= 40) coll = name;
+    }
+    for (final p in numbered.poems) {
+      poems.add(make(p.number, p.title, p.body, p.problem, p.written));
+    }
+  } else {
+    // No numbering: split at mark lines, or at blank-line gaps.
+    final hasMarks = lines.any((l) => _isSeparator(l.trim()) && l.trim().isNotEmpty);
+    final chunks = <List<String>>[[]];
+    var blanks = 0;
+    for (final l in lines) {
+      final t = l.trim();
+      if (hasMarks ? (_isSeparator(t) && t.isNotEmpty) : (t.isEmpty && ++blanks >= 2)) {
+        if (chunks.last.any((x) => x.trim().isNotEmpty)) chunks.add([]);
+        blanks = 0;
+        continue;
+      }
+      if (t.isNotEmpty) blanks = 0;
+      chunks.last.add(l);
+    }
+    for (final chunk in chunks) {
+      final written = _writtenOn(chunk, today);
+      final body = tidyBody(chunk);
+      if (body.isEmpty || !body.any(hasLetter)) continue;
+      // A short first line followed by more text is the title.
+      var title = '';
+      var rest = body;
+      if (body.length > 1 && body.first.runes.length <= 50) {
+        title = tidyTitle(body.first);
+        rest = tidyBody(body.sublist(1));
+      }
+      if (rest.isEmpty) {
+        rest = body;
+        title = '';
+      }
+      if (title.isEmpty) title = tidyTitle(rest.first);
+      poems.add(make(null, title, rest.join('\n'), null, written));
+    }
+  }
+  if (coll.isEmpty) coll = 'Google Keep';
+  for (final p in poems) {
+    p.collection = coll;
+  }
+  return KeepParseResult(poems, [NoteSummary('paste', coll, poems.length, numbered.listed.length, const [])], const []);
+}
+
+// ---------- prose (stories, articles, essays) ----------
+
+final _proseNoiseWord = RegExp(r'\b(ok|okay)\b|ઓકે|ઑકે', caseSensitive: false);
+final _proseKindWord = RegExp(r'^(કહાની|વાર્તા|લેખ|નિબંધ|कहानी|लेख|निबंध)[\s.:,-]*$');
+
+/// A prose title without the poet's working marks: "અંતિમ લક્ષ.૧. કહાની.. ઓકે" → "અંતિમ લક્ષ",
+/// "વેદના... ,(૦૨)... ok.." → "વેદના", "ભરતી ઓટ . સફળતા કે નિષ્ફળતા?" stays whole.
+String proseTitle(String raw) {
+  var t = raw.replaceAll(' ', ' ').replaceAll(_proseNoiseWord, ' ');
+  t = t.replaceAll(RegExp(r'^\s*[0-9૦-૯०-९]+\s+'), ''); // leading file number
+  t = t.replaceAll(RegExp(r'\(\s*[0-9૦-૯०-९.]*\s*\)'), ' '); // "(૦૨)"
+  t = t.replaceAll(RegExp(r'[.।]\s*[0-9૦-૯०-९]+\s*[.।]?'), ' '); // ".૧." / "... ૧૧."
+  t = t.replaceAll(RegExp(r'\s+[0-9૦-૯०-९]+\s*$'), ''); // trailing number
+  t = t.replaceAll(RegExp(r'(?<=\S)\s*[.]{1,}\s*(કહાની|વાર્તા)\b.*$'), ''); // ".. કહાની...."
+  t = t.replaceAll(RegExp(r'[\s.,:;_\-]+$'), '').replaceAll(RegExp(r'^[\s.,:;_\-]+'), '');
+  // Inner runs of dots become one space ("ભરતી ઓટ . સફળતા" keeps its words).
+  t = t.replaceAll(RegExp(r'\s*\.{2,}\s*'), ' ').replaceAll(RegExp(r'\s{2,}'), ' ').trim();
+  // "… કહાની" at the end only says what it is.
+  t = t.replaceAll(RegExp(r'\s+(કહાની|વાર્તા|कहानी)$'), '');
+  // A lone " . " between two parts reads as a dash: "ભરતી ઓટ – સફળતા કે નિષ્ફળતા".
+  t = t.replaceAll(RegExp(r'\s+\.\s+'), ' – ').trim();
+  return t;
+}
+
+/// The text of a prose piece: the heading lines the poet writes on top (the
+/// title again, "કહાની", "લેખક:- જી.એસ.વાળા \"ગૌરવ\"", a bare number) and his
+/// name or a date at the end are dropped; paragraphs are kept, one blank line
+/// apart, without the leading spaces Keep keeps.
+String proseBody(String text, String title) {
+  final lines = text.replaceAll('\r\n', '\n').replaceAll(' ', ' ').split('\n').map((l) => l.trim()).toList();
+  bool isHeader(String l) {
+    if (l.isEmpty) return true;
+    if (!hasLetter(l)) return true; // "૧..", "1", ". "
+    if (_proseKindWord.hasMatch(l)) return true;
+    if (_isSignature(l) || l.contains('વાળા') || l.contains('લેખક') || l.contains('ગૌરવ')) return true;
+    final p = proseTitle(l);
+    return p.isNotEmpty && (_similar(p, title) || _similar(title, p));
+  }
+
+  var start = 0;
+  var seen = 0;
+  while (start < lines.length && seen < 8 && isHeader(lines[start])) {
+    if (lines[start].isNotEmpty) seen++;
+    start++;
+  }
+  var end = lines.length;
+  while (end > start &&
+      (lines[end - 1].isEmpty ||
+          !hasLetter(lines[end - 1]) ||
+          _isSignature(lines[end - 1]) ||
+          _dateLine.hasMatch(lines[end - 1]) && lines[end - 1].runes.length < 30)) {
+    end--;
+  }
+  final out = <String>[];
+  for (final l in lines.sublist(start, end)) {
+    if (l.isEmpty) {
+      if (out.isNotEmpty && out.last.isNotEmpty) out.add('');
+    } else {
+      out.add(l);
+    }
+  }
+  return out.join('\n').trim();
+}
+
+/// Turns Google Keep notes that each hold one story or article into prose
+/// entries ([files]: name → note json). Order follows the number in front of
+/// the file name.
+List<ImportedPoem> parseProseNotes(Map<String, String> files, {required String collection, DateTime? now}) {
+  final today = now ?? DateTime.now();
+  final out = <ImportedPoem>[];
+  for (final e in files.entries) {
+    Map<String, dynamic> note;
+    try {
+      final d = jsonDecode(e.value);
+      if (d is! Map<String, dynamic> || d['isTrashed'] == true) continue;
+      note = d;
+    } on FormatException {
+      continue;
+    }
+    final text = '${note['textContent'] ?? ''}';
+    if (text.trim().isEmpty) continue;
+    final fileNo = int.tryParse(RegExp(r'^\s*(\d+)').firstMatch(e.key.split(RegExp(r'[\\/]')).last)?[1] ?? '');
+    var title = proseTitle('${note['title'] ?? ''}');
+    if (title.isEmpty) title = proseTitle(e.key.replaceAll(RegExp(r'\.json$', caseSensitive: false), ''));
+    final body = proseBody(text, title);
+    if (body.isEmpty) continue;
+    final created = _fromUsec(note['createdTimestampUsec'], today);
+    final edited = _fromUsec(note['userEditedTimestampUsec'], created);
+    final key = sha1.convert(utf8.encode('prose|${lettersOnly(title)}|${lettersOnly(body)}')).toString();
+    out.add(
+      ImportedPoem(
+        number: fileNo,
+        title: title,
+        body: body,
+        lang: detectLang('$title\n$body'),
+        createdAt: created,
+        updatedAt: edited,
+        collection: collection,
+        sourceKey: 'prose:$key',
+        fileName: e.key,
+        kind: 'prose',
+      ),
+    );
+  }
+  out.sort((a, b) => (a.number ?? 0).compareTo(b.number ?? 0));
+  return out;
 }

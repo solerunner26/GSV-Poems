@@ -50,10 +50,23 @@ void main() {
   });
 
   Poem poem(String id, String title, String body, String cat, {int n = 1}) => Poem(
-        id: id, number: n, title: title, body: body, lang: 'gu', categoryId: cat, isFavorite: n.isEven, wordCount: 12,
-        searchBlob: '', createdAt: DateTime(2024, 11, 7), updatedAt: DateTime(2026, 11, 6), source: 'app', sourceKey: null,
-        contentKey: null, deletedAt: null,
-      );
+    id: id,
+    number: n,
+    title: title,
+    body: body,
+    lang: 'gu',
+    categoryId: cat,
+    isFavorite: n.isEven,
+    wordCount: 12,
+    searchBlob: '',
+    createdAt: DateTime(2024, 11, 7),
+    updatedAt: DateTime(2026, 11, 6),
+    source: 'app',
+    sourceKey: null,
+    contentKey: null,
+    deletedAt: null,
+    kind: 'poem',
+  );
   final poems = [
     poem('p1', 'વરસાદની પહેલી સાંજ', 'ભીની માટીની સુગંધમાં\nયાદો ફરી ખીલી ઊઠી\nઆંગણે ટપકે ટીપાં\nમનમાં ગીત જાગી ઊઠી', 'prakruti', n: 12),
     poem('p2', 'પ્રેમ મિલન', 'તું આવે ને\nઆખું આભ હસે', 'prem', n: 3),
@@ -72,30 +85,37 @@ void main() {
     tester.view.devicePixelRatio = 2;
     addTearDown(tester.view.reset);
     final key = GlobalKey();
-    await tester.pumpWidget(RepaintBoundary(
-      key: key,
-      child: ProviderScope(
-        overrides: [
-          minuteProvider.overrideWith((ref) => Stream.value(DateTime(2026, 11, 7, 15, 40))),
-          prefsProvider.overrideWith(() => PrefsNotifier(AppPrefs(themeId: _theme))),
-          statsProvider.overrideWith((ref) => Stream.value(const PoemStats(total: 890, words: 121105, gu: 801, hi: 89))),
-          recentProvider.overrideWith((ref) => Stream.value(poems)),
-          favoritesProvider.overrideWith((ref) => Stream.value(poems)),
-          poemsProvider.overrideWith((ref, q) => Stream.value(poems)),
-          poemProvider.overrideWith((ref, id) => Stream.value(poems.firstWhere((p) => p.id == id))),
-          onThisDayProvider.overrideWith((ref) async => poems),
-          duplicateCountProvider.overrideWith((ref) => Stream.value(0)),
-          categoriesProvider.overrideWith((ref) => Stream.value(cats)),
-          profileProvider.overrideWith((ref) async => const Profile(name: 'ગીગાભાઈ સનાભાઈ વાળા', penName: 'ગૌરવ', birthDate: '૧૨ જૂન ૧૯૫૮', place: 'ભાવનગર')),
-          backupStatusProvider.overrideWith((ref) async => BackupStatus(lastBackup: DateTime(2026, 11, 7, 23, 59), localCount: 14)),
-        ],
-        child: MaterialApp(
-          debugShowCheckedModeBanner: false,
-          theme: buildTheme(themeById(_theme)),
-          home: LangScope(lang: PoemLang.gu, child: scaffold ? Scaffold(body: screen) : screen),
+    await tester.pumpWidget(
+      RepaintBoundary(
+        key: key,
+        child: ProviderScope(
+          overrides: [
+            minuteProvider.overrideWith((ref) => Stream.value(DateTime(2026, 11, 7, 15, 40))),
+            prefsProvider.overrideWith(() => PrefsNotifier(AppPrefs(themeId: _theme))),
+            statsProvider.overrideWith((ref) => Stream.value(const PoemStats(total: 890, words: 121105, gu: 801, hi: 89))),
+            recentProvider.overrideWith((ref) => Stream.value(poems)),
+            favoritesProvider.overrideWith((ref) => Stream.value(poems)),
+            poemsProvider.overrideWith((ref, q) => Stream.value(poems)),
+            poemProvider.overrideWith((ref, id) => Stream.value(poems.firstWhere((p) => p.id == id))),
+            onThisDayProvider.overrideWith((ref) async => poems),
+            duplicateCountProvider.overrideWith((ref) => Stream.value(0)),
+            categoriesProvider.overrideWith((ref) => Stream.value(cats)),
+            profileProvider.overrideWith(
+              (ref) async => const Profile(name: 'ગીગાભાઈ સનાભાઈ વાળા', penName: 'ગૌરવ', birthDate: '૧૨ જૂન ૧૯૫૮', place: 'ભાવનગર'),
+            ),
+            backupStatusProvider.overrideWith((ref) async => BackupStatus(lastBackup: DateTime(2026, 11, 7, 23, 59), localCount: 14)),
+          ],
+          child: MaterialApp(
+            debugShowCheckedModeBanner: false,
+            theme: buildTheme(themeById(_theme)),
+            home: LangScope(
+              lang: PoemLang.gu,
+              child: scaffold ? Scaffold(body: screen) : screen,
+            ),
+          ),
         ),
       ),
-    ));
+    );
     for (var i = 0; i < 6; i++) {
       await tester.pump(const Duration(milliseconds: 120));
     }
@@ -110,7 +130,7 @@ void main() {
   final screens = <String, (Widget, bool)>{
     'home': (HomeScreen(onOpenCollection: () {}, onWrite: () {}), true),
     'collection': (const CollectionScreen(), true),
-    'topic': (const TopicPoemsScreen(section: PoemLang.gu, topicId: 'prakruti'), false),
+    'topic': (const TopicPoemsScreen(lang: PoemLang.gu, topicId: 'prakruti'), false),
     'reader': (const ReaderScreen(ids: ['p1', 'p2']), false),
     'editor': (const EditorScreen(), false),
     'calendar': (CalendarScreen(initial: DateTime(2026, 11, 8)), false),
@@ -129,15 +149,22 @@ void main() {
       '${_theme}_icons',
       Padding(
         padding: const EdgeInsets.all(8),
-        child: Wrap(spacing: 4, runSpacing: 4, children: [
-          for (final k in iconArt.keys)
-            Stack(alignment: Alignment.center, children: [
-              Icon3D(k, size: 58),
-              // Centre guides.
-              Container(width: 1, height: 58, color: const Color(0x66FF0000)),
-              Container(width: 58, height: 1, color: const Color(0x66FF0000)),
-            ]),
-        ]),
+        child: Wrap(
+          spacing: 4,
+          runSpacing: 4,
+          children: [
+            for (final k in iconArt.keys)
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  Icon3D(k, size: 58),
+                  // Centre guides.
+                  Container(width: 1, height: 58, color: const Color(0x66FF0000)),
+                  Container(width: 58, height: 1, color: const Color(0x66FF0000)),
+                ],
+              ),
+          ],
+        ),
       ),
       scaffold: true,
     );

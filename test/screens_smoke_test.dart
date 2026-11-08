@@ -18,29 +18,47 @@ void main() {
   setUpAll(() => initializeDateFormatting());
 
   final poem = Poem(
-    id: 'p1', number: 12, title: 'વરસાદની પહેલી સાંજ', body: 'ભીની માટીની સુગંધમાં\nયાદો ફરી ખીલી ઊઠી', lang: 'gu',
-    categoryId: 'prakruti', isFavorite: true, wordCount: 7, searchBlob: '', createdAt: DateTime(2024, 11, 7),
-    updatedAt: DateTime(2026, 11, 6), source: 'app', sourceKey: null, contentKey: null, deletedAt: null,
+    id: 'p1',
+    number: 12,
+    title: 'વરસાદની પહેલી સાંજ',
+    body: 'ભીની માટીની સુગંધમાં\nયાદો ફરી ખીલી ઊઠી',
+    lang: 'gu',
+    categoryId: 'prakruti',
+    isFavorite: true,
+    wordCount: 7,
+    searchBlob: '',
+    createdAt: DateTime(2024, 11, 7),
+    updatedAt: DateTime(2026, 11, 6),
+    source: 'app',
+    sourceKey: null,
+    contentKey: null,
+    deletedAt: null,
+    kind: 'poem',
   );
 
   Future<void> pumpScreen(WidgetTester tester, Widget screen, PoemLang lang, Size size) async {
     tester.view.physicalSize = size * 3;
     tester.view.devicePixelRatio = 3;
     addTearDown(tester.view.reset);
-    await tester.pumpWidget(ProviderScope(
-      overrides: [
-        minuteProvider.overrideWith((ref) => Stream.value(DateTime(2026, 11, 7, 15, 40))),
-        prefsProvider.overrideWith(() => PrefsNotifier(AppPrefs(lang: lang))),
-        statsProvider.overrideWith((ref) => Stream.value(const PoemStats(total: 890, words: 121105, gu: 801, hi: 89))),
-        recentProvider.overrideWith((ref) => Stream.value([poem])),
-        favoritesProvider.overrideWith((ref) => Stream.value([poem])),
-        poemsProvider.overrideWith((ref, q) => Stream.value([poem])),
-        onThisDayProvider.overrideWith((ref) async => [poem]),
-        duplicateCountProvider.overrideWith((ref) => Stream.value(2)),
-        categoriesProvider.overrideWith((ref) => Stream.value(const <PoemCategory>[])),
-      ],
-      child: MaterialApp(theme: buildTheme(themeById('mor')), home: LangScope(lang: lang, child: screen)),
-    ));
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          minuteProvider.overrideWith((ref) => Stream.value(DateTime(2026, 11, 7, 15, 40))),
+          prefsProvider.overrideWith(() => PrefsNotifier(AppPrefs(lang: lang))),
+          statsProvider.overrideWith((ref) => Stream.value(const PoemStats(total: 890, words: 121105, gu: 801, hi: 89))),
+          recentProvider.overrideWith((ref) => Stream.value([poem])),
+          favoritesProvider.overrideWith((ref) => Stream.value([poem])),
+          poemsProvider.overrideWith((ref, q) => Stream.value([poem])),
+          onThisDayProvider.overrideWith((ref) async => [poem]),
+          duplicateCountProvider.overrideWith((ref) => Stream.value(2)),
+          categoriesProvider.overrideWith((ref) => Stream.value(const <PoemCategory>[])),
+        ],
+        child: MaterialApp(
+          theme: buildTheme(themeById('mor')),
+          home: LangScope(lang: lang, child: screen),
+        ),
+      ),
+    );
     await tester.pump(const Duration(milliseconds: 300));
   }
 
@@ -52,7 +70,14 @@ void main() {
         expect(find.textContaining(tr('panchang', lang)), findsWidgets);
       });
       testWidgets('Home screen · ${lang.name} · ${size.width.toInt()}', (tester) async {
-        await pumpScreen(tester, Scaffold(body: HomeScreen(onOpenCollection: () {}, onWrite: () {})), lang, size);
+        await pumpScreen(
+          tester,
+          Scaffold(
+            body: HomeScreen(onOpenCollection: () {}, onWrite: () {}),
+          ),
+          lang,
+          size,
+        );
         expect(tester.takeException(), isNull);
         expect(find.textContaining(tr('upcoming_fest', lang)), findsOneWidget);
       });

@@ -13,6 +13,7 @@ import '../common/new_topic_sheet.dart';
 import '../common/poem_share.dart';
 import '../common/poem_tile.dart';
 import '../editor/editor_screen.dart';
+import '../sync/writer_gate.dart';
 
 /// "⋯" on a poem: edit, share or move to the recycle bin.
 Future<void> poemActions(BuildContext context, WidgetRef ref, Poem p) async {
@@ -46,10 +47,12 @@ Future<void> poemActions(BuildContext context, WidgetRef ref, Poem p) async {
   if (!context.mounted || choice == null) return;
   switch (choice) {
     case 'edit':
+      if (!await ensureCanWrite(context, ref) || !context.mounted) return;
       await Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => EditorScreen(poemId: p.id)));
     case 'share':
       await sharePoem(context, p);
     case 'bin':
+      if (!await ensureCanWrite(context, ref) || !context.mounted) return;
       await repo.moveToBin(p.id);
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -62,10 +65,20 @@ Future<void> poemActions(BuildContext context, WidgetRef ref, Poem p) async {
   }
 }
 
-bool _inSection(Poem p, PoemLang section) => section == PoemLang.hi ? p.lang == 'hi' : p.lang != 'hi';
+/// Whether [p] belongs to the language filter (null = every language).
+/// Gujarati also holds the few English pieces.
+bool inLang(Poem p, PoemLang? lang) => switch (lang) {
+  null => true,
+  PoemLang.hi => p.lang == 'hi',
+  _ => p.lang != 'hi',
+};
 
-/// Topics at a glance: a Gujarati / Hindi switch, "All poems", then one compact
-/// row per topic. Tapping a row opens that topic on its own screen.
+/// The unit after a count: "૧૨ કવિતા" or "૧૨ લેખ".
+String kindUnit(BuildContext context, String kind) => context.t(kind == Kind.prose ? 'prose_unit' : 'poems');
+
+/// Writing at a glance. First the two kinds (Poems · Prose), then a language
+/// filter (All · Gujarati · Hindi), "All poems", and one compact tile per
+/// topic that holds something. Tapping a tile opens that topic on its own screen.
 class CollectionScreen extends ConsumerStatefulWidget {
   const CollectionScreen({super.key});
 
@@ -74,34 +87,38 @@ class CollectionScreen extends ConsumerStatefulWidget {
 }
 
 class _CollectionScreenState extends ConsumerState<CollectionScreen> {
-  /// Gujarati or Hindi section. Starts on Hindi only when the interface is Hindi.
-  PoemLang? _section;
+  String _kind = Kind.poem;
+  PoemLang? _lang;
 
-  void _open(PoemLang section, {PoemCategory? topic}) => Navigator.of(context).push(
+  void _open({PoemCategory? topic}) => Navigator.of(context).push(
     MaterialPageRoute<void>(
-      builder: (_) => TopicPoemsScreen(section: section, topicId: topic?.id),
+      builder: (_) => TopicPoemsScreen(kind: _kind, lang: _lang, topicId: topic?.id),
     ),
   );
 
   @override
   Widget build(BuildContext context) {
     final c = context.gc;
-    final lang = context.lang;
-    final section = _section ?? (lang == PoemLang.hi ? PoemLang.hi : PoemLang.gu);
+    final ui = context.lang;
     final allCats = ref.watch(categoriesProvider).asData?.value ?? const <PoemCategory>[];
-    final every = ref.watch(poemsProvider((lang: null, categoryId: null, sort: PoemSort.number))).asData?.value ?? const <Poem>[];
-    final mine = every.where((p) => _inSection(p, section)).toList();
+    final every = ref.watch(poemsProvider((lang: null, categoryId: null, kind: _kind, sort: PoemSort.number))).asData?.value ?? const <Poem>[];
+    final mine = every.where((p) => inLang(p, _lang)).toList();
     final stats = ref.watch(statsProvider).asData?.value ?? const PoemStats();
     final counts = <String, int>{};
-    for (final p in every) {
+    for (final p in mine) {
       final k = p.categoryId ?? 'other';
-      if (_inSection(p, section)) counts[k] = (counts[k] ?? 0) + 1;
+      counts[k] = (counts[k] ?? 0) + 1;
     }
-    // Only topics that hold poems in this section get a tile.
+    // Only topics that hold something here get a tile.
     final cats = allCats.where((t) => (counts[t.id] ?? 0) > 0).toList();
-    // Names follow the section's script (जीवन मंथन in Hindi, જીવન મંથન in Gujarati).
-    final nameLang = lang == PoemLang.en ? PoemLang.en : section;
-    final cols = MediaQuery.sizeOf(context).width >= 600 ? 3 : 2;
+    // Topic names follow the chosen language's script.
+    final nameLang = ui == PoemLang.en ? PoemLang.en : (_lang ?? ui);
+    final width = MediaQuery.sizeOf(context).width;
+    final cols = width >= 600 ? 3 : 2;
+    // Tiles grow with the text size, so two-line names are never cut off.
+    final scaler = MediaQuery.textScalerOf(context);
+    final tileHeight = 22 + scaler.scale(15) * 1.25 * 2 + scaler.scale(13) * 1.3;
+    final unit = kindUnit(context, _kind);
 
     return SafeArea(
       bottom: false,
@@ -114,34 +131,60 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
                 child: ScreenHeader(
                   title: context.t('nav_collection'),
                   actions: [
-                    TextButton.icon(
+                    IconButton(
+                      tooltip: '${context.t('recycle_bin')} · ${localDigits(stats.inBin, ui)}',
                       onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const RecycleBinScreen())),
-                      icon: const Icon3D('trash', size: 36),
-                      label: Text(
-                        '${context.t('recycle_bin')} · ${localDigits(stats.inBin, lang)}',
-                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: c.primary),
-                      ),
-                      style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
+                      icon: Badge(isLabelVisible: stats.inBin > 0, label: Text(localDigits(stats.inBin, ui)), child: const Icon3D('trash', size: 36)),
                     ),
                     const HelpButton('collection'),
                   ],
                 ),
               ),
+              // The two kinds of writing.
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(18, 0, 18, 14),
-                  child: SegmentedButton<PoemLang>(
+                  padding: const EdgeInsets.fromLTRB(18, 0, 18, 10),
+                  child: SegmentedButton<String>(
                     showSelectedIcon: false,
                     style: SegmentedButton.styleFrom(
-                      minimumSize: const Size(48, 54),
-                      textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                      minimumSize: const Size(48, 52),
+                      textStyle: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
                     ),
                     segments: [
-                      ButtonSegment(value: PoemLang.gu, label: Text('${tr('lang_gu', PoemLang.gu)} · ${localDigits(stats.gu + stats.en, lang)}')),
-                      ButtonSegment(value: PoemLang.hi, label: Text('${tr('lang_hi', PoemLang.hi)} · ${localDigits(stats.hi, lang)}')),
+                      for (final k in Kind.all)
+                        ButtonSegment(
+                          value: k,
+                          label: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text('${context.t('kind_$k')} · ${localDigits(stats.of(k), ui)}', maxLines: 1),
+                          ),
+                        ),
                     ],
-                    selected: {section},
-                    onSelectionChanged: (s) => setState(() => _section = s.first),
+                    selected: {_kind},
+                    onSelectionChanged: (s) => setState(() => _kind = s.first),
+                  ),
+                ),
+              ),
+              // Language filter.
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(18, 0, 18, 12),
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 6,
+                    children: [
+                      for (final l in const [null, PoemLang.gu, PoemLang.hi])
+                        ChoiceChip(
+                          label: Text(
+                            '${l == null ? context.t('lang_all') : tr('lang_${l.name}', l)} · ${localDigits(stats.of(_kind, lang: l?.name), ui)}',
+                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: _lang == l ? c.onPrimary : c.ink),
+                          ),
+                          selected: _lang == l,
+                          showCheckmark: false,
+                          selectedColor: c.primary,
+                          onSelected: (_) => setState(() => _lang = l),
+                        ),
+                    ],
                   ),
                 ),
               ),
@@ -149,14 +192,18 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
                 padding: const EdgeInsets.fromLTRB(18, 0, 18, 10),
                 sliver: SliverToBoxAdapter(
                   child: _TopicRow(
-                    icon: 'collection',
-                    name: context.t('all_poems'),
-                    count: '${localDigits(mine.length, lang)} ${context.t('poems')}',
+                    icon: _kind == Kind.prose ? 'write' : 'collection',
+                    name: context.t(_kind == Kind.prose ? 'all_prose' : 'all_poems'),
+                    count: '${localDigits(mine.length, ui)} $unit',
                     emphasised: true,
-                    onTap: () => _open(section),
+                    onTap: _open,
                   ),
                 ),
               ),
+              if (mine.isEmpty)
+                SliverToBoxAdapter(
+                  child: EmptyState(icon: 'write', text: context.t(_kind == Kind.prose ? 'no_prose' : 'no_poems')),
+                ),
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(18, 0, 18, 10),
                 sliver: SliverGrid(
@@ -164,15 +211,15 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
                     crossAxisCount: cols,
                     mainAxisSpacing: 10,
                     crossAxisSpacing: 10,
-                    mainAxisExtent: 76,
+                    mainAxisExtent: tileHeight,
                   ),
                   delegate: SliverChildBuilderDelegate((_, i) {
                     final t = cats[i];
                     return _TopicRow(
                       icon: t.iconKey,
                       name: categoryName(t, nameLang),
-                      count: '${localDigits(counts[t.id] ?? 0, lang)} ${context.t('poems')}',
-                      onTap: () => _open(section, topic: t),
+                      count: '${localDigits(counts[t.id] ?? 0, ui)} $unit',
+                      onTap: () => _open(topic: t),
                     );
                   }, childCount: cats.length),
                 ),
@@ -183,7 +230,9 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
                   child: Align(
                     alignment: Alignment.centerLeft,
                     child: TextButton.icon(
-                      onPressed: () => addTopic(context, ref),
+                      onPressed: () async {
+                        if (await ensureCanWrite(context, ref) && context.mounted) await addTopic(context, ref);
+                      },
                       icon: Icon(Icons.add_rounded, color: c.primary),
                       label: Text(
                         context.t('topic_new'),
@@ -202,7 +251,7 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
   }
 }
 
-/// One compact, tappable topic: symbol, name, count and a chevron.
+/// One compact, tappable topic: symbol, name (up to two lines), count and a chevron.
 class _TopicRow extends StatelessWidget {
   const _TopicRow({required this.icon, required this.name, required this.count, required this.onTap, this.emphasised = false});
   final String icon, name, count;
@@ -219,10 +268,10 @@ class _TopicRow extends StatelessWidget {
       child: GsvCard(
         onTap: onTap,
         radius: 18,
-        padding: const EdgeInsets.fromLTRB(10, 8, 6, 8),
+        padding: const EdgeInsets.fromLTRB(10, 8, 4, 8),
         child: Row(
           children: [
-            Icon3D(icon, size: 48),
+            Icon3D(icon, size: 40),
             const SizedBox(width: 8),
             Expanded(
               child: Column(
@@ -231,15 +280,19 @@ class _TopicRow extends StatelessWidget {
                 children: [
                   Text(
                     name,
-                    maxLines: 1,
+                    maxLines: emphasised ? 1 : 2,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: emphasised ? 17 : 16, fontWeight: FontWeight.w700, color: c.ink),
+                    style: TextStyle(fontSize: emphasised ? 17 : 15, height: 1.2, fontWeight: FontWeight.w700, color: c.ink),
                   ),
-                  Text(count, maxLines: 1, style: TextStyle(fontSize: 13.5, color: c.mute)),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(count, maxLines: 1, style: TextStyle(fontSize: 13, color: c.mute)),
+                  ),
                 ],
               ),
             ),
-            Icon(Icons.chevron_right_rounded, color: c.accentText),
+            Icon(Icons.chevron_right_rounded, size: 20, color: c.accentText),
           ],
         ),
       ),
@@ -247,13 +300,16 @@ class _TopicRow extends StatelessWidget {
   }
 }
 
-/// The poems of one topic (or all poems) in one language section, with sort
-/// and the usual "⋯" actions. Back returns to the topics.
+/// The writing of one topic (or all of it) for one kind and language, with
+/// sort and the usual "⋯" actions. Back returns to the topics.
 class TopicPoemsScreen extends ConsumerStatefulWidget {
-  const TopicPoemsScreen({super.key, required this.section, this.topicId});
-  final PoemLang section;
+  const TopicPoemsScreen({super.key, this.kind = Kind.poem, this.lang, this.topicId});
+  final String kind;
 
-  /// Null shows every poem of the section.
+  /// Null shows every language.
+  final PoemLang? lang;
+
+  /// Null shows every topic.
   final String? topicId;
 
   @override
@@ -272,11 +328,12 @@ class _TopicPoemsScreenState extends ConsumerState<TopicPoemsScreen> {
     for (final t in cats) {
       if (t.id == widget.topicId) topic = t;
     }
-    final poems = (ref.watch(poemsProvider((lang: null, categoryId: null, sort: _sort))).asData?.value ?? const <Poem>[])
-        .where((p) => _inSection(p, widget.section) && (widget.topicId == null || (p.categoryId ?? 'other') == widget.topicId))
+    final poems = (ref.watch(poemsProvider((lang: null, categoryId: null, kind: widget.kind, sort: _sort))).asData?.value ?? const <Poem>[])
+        .where((p) => inLang(p, widget.lang) && (widget.topicId == null || (p.categoryId ?? 'other') == widget.topicId))
         .toList();
-    final nameLang = lang == PoemLang.en ? PoemLang.en : widget.section;
-    final title = topic == null ? context.t('all_poems') : categoryName(topic, nameLang);
+    final nameLang = lang == PoemLang.en ? PoemLang.en : (widget.lang ?? lang);
+    final title = topic == null ? context.t(widget.kind == Kind.prose ? 'all_prose' : 'all_poems') : categoryName(topic, nameLang);
+    final langLabel = widget.lang == null ? context.t('lang_all') : tr('lang_${widget.lang!.name}', widget.lang!);
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -287,7 +344,7 @@ class _TopicPoemsScreenState extends ConsumerState<TopicPoemsScreen> {
                 ScreenHeader(
                   back: true,
                   title: title,
-                  subtitle: '${tr('lang_${widget.section.name}', widget.section)} · ${localDigits(poems.length, lang)} ${context.t('poems')}',
+                  subtitle: '${context.t('kind_${widget.kind}')} · $langLabel · ${localDigits(poems.length, lang)} ${kindUnit(context, widget.kind)}',
                   actions: [
                     PopupMenuButton<PoemSort>(
                       initialValue: _sort,
@@ -408,6 +465,7 @@ class RecycleBinScreen extends ConsumerWidget {
                                               foregroundColor: c.onPrimary,
                                             ),
                                             onPressed: () async {
+                                              if (!await ensureCanWrite(context, ref)) return;
                                               await repo.restoreFromBin(p.id);
                                               if (context.mounted) {
                                                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.t('restored'))));
@@ -424,6 +482,7 @@ class RecycleBinScreen extends ConsumerWidget {
                                             if (await _confirm(context, 'confirm_forever') &&
                                                 context.mounted &&
                                                 await _confirm(context, 'confirm_forever2')) {
+                                              if (!context.mounted || !await ensureCanWrite(context, ref)) return;
                                               await repo.deleteForever(p.id);
                                             }
                                           },

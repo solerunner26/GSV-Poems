@@ -9,6 +9,7 @@ import '../../core/widgets/common.dart';
 import '../../core/widgets/icon3d.dart';
 import '../../data/db/database.dart';
 import '../common/poem_tile.dart';
+import '../sync/writer_gate.dart';
 
 final duplicateGroupsProvider = FutureProvider.autoDispose<List<List<Poem>>>((ref) {
   ref.watch(duplicateCountProvider);
@@ -39,7 +40,8 @@ class DuplicatesScreen extends ConsumerWidget {
         ],
       ),
     );
-    if (ok != true) return;
+    if (ok != true || !context.mounted) return;
+    if (!await ensureCanWrite(context, ref)) return;
     final repo = ref.read(repoProvider);
     var moved = 0;
     for (final g in groups) {
@@ -127,7 +129,11 @@ class DuplicatesScreen extends ConsumerWidget {
                                               ),
                                               TextButton(
                                                 style: TextButton.styleFrom(minimumSize: const Size(48, 44)),
-                                                onPressed: () => ref.read(repoProvider).removeDuplicates(g, keepId: p.id),
+                                                onPressed: () async {
+                                                  if (await ensureCanWrite(context, ref)) {
+                                                    await ref.read(repoProvider).removeDuplicates(g, keepId: p.id);
+                                                  }
+                                                },
                                                 child: Text(
                                                   context.t('dup_keep_this'),
                                                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: c.primary),

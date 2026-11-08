@@ -12,6 +12,7 @@ import '../../core/theme/app_themes.dart';
 import '../../core/widgets/common.dart';
 import '../../core/widgets/icon3d.dart';
 import '../../data/db/database.dart';
+import '../../data/poem_repository.dart';
 import '../common/new_topic_sheet.dart';
 import '../common/poem_tile.dart';
 import '../sync/drive_screen.dart';
@@ -19,8 +20,11 @@ import '../sync/drive_screen.dart';
 /// Write a new poem ([poemId] null) or edit one. Saves itself a moment after
 /// each change; the text as it was before editing goes to the edit history once.
 class EditorScreen extends ConsumerStatefulWidget {
-  const EditorScreen({super.key, this.poemId});
+  const EditorScreen({super.key, this.poemId, this.kind = Kind.poem});
   final String? poemId;
+
+  /// For new writing: a poem or prose. An existing piece keeps its own.
+  final String kind;
 
   @override
   ConsumerState<EditorScreen> createState() => _EditorScreenState();
@@ -33,6 +37,7 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
   final _speech = SpeechToText();
   String? _id;
   String? _categoryId;
+  late String _kind = widget.kind;
   bool _loaded = false;
   bool _versionTaken = false;
   bool _dirty = false;
@@ -62,6 +67,7 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
         _title.text = p.title;
         _body.text = p.body;
         _categoryId = p.categoryId;
+        _kind = p.kind;
         _number = p.number;
       }
     }
@@ -98,11 +104,11 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
     if (body.trim().isEmpty) return;
     final repo = _repo;
     if (_id == null) {
-      _id = await repo.createPoem(title: title, body: body, categoryId: _categoryId);
+      _id = await repo.createPoem(title: title, body: body, categoryId: _categoryId, kind: _kind);
       _number = (await repo.getPoem(_id!))?.number;
       _versionTaken = true;
     } else {
-      await repo.updatePoem(_id!, title: title, body: body, categoryId: _categoryId, keepVersion: !_versionTaken);
+      await repo.updatePoem(_id!, title: title, body: body, categoryId: _categoryId, kind: _kind, keepVersion: !_versionTaken);
       _versionTaken = true;
     }
     _dirty = false;
@@ -252,6 +258,21 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
                             : ListView(
                                 padding: const EdgeInsets.fromLTRB(18, 4, 18, 16),
                                 children: [
+                                  // Poem or prose.
+                                  SegmentedButton<String>(
+                                    showSelectedIcon: false,
+                                    style: SegmentedButton.styleFrom(
+                                      minimumSize: const Size(48, 44),
+                                      textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                                    ),
+                                    segments: [for (final k in Kind.all) ButtonSegment(value: k, label: Text(context.t('kind_$k')))],
+                                    selected: {_kind},
+                                    onSelectionChanged: (s) {
+                                      setState(() => _kind = s.first);
+                                      _changed();
+                                    },
+                                  ),
+                                  const SizedBox(height: 12),
                                   TextField(
                                     controller: _title,
                                     textCapitalization: TextCapitalization.sentences,
