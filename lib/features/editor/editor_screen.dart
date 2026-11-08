@@ -16,6 +16,7 @@ import '../../data/poem_repository.dart';
 import '../common/new_topic_sheet.dart';
 import '../common/poem_tile.dart';
 import '../sync/drive_screen.dart';
+import '../sync/library_screen.dart';
 
 /// Write a new poem ([poemId] null) or edit one. Saves itself a moment after
 /// each change; the text as it was before editing goes to the edit history once.
@@ -38,6 +39,9 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
   String? _id;
   String? _categoryId;
   late String _kind = widget.kind;
+
+  /// New writing is a draft until the poet publishes it.
+  bool _isDraft = true;
   bool _loaded = false;
   bool _versionTaken = false;
   bool _dirty = false;
@@ -50,6 +54,7 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
   // Read once: the final save in dispose() runs after ref is gone.
   late final _repo = ref.read(repoProvider);
   late final _sync = ref.read(syncProvider);
+  late final _library = ref.read(libraryProvider);
 
   @override
   void initState() {
@@ -68,6 +73,7 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
         _body.text = p.body;
         _categoryId = p.categoryId;
         _kind = p.kind;
+        _isDraft = p.isDraft;
         _number = p.number;
       }
     }
@@ -104,7 +110,7 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
     if (body.trim().isEmpty) return;
     final repo = _repo;
     if (_id == null) {
-      _id = await repo.createPoem(title: title, body: body, categoryId: _categoryId, kind: _kind);
+      _id = await repo.createPoem(title: title, body: body, categoryId: _categoryId, kind: _kind, isDraft: _isDraft);
       _number = (await repo.getPoem(_id!))?.number;
       _versionTaken = true;
     } else {
@@ -117,7 +123,9 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
     if (mounted) setState(() {});
   }
 
-  Future<void> _saveAndClose() async {
+  /// Saves and closes. With [publish], a draft joins the collection and goes
+  /// to the online library.
+  Future<void> _saveAndClose({bool publish = false}) async {
     if (_body.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.t('empty_poem'))));
       return;
@@ -146,9 +154,14 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
       _dups = const [];
     }
     await _save();
+    if (publish && _id != null) {
+      await _repo.publishDraft(_id!);
+      _isDraft = false;
+      unawaited(_library.quiet());
+    }
     if (!mounted) return;
     final messenger = ScaffoldMessenger.of(context);
-    final text = context.t('saved');
+    final text = context.t(publish ? 'draft_published' : (_isDraft ? 'draft_saved' : 'saved'));
     Navigator.of(context).pop();
     messenger.showSnackBar(SnackBar(content: Text(text)));
   }
@@ -409,44 +422,80 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
                       ),
                       Padding(
                         padding: const EdgeInsets.fromLTRB(18, 8, 18, 14),
-                        child: Row(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            Expanded(
-                              child: SizedBox(
-                                height: 60,
-                                child: OutlinedButton(
-                                  onPressed: _toggleMic,
-                                  style: OutlinedButton.styleFrom(
-                                    backgroundColor: _listening ? c.accent : c.surface,
-                                    foregroundColor: _listening ? Colors.white : c.primary,
-                                    side: BorderSide(color: _listening ? c.accent : c.primary, width: 2),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(60 / 2.6)),
-                                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const Icon3D('mic', size: 36),
-                                      const SizedBox(width: 6),
-                                      Flexible(
-                                        child: FittedBox(
-                                          fit: BoxFit.scaleDown,
-                                          child: Text(
-                                            _listening ? context.t('listening') : context.t('voice'),
-                                            maxLines: 1,
-                                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-                                          ),
-                                        ),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: SizedBox(
+                                    height: 60,
+                                    child: OutlinedButton(
+                                      onPressed: _toggleMic,
+                                      style: OutlinedButton.styleFrom(
+                                        backgroundColor: _listening ? c.accent : c.surface,
+                                        foregroundColor: _listening ? Colors.white : c.primary,
+                                        side: BorderSide(color: _listening ? c.accent : c.primary, width: 2),
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(60 / 2.6)),
+                                        padding: const EdgeInsets.symmetric(horizontal: 10),
                                       ),
-                                    ],
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          const Icon3D('mic', size: 36),
+                                          const SizedBox(width: 6),
+                                          Flexible(
+                                            child: FittedBox(
+                                              fit: BoxFit.scaleDown,
+                                              child: Text(
+                                                _listening ? context.t('listening') : context.t('voice'),
+                                                maxLines: 1,
+                                                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                                   ),
                                 ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: _isDraft
+                                      // A draft: saving keeps it private; publishing is the main action below.
+                                      ? SizedBox(
+                                          height: 60,
+                                          child: OutlinedButton(
+                                            onPressed: _saveAndClose,
+                                            style: OutlinedButton.styleFrom(
+                                              foregroundColor: c.primary,
+                                              side: BorderSide(color: c.primary, width: 2),
+                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(60 / 2.6)),
+                                              padding: const EdgeInsets.symmetric(horizontal: 10),
+                                            ),
+                                            child: FittedBox(
+                                              fit: BoxFit.scaleDown,
+                                              child: Text(
+                                                context.t('draft_save'),
+                                                maxLines: 1,
+                                                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                                              ),
+                                            ),
+                                          ),
+                                        )
+                                      : PrimaryButton(label: context.t('save'), icon: 'check', onPressed: _saveAndClose),
+                                ),
+                              ],
+                            ),
+                            if (_isDraft) ...[
+                              const SizedBox(height: 10),
+                              PrimaryButton(
+                                label: context.t('draft_publish'),
+                                icon: 'check',
+                                height: 56,
+                                onPressed: () => _saveAndClose(publish: true),
                               ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: PrimaryButton(label: context.t('save'), icon: 'check', onPressed: _saveAndClose),
-                            ),
+                            ],
                           ],
                         ),
                       ),

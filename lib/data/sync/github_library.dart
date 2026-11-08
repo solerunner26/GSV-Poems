@@ -52,10 +52,29 @@ class GithubLibrary {
   /// A fingerprint of the poems and topics only (not settings or edit times of
   /// the backup itself), so an unchanged collection is never sent twice.
   Future<String> fingerprint() async {
-    final data = await repo.exportBackup();
+    final data = await publicExport();
     final poems = [...(data['poems'] as List)]..sort((a, b) => '${(a as Map)['id']}'.compareTo('${(b as Map)['id']}'));
     final cats = [...(data['categories'] as List)]..sort((a, b) => '${(a as Map)['id']}'.compareTo('${(b as Map)['id']}'));
     return sha1.convert(utf8.encode(jsonEncode({'p': poems, 'c': cats}))).toString();
+  }
+
+  /// The collection as readers may see it: drafts (and their history) left out.
+  Future<Map<String, dynamic>> publicExport() async {
+    final data = await repo.exportBackup();
+    final all = (data['poems'] as List).cast<Map<String, dynamic>>();
+    final drafts = {
+      for (final p in all)
+        if (p['isDraft'] == true) '${p['id']}',
+    };
+    data['poems'] = [
+      for (final p in all)
+        if (!drafts.contains('${p['id']}')) p,
+    ];
+    data['versions'] = [
+      for (final v in (data['versions'] as List).cast<Map<String, dynamic>>())
+        if (!drafts.contains('${v['poemId']}')) v,
+    ];
+    return data;
   }
 
   /// Reads the online copy and merges anything new (newer edit wins, nothing
@@ -93,7 +112,7 @@ class GithubLibrary {
     if (before.needsKey) return before;
     final fp = await fingerprint();
     if (await repo.getSetting('libPublished') == fp) return before;
-    final bytes = await encodeBackup(await repo.exportBackup(), await backups.recoveryKey(), device: 'library');
+    final bytes = await encodeBackup(await publicExport(), await backups.recoveryKey(), device: 'library');
     final auth = {'Authorization': 'Bearer $token', 'Accept': 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28'};
     Future<http.Response> put() async {
       final meta = await _http.get(_contents, headers: auth);

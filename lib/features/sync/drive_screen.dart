@@ -48,6 +48,7 @@ class SyncCoordinator {
         throw StateError('Google Drive needs to be connected again');
       }
       final model = await ref.read(deviceModelProvider.future);
+      await refreshOwnerVerifier(repo, ref.read(pinServiceProvider), model);
       final svc = SyncService(
         repo,
         ref.read(backupServiceProvider),

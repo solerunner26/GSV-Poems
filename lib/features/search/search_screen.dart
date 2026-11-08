@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../drafts/drafts.dart';
+
 import '../../app_providers.dart';
 import '../../core/l10n/strings.dart';
 import '../../core/text/text_tools.dart';
@@ -130,7 +132,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 ),
               ),
               Expanded(
-                child: _searched && _results.isEmpty
+                child: !_searched && _q.text.isEmpty
+                    ? const DraftsSection()
+                    : _searched && _results.isEmpty
                     ? ListView(
                         children: [EmptyState(icon: 'search', text: context.t('no_results'))],
                       )

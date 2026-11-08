@@ -107,6 +107,7 @@ typedef PoemQuery = ({String? lang, String? categoryId, String? kind, PoemSort s
 final poemsProvider = StreamProvider.family<List<Poem>, PoemQuery>(
   (ref, q) => ref.watch(repoProvider).watchPoems(lang: q.lang, categoryId: q.categoryId, kind: q.kind, sort: q.sort),
 );
+final draftsProvider = StreamProvider<List<Poem>>((ref) => ref.watch(repoProvider).watchDrafts());
 final statsProvider = StreamProvider<PoemStats>((ref) => ref.watch(repoProvider).watchStats());
 final favoritesProvider = StreamProvider<List<Poem>>((ref) => ref.watch(repoProvider).watchFavorites());
 final binProvider = StreamProvider<List<Poem>>((ref) => ref.watch(repoProvider).watchRecycleBin());

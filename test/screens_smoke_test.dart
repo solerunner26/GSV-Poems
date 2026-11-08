@@ -33,7 +33,7 @@ void main() {
     sourceKey: null,
     contentKey: null,
     deletedAt: null,
-    kind: 'poem',
+    kind: 'poem', isDraft: false,
   );
 
   Future<void> pumpScreen(WidgetTester tester, Widget screen, PoemLang lang, Size size) async {

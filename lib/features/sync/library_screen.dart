@@ -38,6 +38,7 @@ class LibraryCoordinator {
       final lib = GithubLibrary(repo, ref.read(backupServiceProvider));
       final tok = await token();
       final writer = await ref.read(canWriteProvider.future);
+      await refreshOwnerVerifier(repo, ref.read(pinServiceProvider), await ref.read(deviceModelProvider.future));
       if (typedKey == null && writer && tok != null) return await lib.publish(tok);
       if (daily && typedKey == null && !await lib.dueToday()) return const LibraryResult();
       return await lib.pull(typedKey: typedKey);

@@ -148,6 +148,17 @@ class $PoemsTable extends Poems with TableInfo<$PoemsTable, Poem> {
     requiredDuringInsert: false,
     defaultValue: const Constant('poem'),
   );
+  static const VerificationMeta _isDraftMeta = const VerificationMeta('isDraft');
+  @override
+  late final GeneratedColumn<bool> isDraft = GeneratedColumn<bool>(
+    'is_draft',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('CHECK ("is_draft" IN (0, 1))'),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -166,6 +177,7 @@ class $PoemsTable extends Poems with TableInfo<$PoemsTable, Poem> {
     sourceKey,
     contentKey,
     kind,
+    isDraft,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -232,6 +244,9 @@ class $PoemsTable extends Poems with TableInfo<$PoemsTable, Poem> {
     if (data.containsKey('kind')) {
       context.handle(_kindMeta, kind.isAcceptableOrUnknown(data['kind']!, _kindMeta));
     }
+    if (data.containsKey('is_draft')) {
+      context.handle(_isDraftMeta, isDraft.isAcceptableOrUnknown(data['is_draft']!, _isDraftMeta));
+    }
     return context;
   }
 
@@ -257,6 +272,7 @@ class $PoemsTable extends Poems with TableInfo<$PoemsTable, Poem> {
       sourceKey: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}source_key']),
       contentKey: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}content_key']),
       kind: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}kind'])!,
+      isDraft: attachedDatabase.typeMapping.read(DriftSqlType.bool, data['${effectivePrefix}is_draft'])!,
     );
   }
 
@@ -289,6 +305,10 @@ class Poem extends DataClass implements Insertable<Poem> {
 
   /// What the writing is: 'poem' (કવિતા) or 'prose' (ગદ્ય: articles, essays).
   final String kind;
+
+  /// Written but not yet published by the poet: kept on his devices only,
+  /// never in the online library, and listed under Drafts until he publishes.
+  final bool isDraft;
   const Poem({
     required this.id,
     this.number,
@@ -306,6 +326,7 @@ class Poem extends DataClass implements Insertable<Poem> {
     this.sourceKey,
     this.contentKey,
     required this.kind,
+    required this.isDraft,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -336,6 +357,7 @@ class Poem extends DataClass implements Insertable<Poem> {
       map['content_key'] = Variable<String>(contentKey);
     }
     map['kind'] = Variable<String>(kind);
+    map['is_draft'] = Variable<bool>(isDraft);
     return map;
   }
 
@@ -357,6 +379,7 @@ class Poem extends DataClass implements Insertable<Poem> {
       sourceKey: sourceKey == null && nullToAbsent ? const Value.absent() : Value(sourceKey),
       contentKey: contentKey == null && nullToAbsent ? const Value.absent() : Value(contentKey),
       kind: Value(kind),
+      isDraft: Value(isDraft),
     );
   }
 
@@ -379,6 +402,7 @@ class Poem extends DataClass implements Insertable<Poem> {
       sourceKey: serializer.fromJson<String?>(json['sourceKey']),
       contentKey: serializer.fromJson<String?>(json['contentKey']),
       kind: serializer.fromJson<String>(json['kind']),
+      isDraft: serializer.fromJson<bool>(json['isDraft']),
     );
   }
   @override
@@ -401,6 +425,7 @@ class Poem extends DataClass implements Insertable<Poem> {
       'sourceKey': serializer.toJson<String?>(sourceKey),
       'contentKey': serializer.toJson<String?>(contentKey),
       'kind': serializer.toJson<String>(kind),
+      'isDraft': serializer.toJson<bool>(isDraft),
     };
   }
 
@@ -421,6 +446,7 @@ class Poem extends DataClass implements Insertable<Poem> {
     Value<String?> sourceKey = const Value.absent(),
     Value<String?> contentKey = const Value.absent(),
     String? kind,
+    bool? isDraft,
   }) => Poem(
     id: id ?? this.id,
     number: number.present ? number.value : this.number,
@@ -438,6 +464,7 @@ class Poem extends DataClass implements Insertable<Poem> {
     sourceKey: sourceKey.present ? sourceKey.value : this.sourceKey,
     contentKey: contentKey.present ? contentKey.value : this.contentKey,
     kind: kind ?? this.kind,
+    isDraft: isDraft ?? this.isDraft,
   );
   Poem copyWithCompanion(PoemsCompanion data) {
     return Poem(
@@ -457,6 +484,7 @@ class Poem extends DataClass implements Insertable<Poem> {
       sourceKey: data.sourceKey.present ? data.sourceKey.value : this.sourceKey,
       contentKey: data.contentKey.present ? data.contentKey.value : this.contentKey,
       kind: data.kind.present ? data.kind.value : this.kind,
+      isDraft: data.isDraft.present ? data.isDraft.value : this.isDraft,
     );
   }
 
@@ -478,7 +506,8 @@ class Poem extends DataClass implements Insertable<Poem> {
           ..write('source: $source, ')
           ..write('sourceKey: $sourceKey, ')
           ..write('contentKey: $contentKey, ')
-          ..write('kind: $kind')
+          ..write('kind: $kind, ')
+          ..write('isDraft: $isDraft')
           ..write(')'))
         .toString();
   }
@@ -501,6 +530,7 @@ class Poem extends DataClass implements Insertable<Poem> {
     sourceKey,
     contentKey,
     kind,
+    isDraft,
   );
   @override
   bool operator ==(Object other) =>
@@ -521,7 +551,8 @@ class Poem extends DataClass implements Insertable<Poem> {
           other.source == this.source &&
           other.sourceKey == this.sourceKey &&
           other.contentKey == this.contentKey &&
-          other.kind == this.kind);
+          other.kind == this.kind &&
+          other.isDraft == this.isDraft);
 }
 
 class PoemsCompanion extends UpdateCompanion<Poem> {
@@ -541,6 +572,7 @@ class PoemsCompanion extends UpdateCompanion<Poem> {
   final Value<String?> sourceKey;
   final Value<String?> contentKey;
   final Value<String> kind;
+  final Value<bool> isDraft;
   final Value<int> rowid;
   const PoemsCompanion({
     this.id = const Value.absent(),
@@ -559,6 +591,7 @@ class PoemsCompanion extends UpdateCompanion<Poem> {
     this.sourceKey = const Value.absent(),
     this.contentKey = const Value.absent(),
     this.kind = const Value.absent(),
+    this.isDraft = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   PoemsCompanion.insert({
@@ -578,6 +611,7 @@ class PoemsCompanion extends UpdateCompanion<Poem> {
     this.sourceKey = const Value.absent(),
     this.contentKey = const Value.absent(),
     this.kind = const Value.absent(),
+    this.isDraft = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        body = Value(body),
@@ -600,6 +634,7 @@ class PoemsCompanion extends UpdateCompanion<Poem> {
     Expression<String>? sourceKey,
     Expression<String>? contentKey,
     Expression<String>? kind,
+    Expression<bool>? isDraft,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -619,6 +654,7 @@ class PoemsCompanion extends UpdateCompanion<Poem> {
       if (sourceKey != null) 'source_key': sourceKey,
       if (contentKey != null) 'content_key': contentKey,
       if (kind != null) 'kind': kind,
+      if (isDraft != null) 'is_draft': isDraft,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -640,6 +676,7 @@ class PoemsCompanion extends UpdateCompanion<Poem> {
     Value<String?>? sourceKey,
     Value<String?>? contentKey,
     Value<String>? kind,
+    Value<bool>? isDraft,
     Value<int>? rowid,
   }) {
     return PoemsCompanion(
@@ -659,6 +696,7 @@ class PoemsCompanion extends UpdateCompanion<Poem> {
       sourceKey: sourceKey ?? this.sourceKey,
       contentKey: contentKey ?? this.contentKey,
       kind: kind ?? this.kind,
+      isDraft: isDraft ?? this.isDraft,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -714,6 +752,9 @@ class PoemsCompanion extends UpdateCompanion<Poem> {
     if (kind.present) {
       map['kind'] = Variable<String>(kind.value);
     }
+    if (isDraft.present) {
+      map['is_draft'] = Variable<bool>(isDraft.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -739,6 +780,7 @@ class PoemsCompanion extends UpdateCompanion<Poem> {
           ..write('sourceKey: $sourceKey, ')
           ..write('contentKey: $contentKey, ')
           ..write('kind: $kind, ')
+          ..write('isDraft: $isDraft, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1537,6 +1579,7 @@ typedef $$PoemsTableCreateCompanionBuilder = PoemsCompanion Function({
   Value<String?> sourceKey,
   Value<String?> contentKey,
   Value<String> kind,
+  Value<bool> isDraft,
   Value<int> rowid,
 });
 typedef $$PoemsTableUpdateCompanionBuilder = PoemsCompanion Function({
@@ -1556,6 +1599,7 @@ typedef $$PoemsTableUpdateCompanionBuilder = PoemsCompanion Function({
   Value<String?> sourceKey,
   Value<String?> contentKey,
   Value<String> kind,
+  Value<bool> isDraft,
   Value<int> rowid,
 });
 
@@ -1612,6 +1656,8 @@ class $$PoemsTableFilterComposer extends Composer<_$AppDatabase, $PoemsTable> {
   ColumnFilters<String> get contentKey => $composableBuilder(column: $table.contentKey, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get kind => $composableBuilder(column: $table.kind, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isDraft => $composableBuilder(column: $table.isDraft, builder: (column) => ColumnFilters(column));
 
   Expression<bool> poemVersionsRefs(Expression<bool> Function($$PoemVersionsTableFilterComposer f) f) {
     final $$PoemVersionsTableFilterComposer composer = $composerBuilder(
@@ -1670,6 +1716,8 @@ class $$PoemsTableOrderingComposer extends Composer<_$AppDatabase, $PoemsTable> 
   ColumnOrderings<String> get contentKey => $composableBuilder(column: $table.contentKey, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<String> get kind => $composableBuilder(column: $table.kind, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isDraft => $composableBuilder(column: $table.isDraft, builder: (column) => ColumnOrderings(column));
 }
 
 class $$PoemsTableAnnotationComposer extends Composer<_$AppDatabase, $PoemsTable> {
@@ -1711,6 +1759,8 @@ class $$PoemsTableAnnotationComposer extends Composer<_$AppDatabase, $PoemsTable
   GeneratedColumn<String> get contentKey => $composableBuilder(column: $table.contentKey, builder: (column) => column);
 
   GeneratedColumn<String> get kind => $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDraft => $composableBuilder(column: $table.isDraft, builder: (column) => column);
 
   Expression<T> poemVersionsRefs<T extends Object>(Expression<T> Function($$PoemVersionsTableAnnotationComposer a) f) {
     final $$PoemVersionsTableAnnotationComposer composer = $composerBuilder(
@@ -1771,6 +1821,7 @@ class $$PoemsTableTableManager
                 Value<String?> sourceKey = const Value.absent(),
                 Value<String?> contentKey = const Value.absent(),
                 Value<String> kind = const Value.absent(),
+                Value<bool> isDraft = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PoemsCompanion(
                 id: id,
@@ -1789,6 +1840,7 @@ class $$PoemsTableTableManager
                 sourceKey: sourceKey,
                 contentKey: contentKey,
                 kind: kind,
+                isDraft: isDraft,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -1809,6 +1861,7 @@ class $$PoemsTableTableManager
                 Value<String?> sourceKey = const Value.absent(),
                 Value<String?> contentKey = const Value.absent(),
                 Value<String> kind = const Value.absent(),
+                Value<bool> isDraft = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PoemsCompanion.insert(
                 id: id,
@@ -1827,6 +1880,7 @@ class $$PoemsTableTableManager
                 sourceKey: sourceKey,
                 contentKey: contentKey,
                 kind: kind,
+                isDraft: isDraft,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0.map((e) => (e.readTable<$PoemsTable, Poem>(table), $$PoemsTableReferences(db, table, e))).toList(),

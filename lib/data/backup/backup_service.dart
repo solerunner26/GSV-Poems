@@ -15,7 +15,30 @@ import 'backup_codec.dart';
 class EmailConfig {
   const EmailConfig({required this.to, required this.from, required this.appPassword});
   final String to, from, appPassword;
-  bool get complete => to.contains('@') && from.contains('@') && appPassword.replaceAll(' ', '').length >= 16;
+
+  static final _email = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+
+  /// Builds a config from what was typed: spaces removed from the app password
+  /// (Google shows it in four groups), and when the sender box holds a name
+  /// instead of an address, the Gmail it is sent to is used as the sender.
+  factory EmailConfig.typed({required String to, required String from, required String password}) {
+    final t = to.trim(), f = from.trim();
+    return EmailConfig(
+      to: t,
+      from: _email.hasMatch(f) ? f : (t.toLowerCase().endsWith('@gmail.com') ? t : f),
+      appPassword: password.replaceAll(RegExp(r'\s'), ''),
+    );
+  }
+
+  /// What is wrong, as a translation key, or null when everything looks right.
+  String? get problem {
+    if (!_email.hasMatch(to)) return 'email_bad_to';
+    if (!_email.hasMatch(from) || !from.toLowerCase().endsWith('@gmail.com')) return 'email_bad_from';
+    if (!RegExp(r'^[a-zA-Z]{16}$').hasMatch(appPassword)) return 'email_bad_pass';
+    return null;
+  }
+
+  bool get complete => problem == null;
 }
 
 class BackupStatus {
@@ -71,7 +94,7 @@ class BackupService {
   Future<EmailConfig?> emailConfig() async {
     final to = await secrets.read(_kTo), from = await secrets.read(_kFrom), pass = await secrets.read(_kPass);
     if (to == null || from == null || pass == null) return null;
-    return EmailConfig(to: to, from: from, appPassword: pass);
+    return EmailConfig(to: to, from: from, appPassword: pass.replaceAll(RegExp(r'\s'), ''));
   }
 
   Future<void> saveEmailConfig(EmailConfig c) async {

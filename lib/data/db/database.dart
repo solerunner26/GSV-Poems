@@ -28,6 +28,10 @@ class Poems extends Table {
   /// What the writing is: 'poem' (કવિતા) or 'prose' (ગદ્ય: articles, essays).
   TextColumn get kind => text().withDefault(const Constant('poem'))();
 
+  /// Written but not yet published by the poet: kept on his devices only,
+  /// never in the online library, and listed under Drafts until he publishes.
+  BoolColumn get isDraft => boolean().withDefault(const Constant(false))();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -84,7 +88,7 @@ class AppDatabase extends _$AppDatabase {
   static Future<void> Function(AppDatabase db)? backfill;
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -100,6 +104,10 @@ class AppDatabase extends _$AppDatabase {
       if (from < 3) {
         // v3: prose (articles, essays) next to poems. Everything so far is a poem.
         await m.addColumn(poems, poems.kind);
+      }
+      if (from < 4) {
+        // v4: drafts. Everything written so far counts as published.
+        await m.addColumn(poems, poems.isDraft);
       }
     },
     onCreate: (m) async {

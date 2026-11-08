@@ -107,6 +107,7 @@ void main() {
     contentKey: null,
     deletedAt: null,
     kind: kind,
+    isDraft: false,
   );
   final items = [
     poem('a', 'વરસાદની પહેલી સાંજ', Kind.poem, 'gu', 'jivan'),

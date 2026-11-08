@@ -16,6 +16,7 @@ import '../sync/library_screen.dart';
 import '../collection/collection_screen.dart';
 import '../editor/editor_screen.dart';
 import '../home/home_screen.dart';
+import '../drafts/drafts.dart';
 import '../search/search_screen.dart';
 import '../settings/settings_screen.dart';
 import '../update/update_prompt.dart';
@@ -55,6 +56,7 @@ class _ShellState extends ConsumerState<Shell> {
         // Older Android: nothing to ask.
       }
     }
+    await refreshOwnerVerifier(repo, ref.read(pinServiceProvider), await ref.read(deviceModelProvider.future));
     // The online library: readers look once a day, the poet's devices publish.
     unawaited(ref.read(libraryProvider).quiet(daily: true));
     final sync = ref.read(syncProvider);
@@ -102,14 +104,15 @@ class _ShellState extends ConsumerState<Shell> {
             const CollectionScreen(),
           ],
         ),
-        bottomNavigationBar: _BottomBar(current: _tab, onTab: _go, onWrite: _write),
+        bottomNavigationBar: _BottomBar(current: _tab, onTab: _go, onWrite: _write, drafts: ref.watch(draftsProvider).asData?.value.length ?? 0),
       ),
     );
   }
 }
 
 class _BottomBar extends StatelessWidget {
-  const _BottomBar({required this.current, required this.onTab, required this.onWrite});
+  const _BottomBar({required this.current, required this.onTab, required this.onWrite, this.drafts = 0});
+  final int drafts;
   final Tab current;
   final ValueChanged<Tab> onTab;
   final VoidCallback onWrite;
@@ -119,7 +122,7 @@ class _BottomBar extends StatelessWidget {
     final c = context.gc;
     final tablet = MediaQuery.sizeOf(context).shortestSide >= 600;
     final bottomInset = MediaQuery.paddingOf(context).bottom;
-    Widget item(String icon, String key, VoidCallback onTap, {bool selected = false}) => Expanded(
+    Widget item(String icon, String key, VoidCallback onTap, {bool selected = false, bool dot = false}) => Expanded(
       child: Semantics(
         button: true,
         selected: selected,
@@ -138,7 +141,14 @@ class _BottomBar extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon3D(icon, size: 38),
+                // A red dot marks unfinished work (drafts waiting).
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Icon3D(icon, size: 38),
+                    if (dot) const Positioned(right: -2, top: -2, child: AttentionDot(size: 11)),
+                  ],
+                ),
                 const SizedBox(height: 2),
                 Text(
                   context.t(key),
@@ -192,7 +202,7 @@ class _BottomBar extends StatelessWidget {
       children: [
         // Order: Write · Search · Home (raised, centre) · Collection · Settings.
         item('write', 'nav_write', onWrite),
-        item('search', 'nav_search', () => onTab(Tab.search), selected: current == Tab.search),
+        item('search', 'nav_search', () => onTab(Tab.search), selected: current == Tab.search, dot: drafts > 0),
         const Expanded(child: SizedBox(height: 66)),
         item('collection', 'nav_collection', () => onTab(Tab.collection), selected: current == Tab.collection),
         item('settings', 'nav_settings', () => onTab(Tab.settings), selected: current == Tab.settings),

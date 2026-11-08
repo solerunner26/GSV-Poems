@@ -53,7 +53,7 @@ void main() {
     sourceKey: null,
     contentKey: null,
     deletedAt: null,
-    kind: 'poem',
+    kind: 'poem', isDraft: false,
   );
 
   final themes = const String.fromEnvironment('THEMES', defaultValue: 'mor,night,light,neel,van,kamal').split(',');

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,9 +11,11 @@ import '../../core/theme/app_themes.dart';
 import '../../core/widgets/common.dart';
 import '../../core/widgets/icon3d.dart';
 import '../../data/security/pin_service.dart';
+import '../../data/poem_repository.dart';
 import '../../data/sync/sync_service.dart';
 import '../backup/backup_screens.dart';
 import 'drive_screen.dart';
+import 'library_screen.dart';
 
 /// Maker and model of this device ('' in tests or off Android).
 typedef DeviceModel = ({String maker, String model});
@@ -33,6 +37,25 @@ bool isPoetDevice(DeviceModel d) =>
 
 /// Only his phone publishes its PIN check (the "PIN of the Nothing phone").
 bool publishesOwnerPin(DeviceModel d) => d.maker == 'nothing';
+
+/// On the poet's phone: keeps his PIN check (salted hash) in the settings that
+/// travel inside every encrypted backup, so his PIN can unlock other devices
+/// that read the collection (through Drive or the online library).
+Future<void> refreshOwnerVerifier(PoemRepository repo, PinService pins, DeviceModel model) async {
+  if (!publishesOwnerPin(model)) return;
+  final v = await pins.verifier();
+  if (v == null) return;
+  final json = jsonEncode(v);
+  if (await repo.getSetting(PoemRepository.ownerVerifierKey) != json) await repo.setSetting(PoemRepository.ownerVerifierKey, json);
+}
+
+/// The poet's PIN check known on this device, or null.
+Future<Map<String, dynamic>?> localOwnerVerifier(PoemRepository repo) async {
+  final s = await repo.getSetting(PoemRepository.ownerVerifierKey);
+  if (s == null || s.isEmpty) return null;
+  final m = jsonDecode(s);
+  return m is Map<String, dynamic> ? m : null;
+}
 
 /// May this device add, edit or remove writing?
 final canWriteProvider = FutureProvider<bool>((ref) async {
@@ -79,18 +102,25 @@ class _UnlockDialogState extends ConsumerState<_UnlockDialog> {
     });
     final t = context.t;
     try {
-      final sync = ref.read(syncProvider);
-      if (!await sync.connected()) {
-        setState(() => _error = t('writer_need_drive'));
-        return;
-      }
-      final drive = await ref.read(driveServiceProvider.future);
-      if (!await drive.signInQuietly()) {
-        setState(() => _error = t('writer_need_drive'));
-        return;
-      }
       final repo = ref.read(repoProvider);
-      final verifier = await SyncService(repo, ref.read(backupServiceProvider), drive).fetchOwnerVerifier();
+      // 1. Already here: it came inside the encrypted collection.
+      var verifier = await localOwnerVerifier(repo);
+      // 2. Fetch the newest collection from the online library.
+      if (verifier == null) {
+        try {
+          await ref.read(libraryProvider).run();
+        } on Object {
+          // Offline or not set up: try Drive next.
+        }
+        verifier = await localOwnerVerifier(repo);
+      }
+      // 3. Google Drive, when this device is connected to the poet's account.
+      if (verifier == null && await ref.read(syncProvider).connected()) {
+        final drive = await ref.read(driveServiceProvider.future);
+        if (await drive.signInQuietly()) {
+          verifier = await SyncService(repo, ref.read(backupServiceProvider), drive).fetchOwnerVerifier();
+        }
+      }
       if (verifier == null) {
         setState(() => _error = t('writer_no_owner'));
         return;

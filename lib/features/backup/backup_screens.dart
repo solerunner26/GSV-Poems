@@ -402,10 +402,13 @@ class _EmailSetupScreenState extends ConsumerState<EmailSetupScreen> {
   }
 
   Future<void> _saveAndTest() async {
-    final cfg = EmailConfig(to: _to.text.trim(), from: _from.text.trim(), appPassword: _pass.text.replaceAll(' ', ''));
-    if (!cfg.complete) {
+    final cfg = EmailConfig.typed(to: _to.text, from: _from.text, password: _pass.text);
+    // Show what was understood, so a name in the sender box visibly becomes the address.
+    _from.text = cfg.from;
+    final problem = cfg.problem;
+    if (problem != null) {
       setState(() {
-        _result = context.t('email_bad_input');
+        _result = context.t(problem);
         _ok = false;
       });
       return;
@@ -461,8 +464,15 @@ class _EmailSetupScreenState extends ConsumerState<EmailSetupScreen> {
                       TextField(
                         controller: _from,
                         keyboardType: TextInputType.emailAddress,
+                        autocorrect: false,
+                        enableSuggestions: false,
                         style: const TextStyle(fontSize: 18),
-                        decoration: InputDecoration(labelText: context.t('email_from')),
+                        decoration: InputDecoration(
+                          labelText: context.t('email_from'),
+                          hintText: 'name@gmail.com',
+                          helperText: context.t('email_from_help'),
+                          helperMaxLines: 3,
+                        ),
                       ),
                       const SizedBox(height: 12),
                       TextField(

@@ -17,6 +17,7 @@ import '../../core/panchang/names.dart';
 import '../../core/panchang/panchang.dart';
 import '../calendar/calendar_screen.dart';
 import '../collection/collection_screen.dart';
+import '../drafts/drafts.dart';
 import '../common/poem_tile.dart';
 import '../duplicates/duplicates_screen.dart';
 import '../profile/profile_screen.dart';
@@ -87,6 +88,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   text: context.t('no_poems'),
                   action: PrimaryButton(label: context.t('write_first'), onPressed: widget.onWrite),
                 ),
+              const DraftsNotice(),
               if (stats.total > 0) ...[
                 // Counters: poems and prose; each number opens its list.
                 const _Counters(),

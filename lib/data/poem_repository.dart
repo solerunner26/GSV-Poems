@@ -31,7 +31,11 @@ class PoemStats {
     this.poemsHi = 0,
     this.proseGu = 0,
     this.proseHi = 0,
+    this.drafts = 0,
   });
+
+  /// Unpublished drafts (not in any other count).
+  final int drafts;
 
   /// Everything (poems and prose) outside the recycle bin.
   final int total, words, gu, hi, en, inBin;
@@ -89,7 +93,7 @@ class PoemRepository {
   // ---------- reading ----------
 
   Stream<List<Poem>> watchPoems({String? lang, String? categoryId, String? kind, PoemSort sort = PoemSort.newest}) {
-    final q = db.select(db.poems)..where((p) => p.deletedAt.isNull());
+    final q = db.select(db.poems)..where((p) => p.deletedAt.isNull() & p.isDraft.equals(false));
     if (kind != null) q.where((p) => p.kind.equals(kind));
     if (lang != null) q.where((p) => p.lang.equals(lang));
     if (categoryId != null) q.where((p) => p.categoryId.equals(categoryId));
@@ -112,7 +116,7 @@ class PoemRepository {
 
   Stream<List<Poem>> watchFavorites() =>
       (db.select(db.poems)
-            ..where((p) => p.deletedAt.isNull() & p.isFavorite.equals(true))
+            ..where((p) => p.deletedAt.isNull() & p.isDraft.equals(false) & p.isFavorite.equals(true))
             ..orderBy([(p) => OrderingTerm.desc(p.updatedAt)]))
           .watch();
 
@@ -121,7 +125,7 @@ class PoemRepository {
     var since = _now().subtract(const Duration(days: 7));
     if (clearedAt != null && clearedAt.isAfter(since)) since = clearedAt;
     return (db.select(db.poems)
-          ..where((p) => p.deletedAt.isNull() & p.updatedAt.isBiggerThanValue(since))
+          ..where((p) => p.deletedAt.isNull() & p.isDraft.equals(false) & p.updatedAt.isBiggerThanValue(since))
           ..orderBy([(p) => OrderingTerm.desc(p.updatedAt)]))
         .watch();
   }
@@ -129,9 +133,20 @@ class PoemRepository {
   /// Poems written on today's day and month in earlier years.
   Future<List<Poem>> onThisDay() async {
     final now = _now();
-    final all = await (db.select(db.poems)..where((p) => p.deletedAt.isNull())).get();
+    final all = await (db.select(db.poems)..where((p) => p.deletedAt.isNull() & p.isDraft.equals(false))).get();
     return all.where((p) => p.createdAt.month == now.month && p.createdAt.day == now.day && p.createdAt.year < now.year).toList();
   }
+
+  /// Unpublished drafts, newest first.
+  Stream<List<Poem>> watchDrafts() =>
+      (db.select(db.poems)
+            ..where((p) => p.deletedAt.isNull() & p.isDraft.equals(true))
+            ..orderBy([(p) => OrderingTerm.desc(p.updatedAt)]))
+          .watch();
+
+  /// Publishes a draft: it joins the collection and goes to the online library.
+  Future<void> publishDraft(String id) =>
+      (db.update(db.poems)..where((p) => p.id.equals(id))).write(PoemsCompanion(isDraft: const Value(false), updatedAt: Value(_now())));
 
   Future<Poem?> getPoem(String id) => (db.select(db.poems)..where((p) => p.id.equals(id))).getSingleOrNull();
 
@@ -141,10 +156,14 @@ class PoemRepository {
     final all = db.select(db.poems).watch();
     return all.map((rows) {
       var total = 0, words = 0, gu = 0, hi = 0, en = 0, bin = 0;
-      var poems = 0, prose = 0, poemsGu = 0, poemsHi = 0, proseGu = 0, proseHi = 0;
+      var poems = 0, prose = 0, poemsGu = 0, poemsHi = 0, proseGu = 0, proseHi = 0, drafts = 0;
       for (final p in rows) {
         if (p.deletedAt != null) {
           bin++;
+          continue;
+        }
+        if (p.isDraft) {
+          drafts++;
           continue;
         }
         total++;
@@ -176,6 +195,7 @@ class PoemRepository {
         poemsHi: poemsHi,
         proseGu: proseGu,
         proseHi: proseHi,
+        drafts: drafts,
       );
     });
   }
@@ -199,7 +219,7 @@ class PoemRepository {
         for (final pat in patterns) {
           any = any | p.searchBlob.like('%${esc(pat)}%', escapeChar: r'\');
         }
-        return p.deletedAt.isNull() & any;
+        return p.deletedAt.isNull() & p.isDraft.equals(false) & any;
       });
     if (lang != null) q.where((p) => p.lang.equals(lang));
     q.orderBy([(p) => OrderingTerm.desc(p.updatedAt)]);
@@ -335,7 +355,14 @@ class PoemRepository {
   }
 
   /// Creates a poem and returns its id.
-  Future<String> createPoem({required String title, required String body, String? categoryId, String? lang, String kind = Kind.poem}) async {
+  Future<String> createPoem({
+    required String title,
+    required String body,
+    String? categoryId,
+    String? lang,
+    String kind = Kind.poem,
+    bool isDraft = false,
+  }) async {
     final id = _uuid.v4();
     final now = _now();
     categoryId ??= 'other';
@@ -353,6 +380,7 @@ class PoemRepository {
             searchBlob: Value(buildSearchBlob(title, body)),
             contentKey: Value(contentKeyOf(body)),
             kind: Value(kind),
+            isDraft: Value(isDraft),
             createdAt: now,
             updatedAt: now,
           ),
@@ -509,7 +537,22 @@ class PoemRepository {
   // ---------- backup & restore ----------
 
   /// Settings that travel with a backup (never secrets: those live in secure storage).
-  static const backupSettingKeys = {'theme', 'lang', 'textScale', 'placeName', 'placeLat', 'placeLon', 'seedHash', 'recentClearedAt'};
+  static const backupSettingKeys = {
+    'theme',
+    'lang',
+    'textScale',
+    'placeName',
+    'placeLat',
+    'placeLon',
+    'seedHash',
+    'recentClearedAt',
+    ownerVerifierKey,
+  };
+
+  /// The poet's PIN check (salted hash, never the PIN), set on his phone and
+  /// carried inside the encrypted backups, so his PIN can unlock writing on
+  /// another device that reads the collection.
+  static const ownerVerifierKey = 'ownerVerifier';
 
   /// Everything a backup holds: poems (also those in the recycle bin), edit history, collections, settings.
   Future<Map<String, dynamic>> exportBackup() async {
@@ -560,7 +603,7 @@ class PoemRepository {
       final idMap = <String, String>{};
       for (final m in (data['poems'] as List? ?? const []).cast<Map<String, dynamic>>()) {
         // Backups from before prose existed hold only poems.
-        var b = Poem.fromJson({...m, 'kind': m['kind'] ?? Kind.poem});
+        var b = Poem.fromJson({...m, 'kind': m['kind'] ?? Kind.poem, 'isDraft': m['isDraft'] ?? false});
         b = b.copyWith(contentKey: Value(b.contentKey ?? contentKeyOf(b.body)));
         final mine = byId[b.id] ?? (b.sourceKey == null ? null : bySource[b.sourceKey]) ?? (b.contentKey == null ? null : byContent[b.contentKey]);
         if (mine == null) {
@@ -607,6 +650,7 @@ class PoemRepository {
             title: Value(b.title),
             body: Value(b.body),
             kind: Value(b.kind),
+            isDraft: Value(b.isDraft),
             lang: Value(b.lang),
             categoryId: Value(b.categoryId),
             isFavorite: Value(b.isFavorite || mine.isFavorite),
@@ -633,6 +677,9 @@ class PoemRepository {
       }
       // Syncing with another device keeps this device's own theme, language and place.
       final settings = applySettings ? (data['settings'] as Map?)?.cast<String, dynamic>() ?? const {} : const <String, dynamic>{};
+      // The poet's PIN check always comes along, even when other settings stay local.
+      final owner = (data['settings'] as Map?)?[ownerVerifierKey];
+      if (owner is String && owner.isNotEmpty && !applySettings) await setSetting(ownerVerifierKey, owner);
       for (final e in settings.entries) {
         if (backupSettingKeys.contains(e.key)) await setSetting(e.key, '${e.value}');
       }

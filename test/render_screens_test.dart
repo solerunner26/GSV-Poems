@@ -26,6 +26,7 @@ import 'package:gsv_poems/features/home/home_screen.dart';
 import 'package:gsv_poems/features/profile/profile_screen.dart';
 import 'package:gsv_poems/data/profile.dart';
 import 'package:gsv_poems/features/reader/reader_screen.dart';
+import 'package:gsv_poems/features/search/search_screen.dart';
 import 'package:gsv_poems/features/settings/settings_screen.dart';
 
 const _dir = String.fromEnvironment('PREVIEW_DIR');
@@ -65,7 +66,7 @@ void main() {
     sourceKey: null,
     contentKey: null,
     deletedAt: null,
-    kind: 'poem',
+    kind: 'poem', isDraft: false,
   );
   final poems = [
     poem('p1', 'વરસાદની પહેલી સાંજ', 'ભીની માટીની સુગંધમાં\nયાદો ફરી ખીલી ઊઠી\nઆંગણે ટપકે ટીપાં\nમનમાં ગીત જાગી ઊઠી', 'prakruti', n: 12),
@@ -100,6 +101,7 @@ void main() {
             onThisDayProvider.overrideWith((ref) async => poems),
             duplicateCountProvider.overrideWith((ref) => Stream.value(0)),
             categoriesProvider.overrideWith((ref) => Stream.value(cats)),
+          draftsProvider.overrideWith((ref) => Stream.value([poems[1]])),
             profileProvider.overrideWith(
               (ref) async => const Profile(name: 'ગીગાભાઈ સનાભાઈ વાળા', penName: 'ગૌરવ', birthDate: '૧૨ જૂન ૧૯૫૮', place: 'ભાવનગર'),
             ),
@@ -133,6 +135,7 @@ void main() {
     'topic': (const TopicPoemsScreen(lang: PoemLang.gu, topicId: 'prakruti'), false),
     'reader': (const ReaderScreen(ids: ['p1', 'p2']), false),
     'editor': (const EditorScreen(), false),
+    'search': (const SearchScreen(), true),
     'calendar': (CalendarScreen(initial: DateTime(2026, 11, 8)), false),
     'settings': (const SettingsScreen(), true),
     'profile': (const ProfileScreen(), false),

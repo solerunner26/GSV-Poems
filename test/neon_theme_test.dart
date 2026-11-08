@@ -123,7 +123,7 @@ void main() {
       sourceKey: null,
       contentKey: null,
       deletedAt: null,
-      kind: 'poem',
+      kind: 'poem', isDraft: false,
     );
     for (final t in [allThemes.first, allThemes[1]]) {
       final bytes = await tester.runAsync(() => poemJpeg(poem, t));
@@ -150,7 +150,7 @@ void main() {
       sourceKey: null,
       contentKey: null,
       deletedAt: null,
-      kind: 'poem',
+      kind: 'poem', isDraft: false,
     );
     // Newest first, as the database returns them.
     final found = [
